@@ -9,7 +9,7 @@
     "sources": "https://github.com/levismith292929-maker/hypixelcustomrecipe"
   },
   "license": "MIT",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
     "main": ["dev.hypixelcustomrecipe.HypixelCustomRecipe"]
   },
