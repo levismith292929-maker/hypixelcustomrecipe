@@ -1,7 +1,6 @@
 package dev.hypixelcustomrecipe;
 
 import eu.pb4.polymer.core.api.item.SimplePolymerItem;
-import net.fabricmc.fabric.api.itemgroup.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,7 +8,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -45,16 +43,6 @@ public final class ModItems {
     }
 
     public static void initialize() {
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
-            entries.accept(OLD_DRAGON_FRAGMENT);
-            entries.accept(PROTECTOR_DRAGON_FRAGMENT);
-            entries.accept(WISE_DRAGON_FRAGMENT);
-            entries.accept(YOUNG_DRAGON_FRAGMENT);
-            entries.accept(STRONG_DRAGON_FRAGMENT);
-            entries.accept(UNSTABLE_DRAGON_FRAGMENT);
-            entries.accept(SUPERIOR_DRAGON_FRAGMENT);
-            entries.accept(HOLY_DRAGON_FRAGMENT);
-            entries.accept(NECRON_CORE);
-        });
+        // Referencing this class initializes and registers all item fields.
     }
 }
