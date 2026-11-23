@@ -13,7 +13,7 @@ public final class RecipeUnlocker {
     public static void initialize() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             List<RecipeHolder<?>> recipes = server.getRecipeManager().getRecipes().stream()
-                    .filter(recipe -> recipe.id().getNamespace().equals("hypixel"))
+                    .filter(recipe -> recipe.id().location().getNamespace().equals("hypixel"))
                     .toList();
 
             if (!recipes.isEmpty()) {
