@@ -28,10 +28,11 @@ dependencies {
     implementation "eu.pb4:polymer-core:0.17.5+26.2"
 }
 
+def modVersion = project.version
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", modVersion
     filesMatching("fabric.mod.json") {
-        expand "version": inputs.properties.version
+        expand "version": modVersion
     }
 }
 
