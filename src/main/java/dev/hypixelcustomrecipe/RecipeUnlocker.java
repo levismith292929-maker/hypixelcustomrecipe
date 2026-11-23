@@ -1,19 +1,39 @@
 package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class RecipeUnlocker {
+    private static final Set<ResourceKey<Recipe<?>>> MOD_RECIPE_KEYS = Stream.of(
+            "holy_dragon_fragment",
+            "necron_core",
+            "old_dragon_fragment",
+            "protector_dragon_fragment",
+            "strong_dragon_fragment",
+            "superior_dragon_fragment",
+            "unstable_dragon_fragment",
+            "wise_dragon_fragment",
+            "young_dragon_fragment"
+    ).map(path -> ResourceKey.create(
+            Registries.RECIPE,
+            Identifier.fromNamespaceAndPath("hypixel", path)
+    )).collect(Collectors.toUnmodifiableSet());
+
     private RecipeUnlocker() {
     }
 
     public static void initialize() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            List<RecipeHolder<?>> recipes = server.getRecipeManager().getRecipes().stream()
-                    .filter(recipe -> recipe.id().location().getNamespace().equals("hypixel"))
+            var recipes = server.getRecipeManager().getRecipes().stream()
+                    .filter(recipe -> MOD_RECIPE_KEYS.contains(recipe.id()))
                     .toList();
 
             if (!recipes.isEmpty()) {
