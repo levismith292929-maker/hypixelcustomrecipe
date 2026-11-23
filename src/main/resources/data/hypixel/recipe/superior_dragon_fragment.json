@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "bn",
+    "n"
+  ],
+  "key": {
+    "n": [
+      "minecraft:diamond_block"
+    ],
+    "b": [
+      "minecraft:dragon_breath"
+    ]
+  },
+  "result": {
+    "id": "hypixel:superior_dragon_fragment",
+    "count": 1
+  }
+}
