@@ -24,10 +24,22 @@ public final class ModItems {
     public static final Item HOLY_DRAGON_FRAGMENT = register("holy_dragon_fragment", "Holy Dragon Fragment", Items.EMERALD);
     public static final Item NECRON_CORE = register("necron_core", "Necron Core", Items.NETHER_STAR);
 
+    // Unique item ID so the AOTV recipe can require an AOTE,
+    // rather than accepting any ordinary diamond sword.
+    public static final Item AOTE = registerUnstackable("aote", "Aspect of the End", Items.DIAMOND_SWORD);
+
     private ModItems() {
     }
 
     private static Item register(String path, String displayName, Item vanillaFallback) {
+        return register(path, displayName, vanillaFallback, 64);
+    }
+
+    private static Item registerUnstackable(String path, String displayName, Item vanillaFallback) {
+        return register(path, displayName, vanillaFallback, 1);
+    }
+
+    private static Item register(String path, String displayName, Item vanillaFallback, int maxStackSize) {
         ResourceKey<Item> key = ResourceKey.create(
                 Registries.ITEM,
                 Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
@@ -35,7 +47,7 @@ public final class ModItems {
         Item item = new SimplePolymerItem(
                 new Item.Properties()
                         .setId(key)
-                        .stacksTo(64)
+                        .stacksTo(maxStackSize)
                         .component(DataComponents.CUSTOM_NAME, Component.literal(displayName)),
                 vanillaFallback
         );
