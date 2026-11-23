@@ -24,7 +24,7 @@ jobs:
           distribution: temurin
           java-version: "25"
       - name: Build
-        run: ./gradlew --no-daemon build
+        run: bash ./gradlew --no-daemon build
       - name: Upload mod and sources jars
         uses: actions/upload-artifact@v4
         with:
