@@ -11,6 +11,6 @@ public final class HypixelCustomRecipe implements ModInitializer {
     @Override
     public void onInitialize() {
         ModItems.initialize();
-        LOGGER.info("Registered the 9 Hypixel custom recipe items.");
+        LOGGER.info("Registered 8 Dragon Fragments, the Necron Core, and the Aspect of the End.");
     }
 }
