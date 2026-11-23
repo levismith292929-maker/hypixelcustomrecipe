@@ -11,6 +11,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
     @Override
     public void onInitialize() {
         ModItems.initialize();
+        RecipeUnlocker.initialize();
         LOGGER.info("Registered 8 Dragon Fragments, the Necron Core, and the Aspect of the End.");
     }
 }
