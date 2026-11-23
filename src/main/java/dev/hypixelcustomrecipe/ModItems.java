@@ -13,8 +13,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.UUID;
 
@@ -60,7 +62,16 @@ public final class ModItems {
                         .component(DataComponents.CUSTOM_NAME, Component.literal("Necron Core"))
                         .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile)),
                 Items.PLAYER_HEAD
-        );
+        ) {
+            @Override
+            public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context) {
+                // Explicitly forward the custom skull profile to the vanilla player head sent to clients.
+                ResolvableProfile skullProfile = stack.get(DataComponents.PROFILE);
+                if (skullProfile != null) {
+                    out.set(DataComponents.PROFILE, skullProfile);
+                }
+            }
+        };
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
