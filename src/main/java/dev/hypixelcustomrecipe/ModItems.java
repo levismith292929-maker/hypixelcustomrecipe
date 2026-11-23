@@ -4,7 +4,7 @@ import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -43,16 +43,16 @@ public final class ModItems {
                 Registries.ITEM,
                 Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, "necron_core")
         );
-        // The two-argument GameProfile constructor uses an immutable empty
-        // property map. Supply a mutable map so the custom texture can be added.
+        // PropertyMap is immutable in this Minecraft/Authlib version, so build it with the texture already present.
+        Property texture = new Property("textures",
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2UwZGNmNmRkYTg1Yzk1ZDdhOTQ3NmY1MTQ4ZGIxOTVkODliN2MyYjQxZTJlYzgwYWRjODIyYzZhOWNiY2UxNyJ9fX0="
+        );
+        PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
         GameProfile profile = new GameProfile(
                 UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 "NecronCore",
-                new PropertyMap(LinkedHashMultimap.create())
+                properties
         );
-        profile.properties().put("textures", new Property("textures",
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2UwZGNmNmRkYTg1Yzk1ZDdhOTQ3NmY1MTQ4ZGIxOTVkODliN2MyYjQxZTJlYzgwYWRjODIyYzZhOWNiY2UxNyJ9fX0="
-        ));
         Item item = new SimplePolymerItem(
                 new Item.Properties()
                         .setId(key)
