@@ -5,6 +5,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -19,12 +23,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "25"
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "9.8.2"
       - name: Build
-        run: gradle build
+        run: ./gradlew --no-daemon build
       - name: Upload mod and sources jars
         uses: actions/upload-artifact@v4
         with:
