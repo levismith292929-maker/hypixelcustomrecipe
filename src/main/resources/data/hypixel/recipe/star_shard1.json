@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "dfd",
+    "ngn",
+    "dfd"
+  ],
+  "key": {
+    "d": [
+      "minecraft:diamond_block"
+    ],
+    "f": "#hypixel:fragments",
+    "n": [
+      "minecraft:netherite_scrap"
+    ],
+    "g": [
+      "minecraft:glowstone_dust"
+    ]
+  },
+  "result": {
+    "id": "hypixel:star_shard1",
+    "count": 1
+  }
+}
