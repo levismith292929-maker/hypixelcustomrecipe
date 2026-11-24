@@ -20,6 +20,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.ItemLore;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.equipment.Equippable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -140,9 +142,15 @@ public final class ModArmorItems {
             );
             Item.Properties properties = new Item.Properties()
                     .setId(key)
-                    .stacksTo(1)
-                    .humanoidArmor(MATERIAL, type)
-                    .component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
+                    .stacksTo(1);
+            if (type == ArmorType.HELMET) {
+                // Keep the helmet's player-head rendering/profile instead of applying a leather helmet layer.
+                properties.component(DataComponents.EQUIPPABLE,
+                        Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).build());
+            } else {
+                properties.humanoidArmor(MATERIAL, type);
+            }
+            properties.component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
                     .component(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, Set.of(DataComponents.UNBREAKABLE)))
                     .component(DataComponents.CUSTOM_NAME, Component.literal(displayName).withColor(set.nameColor))
                     .component(DataComponents.LORE, new ItemLore(lore));
