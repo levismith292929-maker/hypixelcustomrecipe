@@ -2,7 +2,10 @@ package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.world.BossEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.core.particles.ParticleTypes;
@@ -51,6 +54,11 @@ public final class SkyblockPlayerState {
 
     private static final Map<UUID, SkyblockPlayerState> PLAYERS = new ConcurrentHashMap<>();
     private final SkyblockManaState mana = new SkyblockManaState();
+    private final ServerBossEvent manaBossBar = new ServerBossEvent(
+            Component.literal("Mana: 500 / 500"),
+            BossEvent.BossBarColor.BLUE,
+            BossEvent.BossBarOverlay.PROGRESS
+    );
     private SkyblockStats stats = SkyblockStats.BASE;
     private Pet activePet = Pet.NONE;
     private int hudUpdateTicks;
@@ -58,7 +66,7 @@ public final class SkyblockPlayerState {
     private int currentHealth;
     private int maximumHealth;
     private boolean healthInitialized;
-    private boolean statViewerGiven;
+
     private ArmorStand petDisplay;
 
     private SkyblockPlayerState() {}
@@ -67,8 +75,18 @@ public final class SkyblockPlayerState {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) get(player).tick(player);
         });
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            SkyblockPlayerState state = PLAYERS.get(handler.player.getUUID());
+            if (state != null) {
+                state.manaBossBar.removePlayer(handler.player);
+                state.removePetDisplay();
+            }
+        });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            PLAYERS.values().forEach(SkyblockPlayerState::removePetDisplay);
+            PLAYERS.values().forEach(state -> {
+                state.removePetDisplay();
+                state.manaBossBar.removeAllPlayers();
+            });
             PLAYERS.clear();
         });
     }
@@ -198,9 +216,17 @@ public final class SkyblockPlayerState {
     }
 
     private void tick(ServerPlayer player) {
-        if (!statViewerGiven) {
+        // Keep one permanent Stat Viewer in hotbar slot 9, matching the datapack.
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            if (slot != 8 && player.getInventory().getItem(slot).is(DatapackItems.STAT_VIEWER)) {
+                player.getInventory().setItem(slot, ItemStack.EMPTY);
+            }
+        }
+        if (!player.getInventory().getItem(8).is(DatapackItems.STAT_VIEWER)) {
             player.getInventory().setItem(8, new ItemStack(DatapackItems.STAT_VIEWER));
-            statViewerGiven = true;
+        }
+        if (player.getOffhandItem().is(DatapackItems.STAT_VIEWER)) {
+            player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
         stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
@@ -228,6 +254,11 @@ public final class SkyblockPlayerState {
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
+        if (!manaBossBar.getPlayers().contains(player)) manaBossBar.addPlayer(player);
+        manaBossBar.setName(Component.literal(
+                "Mana: " + mana.currentMana() + " / " + mana.maximumMana()));
+        manaBossBar.setProgress(Math.max(0.0F, Math.min(1.0F,
+                mana.currentMana() / (float) mana.maximumMana())));
         updatePetDisplay(player);
 
         if (astraeaOrbTicks > 0) {
@@ -247,9 +278,9 @@ public final class SkyblockPlayerState {
         if (++hudUpdateTicks >= 10) {
             hudUpdateTicks = 0;
             String hud = String.format(java.util.Locale.ROOT,
-                    "Health: %.1f/%.1f | Defense: %d | Mana: %d/%d",
-                    currentHealth / 10.0, maximumHealth / 10.0, stats.defense(),
-                    mana.currentMana(), mana.maximumMana()) + abilityCooldownHud(player);
+                    "Health: %.1f/%.1f | Defense: %d",
+                    currentHealth / 10.0, maximumHealth / 10.0, stats.defense())
+                    + abilityCooldownHud(player);
             player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
         }
     }
