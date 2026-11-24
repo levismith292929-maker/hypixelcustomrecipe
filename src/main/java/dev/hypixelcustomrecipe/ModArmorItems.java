@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -151,7 +152,7 @@ public final class ModArmorItems {
                 properties.humanoidArmor(MATERIAL, type);
             }
             properties.component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
-                    .component(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, Set.of(DataComponents.UNBREAKABLE)))
+                    .component(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, new LinkedHashSet<>(Set.of(DataComponents.UNBREAKABLE))))
                     .component(DataComponents.CUSTOM_NAME, Component.literal(displayName).withColor(set.nameColor))
                     .component(DataComponents.LORE, new ItemLore(lore));
             if (type != ArmorType.HELMET) {
