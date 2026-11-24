@@ -146,7 +146,8 @@ public final class SkyblockAbilityHandler {
         double damage = abilityDamage(player, 60.0);
         DamageSource source = level.damageSources().playerAttack(player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
-                player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player))) {
+                player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player)
+                        && entity.distanceToSqr(player) <= 25.0)) {
             target.hurtServer(level, source, (float) damage);
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
