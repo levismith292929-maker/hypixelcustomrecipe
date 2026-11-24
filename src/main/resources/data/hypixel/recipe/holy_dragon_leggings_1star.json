@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "fff",
+    "faf",
+    "fff"
+  ],
+  "key": {
+    "f": [
+      "hypixel:holy_dragon_fragment"
+    ],
+    "a": [
+      "hypixel:holy_dragon_leggings"
+    ]
+  },
+  "result": {
+    "id": "hypixel:holy_dragon_leggings_1star",
+    "count": 1
+  }
+}
