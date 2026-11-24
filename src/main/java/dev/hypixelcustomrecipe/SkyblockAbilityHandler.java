@@ -4,6 +4,8 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -19,8 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
@@ -133,14 +133,37 @@ public final class SkyblockAbilityHandler {
         playSound(player, net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
     }
 
+
+    /** Reproduces the datapack's 640-step, 0.1-block raycast. */
+    private static BlockPos findRaycastTarget(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        Vec3 eye = player.getEyePosition();
+        Vec3 direction = player.getLookAngle();
+        for (int step = 0; step < 640; step++) {
+            Vec3 sample = eye.add(direction.scale(step * 0.1));
+            BlockPos pos = BlockPos.containing(sample);
+            if (!isRaycastIgnored(level.getBlockState(pos))) return pos;
+        }
+        return null;
+    }
+
+    private static boolean isRaycastIgnored(net.minecraft.world.level.block.state.BlockState state) {
+        return state.isAir()
+                || state.is(BlockTags.REPLACEABLE)
+                || state.getFluidState().is(FluidTags.WATER)
+                || state.getFluidState().is(FluidTags.LAVA)
+                || state.is(Blocks.BUBBLE_COLUMN)
+                || state.is(Blocks.FIRE)
+                || state.is(Blocks.SOUL_FIRE)
+                || state.is(Blocks.LIGHT);
+    }
+
     /** Aspect of the Void: raycast up to 64 blocks and land above the hit block. */
     private static void useAotv(ServerPlayer player) {
         if (!beginAbility(player, "aotv", 50, 60)) return;
-        HitResult hit = player.pick(64.0, 0.0F, false);
-        if (!(hit instanceof BlockHitResult blockHit) || hit.getType() != HitResult.Type.BLOCK) {
-            return;
-        }
-        Vec3 destination = Vec3.atBottomCenterOf(blockHit.getBlockPos()).add(0.0, 1.0, 0.0);
+        BlockPos target = findRaycastTarget(player);
+        if (target == null) return;
+        Vec3 destination = Vec3.atBottomCenterOf(target).add(0.0, 1.0, 0.0);
         player.teleportTo(destination.x, destination.y, destination.z);
         player.fallDistance = 0.0F;
         ServerLevel level = (ServerLevel) player.level();
