@@ -63,12 +63,14 @@ public final class SkyblockPlayerState {
         if (pet == Pet.IRON_GOLEM) {
             player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
         }
-        mana.configure(pet.manaMaximum(), pet.manaRegeneration());
+        mana.configure(pet.manaMaximum() + stats.intelligence(),
+                pet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
     }
 
     private void tick(ServerPlayer player) {
         stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
-        mana.configure(activePet.manaMaximum(), activePet.manaRegeneration());
+        mana.configure(activePet.manaMaximum() + stats.intelligence(),
+                activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
     }
 }
