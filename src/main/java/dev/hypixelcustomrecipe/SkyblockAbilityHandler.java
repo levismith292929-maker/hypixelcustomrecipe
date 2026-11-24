@@ -189,7 +189,7 @@ public final class SkyblockAbilityHandler {
                     5, 0.35, 0.25, 0.35, 0.01);
             AABB area = new AABB(center, center).inflate(1.5);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> entity != player && !(entity instanceof Player) && entity.isAlive())) {
+                    entity -> isValidTarget(entity, player))) {
                 if (hitTargets.add(target.getUUID())) {
                     target.hurtServer(level, source, (float) damage);
                 }
