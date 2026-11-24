@@ -7,9 +7,15 @@
     "f f"
   ],
   "key": {
-    "n": "minecraft:netherite_scrap",
-    "a": "minecraft:diamond_helmet",
-    "f": "hypixel:unstable_dragon_fragment"
+    "n": [
+      "minecraft:netherite_scrap"
+    ],
+    "a": [
+      "minecraft:diamond_helmet"
+    ],
+    "f": [
+      "hypixel:unstable_dragon_fragment"
+    ]
   },
   "result": {
     "id": "hypixel:unstable_dragon_helmet",
