@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "ss",
+    "ss"
+  ],
+  "key": {
+    "s": [
+      "hypixel:star_shard2"
+    ]
+  },
+  "result": {
+    "id": "hypixel:star_shard3",
+    "count": 1
+  }
+}
