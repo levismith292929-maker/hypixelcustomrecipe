@@ -4,7 +4,7 @@
   "category": "equipment",
   "pattern": [
     "iIi",
-    "IdI",
+    "idi",
     "iIi"
   ],
   "key": {
@@ -20,49 +20,6 @@
   },
   "result": {
     "id": "hypixel:pet_iron_golem",
-    "count": 1,
-    "components": {
-      "minecraft:item_model": "minecraft:player_head",
-      "minecraft:custom_name": {
-        "text": "Iron Golem",
-        "italic": false
-      },
-      "minecraft:enchantment_glint_override": true,
-      "minecraft:consumable": {
-        "consume_seconds": 0.05,
-        "animation": "none",
-        "has_consume_particles": false
-      },
-      "minecraft:lore": [
-        {
-          "text": "Ability: Summon Pet  RIGHT CLICK",
-          "color": "gold",
-          "italic": false
-        },
-        {
-          "text": "Damage: +5%",
-          "color": "blue",
-          "italic": false
-        },
-        {
-          "text": "Max Mana: 600",
-          "color": "blue",
-          "italic": false
-        },
-        {
-          "text": "Mana Regeneration: 30/sec",
-          "color": "blue",
-          "italic": false
-        },
-        {
-          "text": "Permanent Resistance I",
-          "color": "blue",
-          "italic": false
-        }
-      ],
-      "minecraft:profile": {
-        "name": "MHF_Golem"
-      }
-    }
+    "count": 1
   }
 }
