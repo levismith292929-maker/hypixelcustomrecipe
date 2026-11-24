@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -203,7 +204,7 @@ public final class SkyblockAbilityHandler {
         }
 
         AABB area = new AABB(center, center).inflate(radius);
-        DamageSource source = level.damageSources().dragonBreath();
+        DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
                 entity -> isValidTarget(entity, player))) {
             if (breath.hitTargets.add(target.getUUID())) {
