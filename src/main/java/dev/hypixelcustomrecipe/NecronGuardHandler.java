@@ -1,6 +1,8 @@
 package dev.hypixelcustomrecipe;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -40,12 +42,16 @@ public final class NecronGuardHandler {
         side = side.normalize();
 
         for (int i = 0; i < 2; i++) {
-            WitherSkeleton guard = EntityType.WITHER_SKELETON.create(level, EntitySpawnReason.TRIGGERED);
-            if (guard == null) continue;
+            var witherSkeletonType = BuiltInRegistries.ENTITY_TYPE.get(
+                    Identifier.fromNamespaceAndPath("minecraft", "wither_skeleton"));
+            var spawned = witherSkeletonType.create(level, EntitySpawnReason.TRIGGERED);
+            if (!(spawned instanceof WitherSkeleton guard)) continue;
 
             double direction = i == 0 ? -1.0 : 1.0;
-            guard.moveTo(owner.getX() + side.x * 1.25 * direction, owner.getY(),
-                    owner.getZ() + side.z * 1.25 * direction, owner.getYRot(), 0.0F);
+            guard.setPos(owner.getX() + side.x * 1.25 * direction, owner.getY(),
+                    owner.getZ() + side.z * 1.25 * direction);
+            guard.setYRot(owner.getYRot());
+            guard.setXRot(0.0F);
             guard.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40.0);
             guard.setHealth(40.0F);
             guard.setPersistenceRequired();
