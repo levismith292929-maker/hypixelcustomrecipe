@@ -14,6 +14,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         DatapackItems.initialize();
         ModArmorItems.initialize();
         RecipeUnlocker.initialize();
+        SkyblockPlayerState.initialize();
         LOGGER.info("Registered the existing custom armor, fragments, shards, and the first migrated datapack item set.");
     }
 }
