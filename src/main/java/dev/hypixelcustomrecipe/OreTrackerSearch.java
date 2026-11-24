@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class OreTrackerSearch {
     private static final int RADIUS = 32;
-    private static final int POSITIONS_PER_TICK = 5000;
+    private static final int POSITIONS_PER_TICK = 4000;
     private static final List<Offset> OFFSETS = createOffsets();
     private static final Map<UUID, Search> ACTIVE = new ConcurrentHashMap<>();
 
