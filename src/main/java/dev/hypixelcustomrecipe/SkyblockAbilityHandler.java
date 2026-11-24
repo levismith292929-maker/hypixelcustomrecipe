@@ -11,7 +11,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -275,9 +275,10 @@ public final class SkyblockAbilityHandler {
 
     /** Mirrors the datapack non-targets tag for living entities. */
     private static boolean isValidTarget(LivingEntity entity, ServerPlayer caster) {
+        String type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
         return entity != caster && !(entity instanceof Player)
-                && entity.getType() != EntityType.ENDERMAN
-                && entity.getType() != EntityType.ARMOR_STAND
+                && !type.equals("enderman")
+                && !type.equals("armor_stand")
                 && entity.isAlive();
     }
 
