@@ -2,6 +2,7 @@ package dev.hypixelcustomrecipe.mixin;
 
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
+import dev.hypixelcustomrecipe.VanillaWeaponStats;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,7 +43,17 @@ public abstract class LivingEntityMixin {
         }
 
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
-            SkyblockStats attackStats = SkyblockPlayerState.get(attacker).stats();
+            SkyblockStats attackStats = VanillaWeaponStats.applyHeldWeapon(
+                    dev.hypixelcustomrecipe.ModArmorItems.getSkyblockStats(attacker),
+                    attacker.getMainHandItem()
+            );
+            VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
+            if (weapon.damage() > 0) {
+                // Replace vanilla sword/axe base damage with the datapack's
+                // custom Damage and Strength values, while retaining this
+                // single combat interception point.
+                adjusted = (float) attackStats.calculateWeaponDamage(false);
+            }
             int chance = Math.min(100, attackStats.critChance());
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
                 adjusted *= (float) attackStats.criticalMultiplier();
