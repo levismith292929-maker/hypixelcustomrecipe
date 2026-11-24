@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.component.ItemLore;
 
 import java.nio.charset.StandardCharsets;
@@ -42,12 +43,12 @@ public final class DatapackItems {
             "Breathe fire 5 blocks in the direction you look.",
             "Each mob is hit once for 18 base damage, increased by Strength and Intelligence.",
             "Mana Cost: 80");
-    public static final Item ASTRAEA = register("astraea", "Astraea", Items.NETHERITE_SWORD,
+    public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, ChatFormatting.LIGHT_PURPLE,
             "Ability: Wither Shield  RIGHT CLICK",
             "Gain Resistance II and Absorption IV for 10 seconds,",
             "with wither orbs spinning around you.",
             "Mana Cost: 40");
-    public static final Item HYPERION = register("hyperion", "Hyperion", Items.NETHERITE_SWORD,
+    public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, ChatFormatting.GOLD,
             "Ability: Implosion  RIGHT CLICK",
             "Deal 60 base ability damage to every target within 5 blocks.",
             "Damage scales with Strength and Intelligence.",
@@ -86,12 +87,24 @@ public final class DatapackItems {
     private DatapackItems() {}
 
     private static Item register(String path, String name, Item fallback, String... loreLines) {
+        return register(path, name, fallback, null, loreLines);
+    }
+
+    private static Item registerColored(String path, String name, Item fallback,
+                                        ChatFormatting color, String... loreLines) {
+        return register(path, name, fallback, color, loreLines);
+    }
+
+    private static Item register(String path, String name, Item fallback,
+                                 ChatFormatting color, String... loreLines) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
+        Component displayName = Component.literal(name);
+        if (color != null) displayName = displayName.withStyle(color);
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
-                .component(DataComponents.CUSTOM_NAME, Component.literal(name))
+                .component(DataComponents.CUSTOM_NAME, displayName)
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
