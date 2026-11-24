@@ -338,20 +338,25 @@ public final class SkyblockPlayerState {
             return;
         }
 
-        // Each armor piece contributes its own share of the set's regeneration bonus.
-        // Protector: +18.75 Health per piece every 4 seconds.
-        // Necron: +93.75 Health per piece every 4 seconds.
+        // Each armor piece contributes its own regeneration bonus per 4 seconds.
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
         String[] suffixes = {"_helmet", "_chestplate", "_leggings", "_boots"};
-        int protectorPieces = 0;
-        int necronPieces = 0;
+        double armorBonusPerFourSeconds = 0.0;
 
         for (int i = 0; i < slots.length; i++) {
-            if (isArmorPiece(player, slots[i], "protector_dragon" + suffixes[i])) protectorPieces++;
-            if (isArmorPiece(player, slots[i], "necron" + suffixes[i])) necronPieces++;
+            if (isArmorPiece(player, slots[i], "protector_dragon" + suffixes[i])) {
+                armorBonusPerFourSeconds += 18.75;
+            }
         }
 
-        double healthPerFourSeconds = 25.0 + protectorPieces * 18.75 + necronPieces * 93.75;
+        // Necron's individual piece values: helmet 70, chestplate 180,
+        // leggings 100, boots 25 Health per 4 seconds.
+        if (isArmorPiece(player, EquipmentSlot.HEAD, "necron_helmet")) armorBonusPerFourSeconds += 70.0;
+        if (isArmorPiece(player, EquipmentSlot.CHEST, "necron_chestplate")) armorBonusPerFourSeconds += 180.0;
+        if (isArmorPiece(player, EquipmentSlot.LEGS, "necron_leggings")) armorBonusPerFourSeconds += 100.0;
+        if (isArmorPiece(player, EquipmentSlot.FEET, "necron_boots")) armorBonusPerFourSeconds += 25.0;
+
+        double healthPerFourSeconds = 25.0 + armorBonusPerFourSeconds;
         healthRegenerationProgress += healthPerFourSeconds / 80.0;
 
         int wholeHealth = (int) healthRegenerationProgress;
