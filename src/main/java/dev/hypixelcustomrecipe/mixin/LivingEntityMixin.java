@@ -114,6 +114,9 @@ public abstract class LivingEntityMixin {
         float actualDamage = Math.max(0.0F, hypixelcustomrecipe$healthBeforeHit - defender.getHealth());
         if (actualDamage <= 0.0F) return;
 
+        // Necron's Guards is an automatic full-set bonus; it has no mana cost.
+        dev.hypixelcustomrecipe.NecronGuardHandler.onPlayerHit(defender);
+
         // Environmental damage (falling, cactus, fire, etc.) does not start
         // the combat regeneration delay; only damage caused by an entity does.
         if (source.getEntity() != null) {
