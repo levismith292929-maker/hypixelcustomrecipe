@@ -9,7 +9,6 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +42,7 @@ public final class NecronGuardHandler {
 
         for (int i = 0; i < 2; i++) {
             var witherSkeletonType = BuiltInRegistries.ENTITY_TYPE.get(
-                    Identifier.fromNamespaceAndPath("minecraft", "wither_skeleton"));
+                    Identifier.fromNamespaceAndPath("minecraft", "wither_skeleton")).orElseThrow().value();
             var spawned = witherSkeletonType.create(level, EntitySpawnReason.TRIGGERED);
             if (!(spawned instanceof WitherSkeleton guard)) continue;
 
@@ -74,11 +73,7 @@ public final class NecronGuardHandler {
             }) {
                 guard.setDropChance(slot, 0.0F);
             }
-            guard.targetSelector.removeAllGoals(goal -> goal instanceof NearestAttackableTargetGoal<?>);
-            guard.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(
-                    guard, Player.class, 10, true, false,
-                    (candidate, serverLevel) -> !(candidate instanceof ServerPlayer serverPlayer)
-                            || !serverPlayer.getGameProfile().name().equalsIgnoreCase("QWDad")));
+            // Start by targeting the nearest player except QWDad.
             if (target != null) guard.setTarget(target);
             level.addFreshEntity(guard);
         }
