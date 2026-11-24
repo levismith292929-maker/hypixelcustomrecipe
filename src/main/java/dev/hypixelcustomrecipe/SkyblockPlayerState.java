@@ -447,8 +447,8 @@ public final class SkyblockPlayerState {
         if (++hudUpdateTicks >= 1) {
             hudUpdateTicks = 0;
             String hud = String.format(java.util.Locale.ROOT,
-                    "Health: %.1f/%.1f | Defense: %d",
-                    currentHealth / 10.0, maximumHealth / 10.0, stats.defense())
+                    "Health: %d/%d | Defense: %d",
+                    (int) Math.round(currentHealth / 10.0), (int) Math.round(maximumHealth / 10.0), stats.defense())
                     + abilityCooldownHud(player);
             player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
         }
