@@ -45,7 +45,7 @@ public record SkyblockStats(
 
     /** Defense-based fraction of incoming damage that is prevented. */
     public double damageReduction() {
-        return defense / (defense + 100.0);
+        return Math.min(1.0, defense / (defense + 50.0));
     }
 
     public double applyDefense(double incomingDamage) {
