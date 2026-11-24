@@ -65,17 +65,17 @@ public final class ModItems {
 
     // Star-upgrade materials. Each shard is used for its matching anvil upgrade.
     public static final Item STAR_SHARD_1 = registerTexturedHeadFromValue(
-            "star_shard1", "Master Star 1",
+            "star_shard1", "Star Shard 1",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjEzNjcyNDc0NWM4YzlhYmM3NWNkZjIyMDVmMmNkMWQzM2U2YmZlZmE0MTVmOTk1YmU3NjkyMjkxMjE2OWVjOSJ9fX0=", 64,
             "Used to upgrade non-vanilla armor to 1 star in an anvil."
     );
     public static final Item STAR_SHARD_2 = registerTexturedHeadFromValue(
-            "star_shard2", "Master Star 3",
+            "star_shard2", "Star Shard 2",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDcxYjk1NGU4OWFlZDE1NmY5MGZhZmNlNmRjNzc4OGFjNzZiNjQ2NmNlY2NhM2E0ZjRlYzFlNDYzZWI5MTRhMSJ9fX0=", 64,
             "Used to upgrade non-vanilla armor to 2 stars in an anvil."
     );
     public static final Item STAR_SHARD_3 = registerTexturedHeadFromValue(
-            "star_shard3", "Master Star 5",
+            "star_shard3", "Star Shard 3",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzFjODA0MjUyN2Y4MWM4ZTI5M2UyODEwMTEzNDg5ZjQzOTRjYzZlZmUxNWQxYWZhYzQzMTU3MWM3M2I2MmRjNCJ9fX0=", 64,
             "Used to upgrade non-vanilla armor to 3 stars in an anvil."
     );
