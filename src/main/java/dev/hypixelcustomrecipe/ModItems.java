@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -158,7 +159,8 @@ public final class ModItems {
                 .setId(key)
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
-                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         if (loreLines.length > 0) {
             ItemLore lore = new ItemLore(java.util.Arrays.stream(loreLines)
                     .<Component>map(Component::literal).toList());
