@@ -1,4 +1,5 @@
 name: Build Fabric Mod
+# Rebuild after adding Unstable Dragon crit-stat lore.
 
 on:
   push:
