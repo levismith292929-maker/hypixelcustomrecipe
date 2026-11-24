@@ -45,6 +45,7 @@ public final class ModArmorItems {
     private static final String NAMESPACE = "hypixel";
     private static final ArmorMaterial MATERIAL = createMaterial();
     private static final Map<String, Item> REGISTERED = new java.util.LinkedHashMap<>();
+    private static final Map<String, Stats> REGISTERED_STATS = new java.util.LinkedHashMap<>();
 
     private ModArmorItems() {
     }
@@ -104,6 +105,31 @@ public final class ModArmorItems {
                 new Stats(500,150,38,90), new Stats(650,200,38,90), new Stats(550,175,38,90), new Stats(350,125,38,90),
                 new int[]{15155516,15162428,15162428,15167036}, true
         ));
+    }
+
+    public static int getCriticalChance(net.minecraft.world.entity.player.Player player) {
+        int chance = 5;
+        for (ItemStack stack : player.getArmorSlots()) {
+            Stats stats = getStats(stack);
+            if (stats != null) chance += stats.critChance();
+        }
+        return Math.min(chance, 100);
+    }
+
+    public static int getCriticalDamage(net.minecraft.world.entity.player.Player player) {
+        int damage = 0;
+        for (ItemStack stack : player.getArmorSlots()) {
+            Stats stats = getStats(stack);
+            if (stats != null) damage += stats.critDamage();
+        }
+        return damage;
+    }
+
+    private static Stats getStats(ItemStack stack) {
+        if (stack.isEmpty()) return null;
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (!NAMESPACE.equals(id.getNamespace())) return null;
+        return REGISTERED_STATS.get(id.getPath());
     }
 
     public static Item get(String id) {
@@ -189,6 +215,7 @@ public final class ModArmorItems {
             };
             Registry.register(BuiltInRegistries.ITEM, key, item);
             REGISTERED.put(itemId, item);
+            REGISTERED_STATS.put(itemId, scaled);
         }
     }
 
