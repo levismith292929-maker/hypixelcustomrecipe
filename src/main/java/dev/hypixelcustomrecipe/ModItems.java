@@ -1,12 +1,13 @@
 package dev.hypixelcustomrecipe;
 
-import eu.pb4.polymer.core.api.item.SimplePolymerItem;
+import com.google.common.collect.ImmutableMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.core.Registry;
+import eu.pb4.polymer.core.api.item.SimplePolymerItem;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -17,21 +18,48 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 
 public final class ModItems {
     private static final String ITEM_NAMESPACE = "hypixel";
 
-    public static final Item OLD_DRAGON_FRAGMENT = register("old_dragon_fragment", "Old Dragon Fragment", Items.COPPER_INGOT);
-    public static final Item PROTECTOR_DRAGON_FRAGMENT = register("protector_dragon_fragment", "Protector Dragon Fragment", Items.DIAMOND);
-    public static final Item WISE_DRAGON_FRAGMENT = register("wise_dragon_fragment", "Wise Dragon Fragment", Items.LAPIS_LAZULI);
-    public static final Item YOUNG_DRAGON_FRAGMENT = register("young_dragon_fragment", "Young Dragon Fragment", Items.PRISMARINE_SHARD);
-    public static final Item STRONG_DRAGON_FRAGMENT = register("strong_dragon_fragment", "Strong Dragon Fragment", Items.OBSIDIAN);
-    public static final Item UNSTABLE_DRAGON_FRAGMENT = register("unstable_dragon_fragment", "Unstable Dragon Fragment", Items.REDSTONE_BLOCK);
-    public static final Item SUPERIOR_DRAGON_FRAGMENT = register("superior_dragon_fragment", "Superior Dragon Fragment", Items.DIAMOND_BLOCK);
-    public static final Item HOLY_DRAGON_FRAGMENT = register("holy_dragon_fragment", "Holy Dragon Fragment", Items.EMERALD);
+    public static final Item OLD_DRAGON_FRAGMENT = registerTexturedFragment(
+            "old_dragon_fragment", "Old Dragon Fragment",
+            "7aa09ad177fbccc53fa316cc04bdd2c9366baed889df76c5a29defea8170def5"
+    );
+    public static final Item PROTECTOR_DRAGON_FRAGMENT = registerTexturedFragment(
+            "protector_dragon_fragment", "Protector Dragon Fragment",
+            "48de339af63a229c9238d027e47f53eeb56141a419f51b35c31ea1494b435dd3"
+    );
+    public static final Item WISE_DRAGON_FRAGMENT = registerTexturedFragment(
+            "wise_dragon_fragment", "Wise Dragon Fragment",
+            "1d7620b2e4934963bb12508310d05494c067dc33e008cecf2cd7b4549654fab3"
+    );
+    public static final Item YOUNG_DRAGON_FRAGMENT = registerTexturedFragment(
+            "young_dragon_fragment", "Young Dragon Fragment",
+            "4b5bd6b64e8bd6c58f5cd1e79a5502d4448bafc006d2fe0568f6a0d6b86d449e"
+    );
+    public static final Item STRONG_DRAGON_FRAGMENT = registerTexturedFragment(
+            "strong_dragon_fragment", "Strong Dragon Fragment",
+            "6ee32fbd4c7b03b869078aa1f493a390e6e13b461d613707eafb326dbcd2b4b5"
+    );
+    public static final Item UNSTABLE_DRAGON_FRAGMENT = registerTexturedFragment(
+            "unstable_dragon_fragment", "Unstable Dragon Fragment",
+            "98228c234c3903c512a5a0aa45260e7b567e0e20eefc7d561ccec97b295871af"
+    );
+    public static final Item SUPERIOR_DRAGON_FRAGMENT = registerTexturedFragment(
+            "superior_dragon_fragment", "Superior Dragon Fragment",
+            "6f89b150be9c4c5249f355f68ea0c4391300a9be1f260d750fc35a1817ad796e"
+    );
+
+    // Holy Dragon Fragment is left on its existing fallback item until its exact Hypixel texture is verified.
+    public static final Item HOLY_DRAGON_FRAGMENT = register(
+            "holy_dragon_fragment", "Holy Dragon Fragment", Items.EMERALD
+    );
+
     public static final Item NECRON_CORE = registerNecronCore();
 
     // Unique item ID so the AOTV recipe can require an AOTE,
@@ -42,37 +70,52 @@ public final class ModItems {
     }
 
     private static Item registerNecronCore() {
+        return registerTexturedHead(
+                "necron_core",
+                "Necron Core",
+                "ce0dcf6dda85c95d7a9476f5148db195d89b7c2b41e2ec80adc822c6a9cbce17",
+                64
+        );
+    }
+
+    private static Item registerTexturedFragment(String path, String displayName, String textureHash) {
+        return registerTexturedHead(path, displayName, textureHash, 64);
+    }
+
+    private static Item registerTexturedHead(String path, String displayName, String textureHash, int maxStackSize) {
         ResourceKey<Item> key = ResourceKey.create(
                 Registries.ITEM,
-                Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, "necron_core")
+                Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
         );
-        // PropertyMap is immutable in this Minecraft/Authlib version, so build it with the texture already present.
-        Property texture = new Property("textures",
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2UwZGNmNmRkYTg1Yzk1ZDdhOTQ3NmY1MTQ4ZGIxOTVkODliN2MyYjQxZTJlYzgwYWRjODIyYzZhOWNiY2UxNyJ9fX0="
-        );
+
+        String textureJson = "{\\"textures\\":{\\"SKIN\\":{\\"url\\":\\"https://textures.minecraft.net/texture/"
+                + textureHash + "\\"}}}";
+        String textureValue = Base64.getEncoder().encodeToString(textureJson.getBytes(StandardCharsets.UTF_8));
+        Property texture = new Property("textures", textureValue);
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
         GameProfile profile = new GameProfile(
-                UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                "NecronCore",
+                UUID.nameUUIDFromBytes(("hypixel:" + path).getBytes(StandardCharsets.UTF_8)),
+                displayName.replace(" ", ""),
                 properties
         );
+
         Item item = new SimplePolymerItem(
                 new Item.Properties()
                         .setId(key)
-                        .stacksTo(64)
-                        .component(DataComponents.CUSTOM_NAME, Component.literal("Necron Core"))
+                        .stacksTo(maxStackSize)
+                        .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
                         .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile)),
                 Items.PLAYER_HEAD
         ) {
             @Override
             public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
-                // Explicitly forward the custom skull profile to the vanilla player head sent to clients.
                 ResolvableProfile skullProfile = stack.get(DataComponents.PROFILE);
                 if (skullProfile != null) {
                     out.set(DataComponents.PROFILE, skullProfile);
                 }
             }
         };
+
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
