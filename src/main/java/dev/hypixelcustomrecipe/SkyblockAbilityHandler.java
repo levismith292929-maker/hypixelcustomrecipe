@@ -1,6 +1,8 @@
 package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -23,16 +25,29 @@ import net.minecraft.world.phys.Vec3;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Java-driven item abilities migrated from the datapack. Each ability has its
  * own cooldown and spends from the player's shared mana pool.
  */
 public final class SkyblockAbilityHandler {
+    private static final Map<UUID, BreathState> ACTIVE_BREATHS = new ConcurrentHashMap<>();
+
     private SkyblockAbilityHandler() {
     }
 
     public static void initialize() {
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                BreathState breath = ACTIVE_BREATHS.get(player.getUUID());
+                if (breath != null) tickDragonBreath(player, breath);
+            }
+            ACTIVE_BREATHS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
+        });
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> ACTIVE_BREATHS.clear());
+
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getItemInHand(hand);
             if (world.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) {
@@ -146,31 +161,60 @@ public final class SkyblockAbilityHandler {
         playSound(player, net.minecraft.sounds.SoundEvents.WITHER_AMBIENT, 0.6F, 1.6F);
     }
 
-    /** Aspect of the Dragon: a widening five-block breath dealing ability damage. */
+    /** Starts the datapack's ten-tick, widening dragon-breath beam. */
     private static void useAotd(ServerPlayer player) {
         if (!beginAbility(player, "aotd", 80, 12)) return;
-        ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(direction.scale(0.3));
-        Set<UUID> hitTargets = new HashSet<>();
-        DamageSource source = level.damageSources().playerAttack(player);
         double damage = abilityDamage(player, 18.0);
+        ACTIVE_BREATHS.put(player.getUUID(), new BreathState(origin, direction, (float) damage));
+        playSound(player, net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.0F);
+    }
 
-        for (int step = 1; step <= 10; step++) {
-            double distance = step * 0.5;
-            double radius = 0.2 + step * 0.125;
-            Vec3 center = origin.add(direction.scale(distance));
-            level.sendParticles(ParticleTypes.FLAME, center.x, center.y, center.z,
-                    18 + step * 2, radius, radius, radius, 0.01);
-            AABB area = new AABB(center, center).inflate(radius);
-            for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> isValidTarget(entity, player))) {
-                if (hitTargets.add(target.getUUID())) {
-                    target.hurtServer(level, source, (float) damage);
-                }
+    private static void tickDragonBreath(ServerPlayer player, BreathState breath) {
+        ServerLevel level = (ServerLevel) player.level();
+        int step = ++breath.step;
+        double distance = step * 0.5;
+        double radius = 0.2 + step * 0.125;
+        Vec3 center = breath.origin.add(breath.direction.scale(distance));
+
+        Vec3 right = breath.direction.cross(new Vec3(0.0, 1.0, 0.0));
+        if (right.lengthSqr() < 1.0E-6) right = new Vec3(1.0, 0.0, 0.0);
+        right = right.normalize();
+        Vec3 up = right.cross(breath.direction).normalize();
+
+        for (int i = 0; i < 24; i++) {
+            double angle = (Math.PI * 2.0 * i) / 24.0;
+            Vec3 point = center.add(right.scale(Math.cos(angle) * radius))
+                    .add(up.scale(Math.sin(angle) * radius));
+            level.sendParticles(ParticleTypes.FLAME, point.x, point.y, point.z,
+                    1, 0.0, 0.0, 0.0, 0.0);
+        }
+
+        AABB area = new AABB(center, center).inflate(radius);
+        DamageSource source = level.damageSources().playerAttack(player);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
+                entity -> isValidTarget(entity, player))) {
+            if (breath.hitTargets.add(target.getUUID())) {
+                target.hurtServer(level, source, breath.damage);
             }
         }
-        playSound(player, net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.0F);
+
+        if (step >= 10) ACTIVE_BREATHS.remove(player.getUUID());
+    }
+
+    private static final class BreathState {
+        private final Vec3 origin;
+        private final Vec3 direction;
+        private final float damage;
+        private final Set<UUID> hitTargets = new HashSet<>();
+        private int step;
+
+        private BreathState(Vec3 origin, Vec3 direction, float damage) {
+            this.origin = origin;
+            this.direction = direction;
+            this.damage = damage;
+        }
     }
 
     /** Necron's Scythe: a three-block forward slash, hitting each target once. */
