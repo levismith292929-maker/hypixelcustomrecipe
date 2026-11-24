@@ -6,6 +6,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.core.Registry;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -64,7 +65,7 @@ public final class ModItems {
                 Items.PLAYER_HEAD
         ) {
             @Override
-            public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context) {
+            public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
                 // Explicitly forward the custom skull profile to the vanilla player head sent to clients.
                 ResolvableProfile skullProfile = stack.get(DataComponents.PROFILE);
                 if (skullProfile != null) {
