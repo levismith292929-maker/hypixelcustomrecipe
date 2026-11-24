@@ -80,7 +80,7 @@ public final class SkyblockPlayerState {
     private int maximumHealth;
     private boolean healthInitialized;
     private int combatTicksRemaining;
-    private int healthRegenerationTicks;
+    private double healthRegenerationProgress;
 
     private ArmorStand petDisplay;
 
@@ -136,7 +136,7 @@ public final class SkyblockPlayerState {
     /** Keeps Health regeneration paused for five seconds after entity combat. */
     public void markCombat() {
         combatTicksRemaining = 100;
-        healthRegenerationTicks = 0;
+        healthRegenerationProgress = 0.0;
     }
 
     /** Restores custom Health points; one vanilla heart is 20 custom points. */
@@ -320,35 +320,45 @@ public final class SkyblockPlayerState {
         }
     }
 
-    private static boolean wearingFullSet(ServerPlayer player, String setId) {
-        String[] suffixes = {"_helmet", "_chestplate", "_leggings", "_boots"};
-        EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-        for (int i = 0; i < slots.length; i++) {
-            ItemStack piece = player.getItemBySlot(slots[i]);
-            String path = BuiltInRegistries.ITEM.getKey(piece.getItem()).getPath();
-            if (!path.equals(setId + suffixes[i])
-                    && !(path.startsWith(setId + suffixes[i] + "_")
-                    && path.substring((setId + suffixes[i] + "_").length()).matches("[0-9]+star"))) {
-                return false;
-            }
-        }
-        return true;
+    private static boolean isArmorPiece(ServerPlayer player, EquipmentSlot slot, String itemId) {
+        String path = BuiltInRegistries.ITEM.getKey(player.getItemBySlot(slot).getItem()).getPath();
+        return path.equals(itemId) || (path.startsWith(itemId + "_")
+                && path.substring((itemId + "_").length()).matches("[0-9]+star"));
     }
 
     private void tickHealthRegeneration(ServerPlayer player) {
         if (combatTicksRemaining > 0) {
             combatTicksRemaining--;
-            healthRegenerationTicks = 0;
+            healthRegenerationProgress = 0.0;
             return;
         }
 
-        if (++healthRegenerationTicks < 80) return;
-        healthRegenerationTicks = 0;
+        if (currentHealth >= maximumHealth) {
+            healthRegenerationProgress = 0.0;
+            return;
+        }
 
-        int amount = 25;
-        if (wearingFullSet(player, "protector_dragon")) amount += 75;
-        else if (wearingFullSet(player, "necron")) amount += 375;
-        heal(amount);
+        // Each armor piece contributes its own share of the set's regeneration bonus.
+        // Protector: +18.75 Health per piece every 4 seconds.
+        // Necron: +93.75 Health per piece every 4 seconds.
+        EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+        String[] suffixes = {"_helmet", "_chestplate", "_leggings", "_boots"};
+        int protectorPieces = 0;
+        int necronPieces = 0;
+
+        for (int i = 0; i < slots.length; i++) {
+            if (isArmorPiece(player, slots[i], "protector_dragon" + suffixes[i])) protectorPieces++;
+            if (isArmorPiece(player, slots[i], "necron" + suffixes[i])) necronPieces++;
+        }
+
+        double healthPerFourSeconds = 25.0 + protectorPieces * 18.75 + necronPieces * 93.75;
+        healthRegenerationProgress += healthPerFourSeconds / 80.0;
+
+        int wholeHealth = (int) healthRegenerationProgress;
+        if (wholeHealth > 0) {
+            heal(wholeHealth);
+            healthRegenerationProgress -= wholeHealth;
+        }
     }
 
     private void tick(ServerPlayer player) {
