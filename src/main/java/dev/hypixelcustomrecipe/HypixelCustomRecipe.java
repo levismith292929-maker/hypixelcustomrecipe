@@ -16,6 +16,6 @@ public final class HypixelCustomRecipe implements ModInitializer {
         RecipeUnlocker.initialize();
         SkyblockPlayerState.initialize();
         SkyblockAbilityHandler.initialize();
-        LOGGER.info("Registered the migrated SkyBlock item, recipe, stat, and ability systems.");
+        LOGGER.info("Registered the migrated SkyBlock item, recipe, stat, and ability systems. Holy Dragon content is excluded.");
     }
 }
