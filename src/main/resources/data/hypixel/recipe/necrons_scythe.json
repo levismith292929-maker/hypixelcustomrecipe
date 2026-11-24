@@ -17,41 +17,6 @@
   },
   "result": {
     "id": "hypixel:necrons_scythe",
-    "count": 1,
-    "components": {
-      "minecraft:custom_name": {
-        "text": "Necron's Scythe",
-        "italic": false
-      },
-      "minecraft:item_model": "minecraft:diamond_hoe",
-      "minecraft:max_stack_size": 1,
-      "minecraft:consumable": {
-        "consume_seconds": 10000,
-        "animation": "none",
-        "has_consume_particles": false
-      },
-      "minecraft:lore": [
-        {
-          "text": "Ability: Wither Impact  RIGHT CLICK",
-          "color": "gold",
-          "italic": false
-        },
-        {
-          "text": "Slash forward with a sweeping scythe strike,",
-          "color": "gray",
-          "italic": false
-        },
-        {
-          "text": "damaging nearby enemies in front of you.",
-          "color": "gray",
-          "italic": false
-        },
-        {
-          "text": "Mana Cost: 35",
-          "color": "blue",
-          "italic": false
-        }
-      ]
-    }
+    "count": 1
   }
 }

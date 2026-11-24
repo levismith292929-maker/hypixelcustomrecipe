@@ -23,43 +23,6 @@
   },
   "result": {
     "id": "hypixel:zombie_sword",
-    "count": 1,
-    "components": {
-      "minecraft:custom_name": {
-        "text": "Zombie Sword",
-        "italic": false
-      },
-      "minecraft:enchantment_glint_override": true,
-      "minecraft:consumable": {
-        "consume_seconds": 10000,
-        "animation": "none",
-        "has_consume_particles": false
-      },
-      "minecraft:lore": [
-        {
-          "text": "Ability: Instant Healing  RIGHT CLICK",
-          "color": "gold",
-          "italic": false
-        },
-        {
-          "text": "Instantly heals 1 heart.",
-          "color": "gray",
-          "italic": false
-        },
-        {
-          "text": "Mana Cost: 50",
-          "color": "blue",
-          "italic": false
-        },
-        {
-          "text": "Cooldown: 1 second",
-          "color": "blue",
-          "italic": false
-        }
-      ],
-      "minecraft:unbreakable": {},
-      "minecraft:attribute_modifiers": [],
-      "minecraft:item_model": "minecraft:golden_sword"
-    }
+    "count": 1
   }
 }
