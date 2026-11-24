@@ -20,6 +20,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -105,7 +106,8 @@ public final class DatapackItems {
                 .setId(key)
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, displayName)
-                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
                     .<Component>map(Component::literal)
@@ -138,6 +140,7 @@ public final class DatapackItems {
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, Component.literal(name))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
                 .component(DataComponents.PROFILE, profile);
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines).<Component>map(Component::literal).toList();
