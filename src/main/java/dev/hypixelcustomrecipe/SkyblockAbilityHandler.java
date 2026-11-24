@@ -195,7 +195,7 @@ public final class SkyblockAbilityHandler {
 
     private static void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
                                   float volume, float pitch) {
-        (ServerLevel) player.level().playSound(null, player.blockPosition(), sound,
+        player.level().playSound(null, player.blockPosition(), sound,
                 net.minecraft.sounds.SoundSource.PLAYERS, volume, pitch);
     }
 }
