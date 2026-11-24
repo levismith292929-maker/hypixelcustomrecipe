@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe.mixin;
 
 import dev.hypixelcustomrecipe.ModArmorItems;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,9 +41,22 @@ public abstract class LivingEntityMixin {
         int critDamage = ModArmorItems.getCriticalDamage(attacker);
         float multiplier = 3.0F + (critDamage / 50.0F);
 
+        LivingEntity target = (LivingEntity) (Object) this;
+        level.sendParticles(
+                ParticleTypes.FLAME,
+                target.getX(),
+                target.getY() + target.getBbHeight() * 0.5,
+                target.getZ(),
+                8,
+                0.22,
+                0.22,
+                0.22,
+                0.015
+        );
+
         hypixelcustomrecipe$insideCriticalDamage.set(true);
         try {
-            cir.setReturnValue(((LivingEntity) (Object) this).hurtServer(level, source, amount * multiplier));
+            cir.setReturnValue(target.hurtServer(level, source, amount * multiplier));
         } finally {
             hypixelcustomrecipe$insideCriticalDamage.remove();
         }
