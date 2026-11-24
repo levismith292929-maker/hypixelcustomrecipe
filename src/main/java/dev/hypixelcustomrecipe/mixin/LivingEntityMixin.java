@@ -49,7 +49,8 @@ public abstract class LivingEntityMixin {
             hypixelcustomrecipe$trackingPlayerDamage = true;
         }
 
-        if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
+        if (source.getEntity() instanceof ServerPlayer attacker && attacker != target
+                && source.getDirectEntity() == attacker) {
             SkyblockPlayerState attackerState = SkyblockPlayerState.get(attacker);
             SkyblockStats attackStats = VanillaWeaponStats.applyHeldWeapon(
                     ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem()
