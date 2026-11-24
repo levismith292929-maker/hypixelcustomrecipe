@@ -104,6 +104,25 @@ public final class SkyblockPlayerState {
      * through its own stat formula instead. Keep that behavior in the mod so
      * vanilla armor does not apply a second, separate armor reduction.
      */
+
+    private String abilityCooldownHud(ServerPlayer player) {
+        ItemStack held = player.getMainHandItem();
+        String ability = null;
+        String label = null;
+        if (held.is(ModItems.AOTE)) { ability = "aote"; label = "AOTE"; }
+        else if (held.is(DatapackItems.AOTV)) { ability = "aotv"; label = "AOTV"; }
+        else if (held.is(DatapackItems.HYPERION)) { ability = "hyperion"; label = "Hyperion"; }
+        else if (held.is(DatapackItems.ASTRAEA)) { ability = "astraea"; label = "Astraea"; }
+        else if (held.is(DatapackItems.AOTD)) { ability = "aotd"; label = "AOTD"; }
+        else if (held.is(DatapackItems.NECRONS_SCYTHE)) { ability = "necrons_scythe"; label = "Necron's Scythe"; }
+        else if (held.is(DatapackItems.ZOMBIE_SWORD)) { ability = "zombie_sword"; label = "Zombie Sword"; }
+        else if (held.is(DatapackItems.ORE_TRACKER)) { ability = "ore_tracker"; label = "Ore Tracker"; }
+
+        if (ability == null) return "";
+        int remaining = mana.cooldownTicks(ability);
+        return " | " + label + ": " + (remaining > 0 ? remaining + " ticks" : "READY");
+    }
+
     private static void stripVanillaArmorAttributes(ServerPlayer player) {
         for (EquipmentSlot slot : new EquipmentSlot[]{
                 EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
@@ -169,7 +188,7 @@ public final class SkyblockPlayerState {
             String hud = String.format(java.util.Locale.ROOT,
                     "Health: %.1f/%.1f | Defense: %d | Mana: %d/%d",
                     currentHealth / 10.0, maximumHealth / 10.0, stats.defense(),
-                    mana.currentMana(), mana.maximumMana());
+                    mana.currentMana(), mana.maximumMana()) + abilityCooldownHud(player);
             player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
         }
     }
