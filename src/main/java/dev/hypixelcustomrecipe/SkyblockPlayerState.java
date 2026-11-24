@@ -3,6 +3,7 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.BossEvent;
@@ -82,6 +83,15 @@ public final class SkyblockPlayerState {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) get(player).tick(player);
         });
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+            newPlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+            newPlayer.setHealth(1024.0F);
+            SkyblockPlayerState state = PLAYERS.get(oldPlayer.getUUID());
+            if (state != null) {
+                state.manaBossBar.removePlayer(oldPlayer);
+                state.manaBossBar.addPlayer(newPlayer);
+            }
+        });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             SkyblockPlayerState state = PLAYERS.get(handler.player.getUUID());
             if (state != null) {
@@ -129,6 +139,9 @@ public final class SkyblockPlayerState {
     }
 
     public void loadPersistentData(ServerPlayer player, ValueInput input) {
+        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+        if (player.isAlive()) player.setHealth(1024.0F);
+
         int savedMaximum = input.getIntOr("hypixel_max_health", 0);
         int savedHealth = input.getIntOr("hypixel_health", -1);
         if (savedMaximum > 0 && savedHealth >= 0) {
