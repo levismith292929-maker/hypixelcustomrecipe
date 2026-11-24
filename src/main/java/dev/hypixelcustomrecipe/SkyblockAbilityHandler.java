@@ -133,6 +133,11 @@ public final class SkyblockAbilityHandler {
     }
 
 
+    /** Shared preview entry point so the HUD uses the exact ability raycast. */
+    public static BlockPos findRaycastTargetForPreview(ServerPlayer player) {
+        return findRaycastTarget(player);
+    }
+
     /** Reproduces the datapack's 640-step, 0.1-block raycast. */
     private static BlockPos findRaycastTarget(ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
