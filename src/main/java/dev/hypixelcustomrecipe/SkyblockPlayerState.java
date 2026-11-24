@@ -90,6 +90,7 @@ public final class SkyblockPlayerState {
         });
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             newPlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+            newPlayer.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
             newPlayer.setHealth(1024.0F);
             SkyblockPlayerState state = PLAYERS.get(oldPlayer.getUUID());
             if (state != null) {
@@ -145,6 +146,7 @@ public final class SkyblockPlayerState {
 
     public void loadPersistentData(ServerPlayer player, ValueInput input) {
         player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+        player.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
         if (player.isAlive()) player.setHealth(1024.0F);
 
         int savedMaximum = input.getIntOr("hypixel_max_health", 0);
