@@ -85,15 +85,20 @@ public final class SkyblockAbilityHandler {
                 showStats(serverPlayer);
             } else if (stack.is(DatapackItems.PET_ENDERMAN)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDERMAN);
+                stack.shrink(1);
             } else if (stack.is(DatapackItems.PET_ENDER_DRAGON)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDER_DRAGON);
+                stack.shrink(1);
             } else if (stack.is(DatapackItems.PET_GOLDEN_DRAGON)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.GOLDEN_DRAGON);
+                stack.shrink(1);
             } else if (stack.is(DatapackItems.PET_IRON_GOLEM)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.IRON_GOLEM);
+                stack.shrink(1);
             } else if (stack.is(DatapackItems.PET_REMOVER)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.NONE);
                 serverPlayer.sendSystemMessage(Component.literal("Your pet has been removed. Your normal stats have been restored."));
+                stack.shrink(1);
             } else {
                 return InteractionResult.PASS;
             }
