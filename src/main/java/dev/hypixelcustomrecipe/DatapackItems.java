@@ -70,7 +70,8 @@ public final class DatapackItems {
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
-                .component(DataComponents.CUSTOM_NAME, Component.literal(name));
+                .component(DataComponents.CUSTOM_NAME, Component.literal(name))
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
                     .<Component>map(Component::literal)
