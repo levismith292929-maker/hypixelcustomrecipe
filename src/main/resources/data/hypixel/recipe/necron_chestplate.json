@@ -8,9 +8,15 @@
     "fnf"
   ],
   "key": {
-    "f": "hypixel:superior_dragon_fragment",
-    "n": "hypixel:necron_core",
-    "a": "minecraft:netherite_chestplate"
+    "f": [
+      "hypixel:superior_dragon_fragment"
+    ],
+    "n": [
+      "hypixel:necron_core"
+    ],
+    "a": [
+      "minecraft:netherite_chestplate"
+    ]
   },
   "result": {
     "id": "hypixel:necron_chestplate",
