@@ -8,15 +8,9 @@
     "fnf"
   ],
   "key": {
-    "f": [
-      "hypixel:superior_dragon_fragment"
-    ],
-    "n": [
-      "minecraft:netherite_scrap"
-    ],
-    "a": [
-      "minecraft:netherite_helmet"
-    ]
+    "f": "hypixel:superior_dragon_fragment",
+    "n": "hypixel:necron_core",
+    "a": "minecraft:netherite_helmet"
   },
   "result": {
     "id": "hypixel:necron_helmet",
