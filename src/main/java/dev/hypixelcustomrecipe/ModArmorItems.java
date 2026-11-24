@@ -127,6 +127,39 @@ public final class ModArmorItems {
         return damage;
     }
 
+    /**
+     * Collect the registered custom armor stats worn by a player.
+     * This is the single equipment aggregation entry point used by the
+     * migrated stat engine, HUD, and Stat Viewer.
+     */
+    public static SkyblockStats getSkyblockStats(net.minecraft.world.entity.player.Player player) {
+        int health = SkyblockStats.BASE.health();
+        int defense = SkyblockStats.BASE.defense();
+        int strength = SkyblockStats.BASE.strength();
+        int intelligence = SkyblockStats.BASE.intelligence();
+        int critChance = SkyblockStats.BASE.critChance();
+        int critDamage = SkyblockStats.BASE.critDamage();
+
+        for (EquipmentSlot slot : new EquipmentSlot[]{
+                EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+        }) {
+            Stats piece = getStats(player.getItemBySlot(slot));
+            if (piece == null) continue;
+            health += piece.health();
+            defense += piece.defense();
+            strength += piece.strength();
+            intelligence += piece.intelligence();
+            critChance += piece.critChance();
+            critDamage += piece.critDamage();
+        }
+
+        return new SkyblockStats(
+                health, defense, strength, 0, critChance, critDamage,
+                intelligence, SkyblockStats.BASE.manaMaximum(),
+                SkyblockStats.BASE.manaRegeneration(), 1.0
+        );
+    }
+
     private static Stats getStats(ItemStack stack) {
         if (stack.isEmpty()) return null;
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
