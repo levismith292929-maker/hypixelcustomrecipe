@@ -184,7 +184,7 @@ public final class SkyblockPlayerState {
         }
 
         ServerLevel level = (ServerLevel) player.level();
-        petDisplay = new ArmorStand(level, player.getX(), player.getY() + 0.2, player.getZ());
+        petDisplay = new ArmorStand(level, player.getX(), player.getY() - 0.6, player.getZ());
         petDisplay.setInvisible(true);
         petDisplay.setNoGravity(true);
         petDisplay.setNoBasePlate(true);
@@ -216,7 +216,7 @@ public final class SkyblockPlayerState {
             return;
         }
         double bob = Math.sin(player.tickCount * 0.12) * 0.12;
-        petDisplay.setPos(player.getX(), player.getY() + 0.2 + bob, player.getZ());
+        petDisplay.setPos(player.getX(), player.getY() - 0.6 + bob, player.getZ());
         petDisplay.setYRot(player.getYRot());
     }
 
@@ -336,7 +336,7 @@ public final class SkyblockPlayerState {
             astraeaOrbTicks--;
         }
 
-        if (++hudUpdateTicks >= 10) {
+        if (++hudUpdateTicks >= 1) {
             hudUpdateTicks = 0;
             String hud = String.format(java.util.Locale.ROOT,
                     "Health: %.1f/%.1f | Defense: %d",
