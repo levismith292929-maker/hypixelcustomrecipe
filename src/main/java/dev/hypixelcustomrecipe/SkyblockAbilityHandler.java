@@ -54,6 +54,8 @@ public final class SkyblockAbilityHandler {
                 useZombieSword(serverPlayer);
             } else if (stack.is(DatapackItems.ORE_TRACKER)) {
                 useOreTracker(serverPlayer);
+            } else if (stack.is(DatapackItems.STAT_VIEWER)) {
+                showStats(serverPlayer);
             } else if (stack.is(DatapackItems.PET_ENDERMAN)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDERMAN);
             } else if (stack.is(DatapackItems.PET_ENDER_DRAGON)) {
@@ -202,6 +204,24 @@ public final class SkyblockAbilityHandler {
         playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.7F, 1.4F);
     }
 
+
+
+    /** Displays the same core stat categories exposed by the datapack viewer. */
+    private static void showStats(ServerPlayer player) {
+        SkyblockPlayerState state = SkyblockPlayerState.get(player);
+        SkyblockStats stats = state.stats();
+        SkyblockManaState mana = state.mana();
+        player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.1f", stats.calculateWeaponDamage(false))));
+        player.sendSystemMessage(Component.literal("Strength: " + stats.strength()));
+        player.sendSystemMessage(Component.literal("Armor Strength: " + stats.armorStrength()));
+        player.sendSystemMessage(Component.literal("Crit Chance: " + stats.critChance() + "%"));
+        player.sendSystemMessage(Component.literal("Crit Damage: " + stats.critDamage() + "%"));
+        player.sendSystemMessage(Component.literal("Maximum Mana: " + mana.maximumMana()));
+        player.sendSystemMessage(Component.literal("Mana Regeneration: " + mana.regenerationPerSecond() + " / second"));
+        player.sendSystemMessage(Component.literal("Defense: " + stats.defense()));
+        player.sendSystemMessage(Component.literal("Intelligence: " + stats.intelligence()));
+    }
 
     /** Searches the current dimension for the nearest diamond ore or ancient debris. */
     private static void useOreTracker(ServerPlayer player) {
