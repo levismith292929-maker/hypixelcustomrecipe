@@ -253,9 +253,9 @@ public final class SkyblockPlayerState {
             maximumHealth = recalculatedMaximum;
             currentHealth = maximumHealth;
             healthInitialized = true;
-        } else if (currentHealth <= 0 && player.isAlive()) {
+        } else if (currentHealth <= 0) {
             maximumHealth = recalculatedMaximum;
-            currentHealth = maximumHealth;
+            if (player.isAlive()) currentHealth = maximumHealth;
         } else {
             int healthDifference = recalculatedMaximum - maximumHealth;
             maximumHealth = recalculatedMaximum;
