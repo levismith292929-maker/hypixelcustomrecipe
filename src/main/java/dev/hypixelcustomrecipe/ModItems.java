@@ -81,8 +81,8 @@ public final class ModItems {
     public static final Item AOTE = registerUnstackable("aote", "Aspect of the End", Items.DIAMOND_SWORD,
             "Ability: Instant Transmission  RIGHT CLICK",
             "Teleports you 5 blocks in the direction you are facing.",
-            "Mana Cost: 35",
-            "Cooldown: 4 ticks");
+            "Mana Cost: 15",
+            "Cooldown: 5 ticks");
 
     private ModItems() {
     }
