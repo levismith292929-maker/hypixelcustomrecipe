@@ -88,37 +88,37 @@ public final class ModArmorItems {
         registerSet(new ArmorSet(
                 "old_dragon", "Old Dragon", 0xAAAAAA, 11184810,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI0YzRkYTZhYjI3ZTljOTNmYmY0OWVhMWIxZmVmYWVmYmUyZDRjMGM4YjIyMmUyZmY2YjE4MTc5ZmI1YWRkZiJ9fX0=",
-                new Stats(51,110,0,0), new Stats(83,160,0,0), new Stats(73,140,0,0), new Stats(44,90,0,0)
+                new Stats(507,110,0,0), new Stats(832,160,0,0), new Stats(728,140,0,0), new Stats(442,90,0,0)
         ));
         registerSet(new ArmorSet(
                 "protector_dragon", "Protector Dragon", 0x55FF55, 10066329,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWYxYTFjY2JiMDI0ZWQxZDI4NDcxYmM0YjNjMjhkMDkzMjc3MTYxYTM4NzFkMjY5OWQ2OGU1ZDJjMzg3OTY0In19fQ==",
-                new Stats(39,135,0,0), new Stats(66,185,0,0), new Stats(56,165,0,0), new Stats(34,115,0,0)
+                new Stats(390,135,0,0), new Stats(663,185,0,0), new Stats(559,165,0,0), new Stats(338,115,0,0)
         ));
         registerSet(new ArmorSet(
                 "strong_dragon", "Strong Dragon", 0xFF5555, 11141290,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhiYzY1NTFiZWIyMTQ4ZDkzOWI2OTkyNTE0MGQyMzc5ZmUwZmFiNmU3ZDMxZjY1ZGY1MGI1OWU5Zjc3YTBlNCJ9fX0=",
-                new Stats(39,110,25,0), new Stats(66,160,25,0), new Stats(56,140,25,0), new Stats(34,90,25,0)
+                new Stats(390,110,25,0), new Stats(663,160,25,0), new Stats(559,140,25,0), new Stats(338,90,25,0)
         ));
         registerSet(new ArmorSet(
                 "superior_dragon", "Superior Dragon", 0xFFAA00, 16766720,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWUwMzI5ZjQyMTkyZWU3YzFhMGM3MDRmODJkYmJiZTdjMDBmYmZhM2YwMjBjMTA2N2EyMDg2MzBiOTkxYjk4OCJ9fX0=",
-                new Stats(51,130,10,25,2,3), new Stats(83,190,10,25,2,3), new Stats(73,170,10,25,2,3), new Stats(44,110,10,25,2,3)
+                new Stats(507,130,10,25,2,3), new Stats(832,190,10,25,2,3), new Stats(728,170,10,25,2,3), new Stats(442,110,10,25,2,3)
         ));
         registerSet(new ArmorSet(
                 "unstable_dragon", "Unstable Dragon", 0xAA00AA, 5570634,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjA1ZmM0ZTJiNjhjNDUwNTlhZmVmMzk5OWU5YTk1YWEzZDg5NDM1OTdhNzg5NGU1NjkzOTdkNmNmNWQxNjcyYSJ9fX0=",
-                new Stats(39,110,0,25,1,4), new Stats(66,160,0,0,1,4), new Stats(56,140,0,0,1,4), new Stats(34,90,0,0,1,4)
+                new Stats(390,110,0,25,1,4), new Stats(663,160,0,0,1,4), new Stats(559,140,0,0,1,4), new Stats(338,90,0,0,1,4)
         ));
         registerSet(new ArmorSet(
                 "wise_dragon", "Wise Dragon", 0xAA00AA, 5636095,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTc5N2M3N2NjZWUzYzA0YzNkZWVkNzcwNTk1ZWE4M2VhMWU4NGM5YTQ2MjliNzUzYWY1ZDM1MWMwY2MxMWE3NCJ9fX0=",
-                new Stats(39,110,0,125), new Stats(66,160,0,75), new Stats(56,140,0,75), new Stats(34,90,0,75)
+                new Stats(390,110,0,125), new Stats(663,160,0,75), new Stats(559,140,0,75), new Stats(338,90,0,75)
         ));
         registerSet(new ArmorSet(
                 "young_dragon", "Young Dragon", 0x55FFFF, 5635925,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBlODFlZDA3ZGZiMDI0NGQ1NmY0ZDVmMmIzNzU1M2VjMDI2ZmI0Nzk2ZjBmYjBjNTdhOGViMjY0OTgzZTFlMCJ9fX0=",
-                new Stats(39,110,0,0), new Stats(66,160,0,0), new Stats(56,140,0,0), new Stats(34,90,0,0)
+                new Stats(390,110,0,0), new Stats(663,160,0,0), new Stats(559,140,0,0), new Stats(338,90,0,0)
         ));
 
         // Necron armor keeps its custom player-head helmet and its per-piece leather dye colours.
@@ -220,7 +220,7 @@ public final class ModArmorItems {
             String displayName = set.displayName + " " + slotName + (stars == 0 ? "" : " " + "★".repeat(stars));
             Stats scaled = baseStats.scale(stars);
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.literal("Health: " + scaled.health).withStyle(ChatFormatting.RED));
+            lore.add(Component.literal("Health: " + String.format(java.util.Locale.ROOT, "%.1f", scaled.health / 10.0)).withStyle(ChatFormatting.RED));
             lore.add(Component.literal("Defense: " + scaled.defense).withStyle(ChatFormatting.GREEN));
             if (scaled.strength != 0) {
                 lore.add(Component.literal("Strength: " + scaled.strength).withStyle(ChatFormatting.RED));
