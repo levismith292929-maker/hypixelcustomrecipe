@@ -74,7 +74,7 @@ public final class ModArmorItems {
         registerSet(new ArmorSet(
                 "superior_dragon", "Superior Dragon", 0xFFAA00, 16766720,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWUwMzI5ZjQyMTkyZWU3YzFhMGM3MDRmODJkYmJiZTdjMDBmYmZhM2YwMjBjMTA2N2EyMDg2MzBiOTkxYjk4OCJ9fX0=",
-                new Stats(51,130,10,25,1,3), new Stats(83,190,10,25,1,3), new Stats(73,170,10,25,1,3), new Stats(44,110,10,25,1,3)
+                new Stats(51,130,10,25,2,3), new Stats(83,190,10,25,2,3), new Stats(73,170,10,25,2,3), new Stats(44,110,10,25,2,3)
         ));
         registerSet(new ArmorSet(
                 "unstable_dragon", "Unstable Dragon", 0xAA00AA, 5570634,
