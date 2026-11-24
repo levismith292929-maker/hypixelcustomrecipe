@@ -1,6 +1,6 @@
 {
   "required": true,
   "package": "dev.hypixelcustomrecipe.mixin",
-  "mixins": ["AnvilMenuMixin"],
+  "mixins": ["AnvilMenuMixin", "LivingEntityMixin"],
   "injectors": {"defaultRequire": 1}
 }
