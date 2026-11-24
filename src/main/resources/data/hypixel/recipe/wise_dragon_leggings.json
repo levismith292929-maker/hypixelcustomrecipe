@@ -8,18 +8,10 @@
     "d d"
   ],
   "key": {
-    "n": [
-      "minecraft:netherite_scrap"
-    ],
-    "a": [
-      "minecraft:diamond_leggings"
-    ],
-    "f": [
-      "hypixel:wise_dragon_fragment"
-    ],
-    "d": [
-      "minecraft:diamond"
-    ]
+    "n": "minecraft:netherite_scrap",
+    "a": "minecraft:diamond_leggings",
+    "f": "hypixel:wise_dragon_fragment",
+    "d": "minecraft:diamond"
   },
   "result": {
     "id": "hypixel:wise_dragon_leggings",
