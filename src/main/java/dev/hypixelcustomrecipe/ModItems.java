@@ -77,7 +77,11 @@ public final class ModItems {
 
     // Unique item ID so the AOTV recipe can require an AOTE,
     // rather than accepting any ordinary diamond sword.
-    public static final Item AOTE = registerUnstackable("aote", "Aspect of the End", Items.DIAMOND_SWORD);
+    public static final Item AOTE = registerUnstackable("aote", "Aspect of the End", Items.DIAMOND_SWORD,
+            "Ability: Instant Transmission  RIGHT CLICK",
+            "Teleports you 5 blocks in the direction you are facing.",
+            "Mana Cost: 35",
+            "Cooldown: 4 ticks");
 
     private ModItems() {
     }
@@ -144,8 +148,24 @@ public final class ModItems {
         return register(path, displayName, vanillaFallback, 64);
     }
 
-    private static Item registerUnstackable(String path, String displayName, Item vanillaFallback) {
-        return register(path, displayName, vanillaFallback, 1);
+    private static Item registerUnstackable(String path, String displayName, Item vanillaFallback,
+                                             String... loreLines) {
+        ResourceKey<Item> key = ResourceKey.create(
+                Registries.ITEM,
+                Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
+        );
+        Item.Properties properties = new Item.Properties()
+                .setId(key)
+                .stacksTo(1)
+                .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+        if (loreLines.length > 0) {
+            ItemLore lore = new ItemLore(java.util.Arrays.stream(loreLines)
+                    .<Component>map(Component::literal).toList());
+            properties.component(DataComponents.LORE, lore);
+        }
+        Item item = new SimplePolymerItem(properties, vanillaFallback);
+        return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
     private static Item register(String path, String displayName, Item vanillaFallback, int maxStackSize) {
