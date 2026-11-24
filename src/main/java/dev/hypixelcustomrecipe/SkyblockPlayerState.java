@@ -267,7 +267,7 @@ public final class SkyblockPlayerState {
         // large reserve so normal damage can be measured after vanilla
         // resistance, shields, and other mitigation have run.
         player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
-        if (player.getHealth() < 1024.0F) player.setHealth(1024.0F);
+        if (player.isAlive() && player.getHealth() < 1024.0F) player.setHealth(1024.0F);
 
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
