@@ -155,8 +155,8 @@ public final class ModArmorItems {
 
         return new SkyblockStats(
                 health, defense, strength, 0, critChance, critDamage,
-                intelligence, SkyblockStats.BASE.manaMaximum(),
-                SkyblockStats.BASE.manaRegeneration(), 1.0
+                intelligence, SkyblockStats.BASE.manaMaximum() + intelligence,
+                SkyblockStats.BASE.manaRegeneration() + (intelligence + 2) / 4, 1.0
         );
     }
 
