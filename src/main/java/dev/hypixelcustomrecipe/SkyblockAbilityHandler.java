@@ -1,15 +1,29 @@
 package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 /**
- * First migrated item-ability handler. Abilities are activated directly from
- * Java item-use events; no datapack advancement trigger is required.
+ * Java-driven item abilities migrated from the datapack. Each ability has its
+ * own cooldown and spends from the player's shared mana pool.
  */
 public final class SkyblockAbilityHandler {
     private SkyblockAbilityHandler() {
@@ -24,37 +38,164 @@ public final class SkyblockAbilityHandler {
 
             if (stack.is(ModItems.AOTE)) {
                 useAote(serverPlayer);
-                return InteractionResult.SUCCESS;
+            } else if (stack.is(DatapackItems.AOTV)) {
+                useAotv(serverPlayer);
+            } else if (stack.is(DatapackItems.HYPERION)) {
+                useHyperion(serverPlayer);
+            } else if (stack.is(DatapackItems.ASTRAEA)) {
+                useAstraea(serverPlayer);
+            } else if (stack.is(DatapackItems.AOTD)) {
+                useAotd(serverPlayer);
+            } else if (stack.is(DatapackItems.NECRONS_SCYTHE)) {
+                useNecronsScythe(serverPlayer);
+            } else if (stack.is(DatapackItems.ZOMBIE_SWORD)) {
+                useZombieSword(serverPlayer);
+            } else {
+                return InteractionResult.PASS;
             }
-
-            return InteractionResult.PASS;
+            return InteractionResult.SUCCESS;
         });
     }
 
-    /**
-     * Aspect of the End: spend 35 mana, teleport five blocks forward,
-     * clear vertical velocity, and use a four-tick cooldown.
-     */
-    private static void useAote(ServerPlayer player) {
-        SkyblockManaState mana = SkyblockPlayerState.get(player).mana();
-        if (mana.isOnCooldown()) {
-            return;
-        }
-        if (!mana.spend(35)) {
-            player.sendSystemMessage(Component.literal("Not enough mana! (35 required)"));
-            return;
-        }
+    private static SkyblockManaState mana(ServerPlayer player) {
+        return SkyblockPlayerState.get(player).mana();
+    }
 
+    private static boolean beginAbility(ServerPlayer player, String id, int cost, int cooldown) {
+        SkyblockManaState mana = mana(player);
+        if (mana.isOnCooldown(id)) return false;
+        if (!mana.spend(cost)) {
+            player.sendSystemMessage(Component.literal("Not enough mana! (" + cost + " required)"));
+            return false;
+        }
         mana.setRegenerationDelay(40);
-        mana.startCooldown(4);
+        mana.startCooldown(id, cooldown);
+        return true;
+    }
+
+    private static void useAote(ServerPlayer player) {
+        if (!beginAbility(player, "aote", 35, 4)) return;
 
         Vec3 destination = player.position().add(player.getLookAngle().scale(5.0));
         player.teleportTo(destination.x, destination.y, destination.z);
         Vec3 velocity = player.getDeltaMovement();
         player.setDeltaMovement(velocity.x, 0.0, velocity.z);
         player.fallDistance = 0.0F;
-        player.level().playSound(null, player.blockPosition(),
-                net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT,
-                net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
+        playSound(player, net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
+    }
+
+    /** Aspect of the Void: raycast up to 64 blocks and land above the hit block. */
+    private static void useAotv(ServerPlayer player) {
+        if (!beginAbility(player, "aotv", 50, 60)) return;
+        HitResult hit = player.pick(64.0, 0.0F, false);
+        if (!(hit instanceof BlockHitResult blockHit) || hit.getType() != HitResult.Type.BLOCK) {
+            return;
+        }
+        Vec3 destination = Vec3.atBottomCenterOf(blockHit.getBlockPos()).add(0.0, 1.0, 0.0);
+        player.teleportTo(destination.x, destination.y, destination.z);
+        player.fallDistance = 0.0F;
+        ServerLevel level = player.serverLevel();
+        level.sendParticles(ParticleTypes.PORTAL, destination.x, destination.y + 1.0, destination.z,
+                45, 0.45, 0.8, 0.45, 0.15);
+        level.sendParticles(ParticleTypes.REVERSE_PORTAL, destination.x, destination.y + 1.0, destination.z,
+                25, 0.3, 0.6, 0.3, 0.05);
+        playSound(player, net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
+    }
+
+    /** Hyperion: 60 ability damage to living non-player targets within five blocks. */
+    private static void useHyperion(ServerPlayer player) {
+        if (!beginAbility(player, "hyperion", 150, 100)) return;
+        ServerLevel level = player.serverLevel();
+        double damage = abilityDamage(player, 60.0);
+        DamageSource source = level.damageSources().playerAttack(player);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
+                player.getBoundingBox().inflate(5.0), entity -> entity != player
+                        && !(entity instanceof Player) && entity.isAlive())) {
+            target.hurtServer(level, source, (float) damage);
+        }
+        level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
+                1, 0.0, 0.0, 0.0, 0.0);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(),
+                30, 1.5, 0.6, 1.5, 0.05);
+        playSound(player, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, 1.0F, 1.2F);
+    }
+
+    /** Astraea: Resistance II and Absorption IV for ten seconds. */
+    private static void useAstraea(ServerPlayer player) {
+        if (!beginAbility(player, "astraea", 40, 200)) return;
+        player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 200, 1));
+        player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 200, 3));
+        playSound(player, net.minecraft.sounds.SoundEvents.WITHER_AMBIENT, 0.6F, 1.6F);
+    }
+
+    /** Aspect of the Dragon: a widening five-block breath dealing ability damage. */
+    private static void useAotd(ServerPlayer player) {
+        if (!beginAbility(player, "aotd", 80, 12)) return;
+        ServerLevel level = player.serverLevel();
+        Vec3 direction = player.getLookAngle().normalize();
+        Vec3 origin = player.getEyePosition().add(direction.scale(0.3));
+        Set<UUID> hitTargets = new HashSet<>();
+        DamageSource source = level.damageSources().playerAttack(player);
+        double damage = abilityDamage(player, 18.0);
+
+        for (int step = 1; step <= 10; step++) {
+            double distance = step * 0.5;
+            double radius = 0.2 + step * 0.125;
+            Vec3 center = origin.add(direction.scale(distance));
+            level.sendParticles(ParticleTypes.FLAME, center.x, center.y, center.z,
+                    18 + step * 2, radius, radius, radius, 0.01);
+            AABB area = new AABB(center, center).inflate(radius);
+            for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
+                    entity -> entity != player && !(entity instanceof Player) && entity.isAlive())) {
+                if (hitTargets.add(target.getUUID())) {
+                    target.hurtServer(level, source, (float) damage);
+                }
+            }
+        }
+        playSound(player, net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.0F);
+    }
+
+    /** Necron's Scythe: a three-block forward slash, hitting each target once. */
+    private static void useNecronsScythe(ServerPlayer player) {
+        if (!beginAbility(player, "necrons_scythe", 35, 15)) return;
+        ServerLevel level = player.serverLevel();
+        Vec3 direction = player.getLookAngle().normalize();
+        Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
+        Set<UUID> hitTargets = new HashSet<>();
+        DamageSource source = level.damageSources().playerAttack(player);
+        double damage = abilityDamage(player, 10.0);
+
+        for (int step = 1; step <= 7; step++) {
+            Vec3 center = origin.add(direction.scale(step * 0.5));
+            level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z,
+                    5, 0.35, 0.25, 0.35, 0.01);
+            AABB area = new AABB(center, center).inflate(1.5);
+            for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
+                    entity -> entity != player && !(entity instanceof Player) && entity.isAlive())) {
+                if (hitTargets.add(target.getUUID())) {
+                    target.hurtServer(level, source, (float) damage);
+                }
+            }
+        }
+        playSound(player, net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 0.8F);
+    }
+
+    /** Zombie Sword: restore one heart, with its one-second cooldown. */
+    private static void useZombieSword(ServerPlayer player) {
+        if (!beginAbility(player, "zombie_sword", 50, 20)) return;
+        player.heal(2.0F);
+        playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.7F, 1.4F);
+    }
+
+    private static double abilityDamage(ServerPlayer player, double baseDamage) {
+        SkyblockStats stats = SkyblockPlayerState.get(player).stats();
+        return (baseDamage + (stats.strength() + stats.armorStrength()) * 0.1
+                + stats.intelligence() * 0.2);
+    }
+
+    private static void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
+                                  float volume, float pitch) {
+        player.serverLevel().playSound(null, player.blockPosition(), sound,
+                net.minecraft.sounds.SoundSource.PLAYERS, volume, pitch);
     }
 }
