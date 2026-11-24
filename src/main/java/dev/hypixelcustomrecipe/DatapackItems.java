@@ -11,6 +11,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemLore;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -56,8 +57,10 @@ public final class DatapackItems {
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, Component.literal(name));
         if (loreLines.length > 0) {
-            properties.component(DataComponents.LORE,
-                    new ItemLore(List.of(loreLines).stream().map(Component::literal).toList()));
+            List<Component> lore = Arrays.stream(loreLines)
+                    .<Component>map(Component::literal)
+                    .toList();
+            properties.component(DataComponents.LORE, new ItemLore(lore));
         }
         Item item = new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, fallback);
         return Registry.register(BuiltInRegistries.ITEM, key, item);
