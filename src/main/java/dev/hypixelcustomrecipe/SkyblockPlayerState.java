@@ -430,14 +430,18 @@ public final class SkyblockPlayerState {
 
         if (astraeaOrbTicks > 0) {
             ServerLevel level = (ServerLevel) player.level();
-            double rotation = (100 - astraeaOrbTicks) * 0.12;
-            for (int i = 0; i < 3; i++) {
-                double angle = rotation + i * (Math.PI * 2.0 / 3.0);
-                double x = player.getX() + Math.cos(angle) * 1.0;
-                double y = player.getY() + 1.0 + Math.sin(angle * 2.0) * 0.2;
-                double z = player.getZ() + Math.sin(angle) * 1.0;
-                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 1, 0.02, 0.02, 0.02, 0.0);
-                level.sendParticles(ParticleTypes.SMOKE, x, y, z, 1, 0.04, 0.04, 0.04, 0.0);
+            double rotation = (100 - astraeaOrbTicks) * Math.toRadians(5.0);
+            var darkDust = new net.minecraft.core.particles.DustParticleOptions(
+                    new org.joml.Vector3f(0.08F, 0.08F, 0.08F), 2.0F);
+            for (int i = 0; i < 4; i++) {
+                double angle = rotation + i * (Math.PI / 2.0);
+                double x = player.getX() + Math.cos(angle) * 2.2;
+                double y = player.getY() + 1.0;
+                double z = player.getZ() + Math.sin(angle) * 2.2;
+                level.sendParticles(darkDust, x, y, z, 5, 0.06, 0.06, 0.06, 0.0);
+                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                        x, y + 0.2, z, 1, 0.15, 0.15, 0.15, 0.0);
+                level.sendParticles(darkDust, x, y, z, 1, 0.05, 0.05, 0.05, 0.0);
             }
             astraeaOrbTicks--;
         }
