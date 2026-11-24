@@ -17,6 +17,8 @@ public final class RecipeUnlocker {
             "necron_core",
             "old_dragon_fragment",
             "protector_dragon_fragment",
+            "star_shard1",
+            "star_shard2",
             "strong_dragon_fragment",
             "superior_dragon_fragment",
             "unstable_dragon_fragment",
