@@ -34,8 +34,8 @@ public final class RecipeUnlocker {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             var recipes = server.getRecipeManager().getRecipes().stream()
                     .filter(recipe -> MOD_RECIPE_KEYS.contains(recipe.id())
-                            || (recipe.id().location().getNamespace().equals("hypixelrecipes")
-                            && recipe.id().location().getPath().contains("_dragon_")))
+                            || (recipe.id().identifier().getNamespace().equals("hypixelrecipes")
+                            && recipe.id().identifier().getPath().contains("_dragon_")))
                     .toList();
 
             if (!recipes.isEmpty()) {
