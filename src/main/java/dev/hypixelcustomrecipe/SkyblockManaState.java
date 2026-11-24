@@ -59,7 +59,11 @@ public final class SkyblockManaState {
     }
 
     public boolean isOnCooldown(String abilityId) {
-        return abilityCooldowns.getOrDefault(abilityId, 0) > 0;
+        return cooldownTicks(abilityId) > 0;
+    }
+
+    public int cooldownTicks(String abilityId) {
+        return abilityCooldowns.getOrDefault(abilityId, 0);
     }
 
     public void startCooldown(String abilityId, int ticks) {
