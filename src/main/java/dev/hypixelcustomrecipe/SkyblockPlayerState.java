@@ -142,14 +142,23 @@ public final class SkyblockPlayerState {
         Pet[] pets = Pet.values();
         if (petIndex >= 0 && petIndex < pets.length) {
             activePet = pets[petIndex];
-            if (activePet == Pet.IRON_GOLEM) {
-                player.addEffect(new MobEffectInstance(
-                        MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
-            }
+
         }
     }
 
     public void startAstraeaOrbs() { astraeaOrbTicks = 100; }
+
+
+    private int maximumManaFor(Pet pet) {
+        int armorBonus = stats.manaMaximum() - SkyblockStats.BASE.manaMaximum();
+        return Math.max(1, pet.manaMaximum() + armorBonus + stats.intelligence());
+    }
+
+    private int manaRegenerationFor(Pet pet) {
+        int armorBonus = stats.manaRegeneration() - SkyblockStats.BASE.manaRegeneration();
+        return Math.max(0, pet.manaRegeneration() + armorBonus
+                + Math.max(0, (stats.intelligence() + 2) / 4));
+    }
 
     public void activatePet(ServerPlayer player, Pet pet) {
         if (activePet == Pet.IRON_GOLEM) player.removeEffect(MobEffects.RESISTANCE);
@@ -158,8 +167,7 @@ public final class SkyblockPlayerState {
         if (pet == Pet.IRON_GOLEM) {
             player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
         }
-        mana.configure(pet.manaMaximum() + stats.intelligence(),
-                pet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
+        mana.configure(maximumManaFor(pet), manaRegenerationFor(pet));
         if (pet != Pet.NONE) spawnPetDisplay(player, pet);
     }
 
@@ -300,8 +308,11 @@ public final class SkyblockPlayerState {
         player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
         if (player.isAlive() && player.getHealth() < 1024.0F) player.setHealth(1024.0F);
 
-        mana.configure(activePet.manaMaximum() + stats.intelligence(),
-                activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
+        if (activePet == Pet.IRON_GOLEM && !player.hasEffect(MobEffects.RESISTANCE)) {
+            player.addEffect(new MobEffectInstance(
+                    MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
+        }
+        mana.configure(maximumManaFor(activePet), manaRegenerationFor(activePet));
         mana.tick();
         renderAotvPreview(player);
         if (!manaBossBar.getPlayers().contains(player)) manaBossBar.addPlayer(player);
