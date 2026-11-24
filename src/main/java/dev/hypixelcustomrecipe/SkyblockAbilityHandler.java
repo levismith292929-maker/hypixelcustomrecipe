@@ -209,7 +209,7 @@ public final class SkyblockAbilityHandler {
     private static void useAotd(ServerPlayer player) {
         if (!beginAbility(player, "aotd", 80, 12)) return;
         Vec3 direction = player.getLookAngle().normalize();
-        Vec3 origin = player.getEyePosition().add(direction.scale(0.3));
+        Vec3 origin = player.getEyePosition().add(direction.scale(0.3)).add(0.0, -0.1, 0.0);
         double damage = abilityDamage(player, 18.0);
         ACTIVE_BREATHS.put(player.getUUID(), new BreathState(origin, direction, (float) damage));
         playSound(player, net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.0F);
@@ -235,7 +235,7 @@ public final class SkyblockAbilityHandler {
                     1, 0.0, 0.0, 0.0, 0.0);
         }
 
-        AABB area = new AABB(center, center).inflate(radius);
+        AABB area = new AABB(center, center).inflate(radius + 0.295);
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
                 entity -> isValidTarget(entity, player))) {
@@ -268,7 +268,7 @@ public final class SkyblockAbilityHandler {
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
-        DamageSource source = level.damageSources().dragonBreath();
+        DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
         float damage = (float) abilityDamage(player, 10.0);
         double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
@@ -276,7 +276,7 @@ public final class SkyblockAbilityHandler {
             Vec3 center = origin.add(direction.scale(distance));
             AABB area = new AABB(center, center).inflate(1.5);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> isValidCombatTarget(entity, player)
+                    entity -> isValidScytheTarget(entity, player)
                             && entity.distanceToSqr(center) <= 2.25)) {
                 if (hitTargets.add(target.getUUID())) {
                     target.hurtServer(level, source, damage);
@@ -284,7 +284,7 @@ public final class SkyblockAbilityHandler {
             }
         }
 
-        Vec3 slashCenter = origin.add(direction.scale(3.0));
+        Vec3 slashCenter = player.getEyePosition().add(direction.scale(3.0));
         Vec3 right = direction.cross(new Vec3(0.0, 1.0, 0.0));
         if (right.lengthSqr() < 1.0E-6) right = new Vec3(1.0, 0.0, 0.0);
         ACTIVE_SLASHES.put(player.getUUID(), new SlashState(slashCenter, right.normalize()));
@@ -362,9 +362,14 @@ public final class SkyblockAbilityHandler {
     }
 
 
-    /** Targets for breath attacks: players are excluded by the datapack selector. */
+    /** Dragon breath excludes players, but otherwise hits all living entities. */
     private static boolean isValidTarget(LivingEntity entity, ServerPlayer caster) {
-        return isValidCombatTarget(entity, caster) && !(entity instanceof Player);
+        return entity != caster && !(entity instanceof Player) && entity.isAlive();
+    }
+
+    /** The scythe's original selector can hit players, Endermen, and armor stands. */
+    private static boolean isValidScytheTarget(LivingEntity entity, ServerPlayer caster) {
+        return entity != caster && entity.isAlive();
     }
 
     /** Targets for implosion and scythe: other players can be hit too. */
