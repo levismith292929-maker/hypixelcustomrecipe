@@ -7,9 +7,15 @@
     "f f"
   ],
   "key": {
-    "n": "minecraft:netherite_scrap",
-    "a": "minecraft:diamond_helmet",
-    "f": "hypixel:protector_dragon_fragment"
+    "n": [
+      "minecraft:netherite_scrap"
+    ],
+    "a": [
+      "minecraft:diamond_helmet"
+    ],
+    "f": [
+      "hypixel:protector_dragon_fragment"
+    ]
   },
   "result": {
     "id": "hypixel:protector_dragon_helmet",
