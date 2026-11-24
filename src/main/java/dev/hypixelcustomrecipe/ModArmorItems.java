@@ -70,6 +70,15 @@ public final class ModArmorItems {
     private ModArmorItems() {
     }
 
+
+    public static int getVanillaArmorDefense(String itemPath) {
+        return VANILLA_ARMOR_DEFENSE.getOrDefault(itemPath, 0);
+    }
+
+    public static int getVanillaArmorStrength(String itemPath) {
+        return VANILLA_ARMOR_STRENGTH.getOrDefault(itemPath, 0);
+    }
+
     public static void initialize() {
         if (!REGISTERED.isEmpty()) {
             return;
