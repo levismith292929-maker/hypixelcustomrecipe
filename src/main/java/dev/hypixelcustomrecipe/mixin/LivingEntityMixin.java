@@ -57,8 +57,9 @@ public abstract class LivingEntityMixin {
             );
             VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
             if (weapon.damage() > 0) {
+                float attackScale = attacker.getAttackStrengthScale(0.5F);
                 adjusted = (float) (attackStats.calculateWeaponDamage(false)
-                        * attackerState.activePet().damageMultiplier());
+                        * attackerState.activePet().damageMultiplier() * attackScale);
             }
 
             int chance = Math.min(100, attackStats.critChance());
