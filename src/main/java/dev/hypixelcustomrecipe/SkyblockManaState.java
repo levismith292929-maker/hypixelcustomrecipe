@@ -1,10 +1,11 @@
 package dev.hypixelcustomrecipe;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
- * Server-side mana and ability-cooldown state for one player.
- *
- * The owning player-state manager will retain one instance per player.
- * Cooldowns and regeneration are advanced in game ticks (20 ticks/second).
+ * Server-side mana and per-ability cooldown state for one player.
  */
 public final class SkyblockManaState {
     private int currentMana = 500;
@@ -12,22 +13,15 @@ public final class SkyblockManaState {
     private int regenerationPerSecond = 40;
     private int regenerationDelayTicks;
     private int regenerationProgressTicks;
-    private int abilityCooldownTicks;
+    private final Map<String, Integer> abilityCooldowns = new HashMap<>();
 
-    public int currentMana() {
-        return currentMana;
-    }
+    public int currentMana() { return currentMana; }
+    public int maximumMana() { return maximumMana; }
+    public int regenerationPerSecond() { return regenerationPerSecond; }
 
-    public int maximumMana() {
-        return maximumMana;
-    }
-
-    public int regenerationPerSecond() {
-        return regenerationPerSecond;
-    }
-
+    /** Compatibility accessor: returns the longest active ability cooldown. */
     public int abilityCooldownTicks() {
-        return abilityCooldownTicks;
+        return abilityCooldowns.values().stream().mapToInt(Integer::intValue).max().orElse(0);
     }
 
     public void configure(int maximumMana, int regenerationPerSecond) {
@@ -40,19 +34,14 @@ public final class SkyblockManaState {
         currentMana = Math.max(0, Math.min(amount, maximumMana));
     }
 
-    /** Returns false and changes nothing when the player cannot afford the cost. */
     public boolean spend(int cost) {
-        if (cost < 0 || currentMana < cost) {
-            return false;
-        }
+        if (cost < 0 || currentMana < cost) return false;
         currentMana -= cost;
         return true;
     }
 
     public void restore(int amount) {
-        if (amount > 0) {
-            currentMana = Math.min(maximumMana, currentMana + amount);
-        }
+        if (amount > 0) currentMana = Math.min(maximumMana, currentMana + amount);
     }
 
     public void setRegenerationDelay(int ticks) {
@@ -60,19 +49,33 @@ public final class SkyblockManaState {
         regenerationProgressTicks = 0;
     }
 
+    /** Legacy shared cooldown API, retained for callers that need it. */
     public void startCooldown(int ticks) {
-        abilityCooldownTicks = Math.max(abilityCooldownTicks, Math.max(0, ticks));
+        startCooldown("default", ticks);
     }
 
     public boolean isOnCooldown() {
-        return abilityCooldownTicks > 0;
+        return abilityCooldownTicks() > 0;
     }
 
-    /** Advance this player's mana and cooldown timers by one server tick. */
+    public boolean isOnCooldown(String abilityId) {
+        return abilityCooldowns.getOrDefault(abilityId, 0) > 0;
+    }
+
+    public void startCooldown(String abilityId, int ticks) {
+        if (ticks <= 0) return;
+        abilityCooldowns.merge(abilityId, ticks, Math::max);
+    }
+
     public void tick() {
-        if (abilityCooldownTicks > 0) {
-            abilityCooldownTicks--;
+        Iterator<Map.Entry<String, Integer>> iterator = abilityCooldowns.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Integer> entry = iterator.next();
+            int remaining = entry.getValue() - 1;
+            if (remaining <= 0) iterator.remove();
+            else entry.setValue(remaining);
         }
+
         if (regenerationDelayTicks > 0) {
             regenerationDelayTicks--;
             return;
@@ -81,7 +84,6 @@ public final class SkyblockManaState {
             regenerationProgressTicks = 0;
             return;
         }
-
         regenerationProgressTicks++;
         if (regenerationProgressTicks >= 20) {
             currentMana = Math.min(maximumMana, currentMana + regenerationPerSecond);
