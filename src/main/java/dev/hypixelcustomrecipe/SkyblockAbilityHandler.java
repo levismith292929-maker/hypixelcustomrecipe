@@ -11,6 +11,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -126,8 +127,7 @@ public final class SkyblockAbilityHandler {
         double damage = abilityDamage(player, 60.0);
         DamageSource source = level.damageSources().playerAttack(player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
-                player.getBoundingBox().inflate(5.0), entity -> entity != player
-                        && !(entity instanceof Player) && entity.isAlive())) {
+                player.getBoundingBox().inflate(5.0), entity -> isValidTarget(entity, player))) {
             target.hurtServer(level, source, (float) damage);
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
@@ -142,6 +142,7 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, "astraea", 40, 200)) return;
         player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 200, 1));
         player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 200, 3));
+        SkyblockPlayerState.get(player).startAstraeaOrbs();
         playSound(player, net.minecraft.sounds.SoundEvents.WITHER_AMBIENT, 0.6F, 1.6F);
     }
 
@@ -163,7 +164,7 @@ public final class SkyblockAbilityHandler {
                     18 + step * 2, radius, radius, radius, 0.01);
             AABB area = new AABB(center, center).inflate(radius);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> entity != player && !(entity instanceof Player) && entity.isAlive())) {
+                    entity -> isValidTarget(entity, player))) {
                 if (hitTargets.add(target.getUUID())) {
                     target.hurtServer(level, source, (float) damage);
                 }
@@ -269,6 +270,15 @@ public final class SkyblockAbilityHandler {
         if (pet != SkyblockPlayerState.Pet.NONE) {
             player.sendSystemMessage(Component.literal(pet.name().replace('_', ' ') + " pet activated!"));
         }
+    }
+
+
+    /** Mirrors the datapack non-targets tag for living entities. */
+    private static boolean isValidTarget(LivingEntity entity, ServerPlayer caster) {
+        return entity != caster && !(entity instanceof Player)
+                && entity.getType() != EntityType.ENDERMAN
+                && entity.getType() != EntityType.ARMOR_STAND
+                && entity.isAlive();
     }
 
     private static double abilityDamage(ServerPlayer player, double baseDamage) {
