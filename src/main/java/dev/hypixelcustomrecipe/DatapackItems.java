@@ -35,6 +35,8 @@ public final class DatapackItems {
             "Ability: Instant Healing", "Instantly heals 1 heart.", "Mana Cost: 50", "Cooldown: 1 second");
     public static final Item ORE_TRACKER = register("ore_tracker", "Ore Tracker", Items.COMPASS,
             "Ability: Ore Search", "Find the nearest diamond ore or ancient debris within 32 blocks.", "Mana Cost: 100", "Cooldown: 30 seconds");
+    public static final Item STAT_VIEWER = register("stat_viewer", "View Stats", Items.NETHER_STAR,
+            "Right-click to view your current SkyBlock stats.");
 
     public static final Item PET_ENDERMAN = register("pet_enderman", "Enderman Pet", Items.PLAYER_HEAD,
             "Ability: Summon Pet", "Max Mana: 1000", "Mana Regeneration: 50/sec", "Damage: -20%");
