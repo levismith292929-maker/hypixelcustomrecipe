@@ -101,7 +101,7 @@ public final class ModItems {
     }
 
     private static Item registerTexturedHead(String path, String displayName, String textureHash, int maxStackSize) {
-        String textureJson = "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/"
+        String textureJson = "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/"
                 + textureHash + "\"}}}";
         String textureValue = Base64.getEncoder().encodeToString(textureJson.getBytes(StandardCharsets.UTF_8));
         return registerTexturedHeadFromValue(path, displayName, textureValue, maxStackSize);
