@@ -78,7 +78,7 @@ public final class ModArmorItems {
         registerSet(new ArmorSet(
                 "unstable_dragon", "Unstable Dragon", 0xAA00AA, 5570634,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjA1ZmM0ZTJiNjhjNDUwNTlhZmVmMzk5OWU5YTk1YWEzZDg5NDM1OTdhNzg5NGU1NjkzOTdkNmNmNWQxNjcyYSJ9fX0=",
-                new Stats(30,110,0,25), new Stats(51,160,0,0), new Stats(43,140,0,0), new Stats(26,90,0,0)
+                new Stats(30,110,0,25,4,4), new Stats(51,160,0,0,4,4), new Stats(43,140,0,0,4,4), new Stats(26,90,0,0,4,4)
         ));
         registerSet(new ArmorSet(
                 "wise_dragon", "Wise Dragon", 0xAA00AA, 5636095,
@@ -136,6 +136,12 @@ public final class ModArmorItems {
             }
             if (scaled.intelligence != 0) {
                 lore.add(Component.literal("Intelligence: " + scaled.intelligence).withStyle(ChatFormatting.AQUA));
+            }
+            if (scaled.critChance != 0) {
+                lore.add(Component.literal("Crit Chance: " + scaled.critChance + "%").withStyle(ChatFormatting.BLUE));
+            }
+            if (scaled.critDamage != 0) {
+                lore.add(Component.literal("Crit Damage: " + scaled.critDamage + "%").withStyle(ChatFormatting.BLUE));
             }
             if (set.necronBonus) {
                 lore.add(Component.literal("Full Set Bonus: Necron's Guards").withStyle(ChatFormatting.GOLD));
@@ -247,7 +253,11 @@ public final class ModArmorItems {
         }
     }
 
-    private record Stats(int health, int defense, int strength, int intelligence) {
+    private record Stats(int health, int defense, int strength, int intelligence, int critChance, int critDamage) {
+        Stats(int health, int defense, int strength, int intelligence) {
+            this(health, defense, strength, intelligence, 0, 0);
+        }
+
         Stats scale(int stars) {
             double multiplier = switch (stars) {
                 case 1 -> 1.10;
@@ -259,7 +269,9 @@ public final class ModArmorItems {
                     (int) Math.round(health * multiplier),
                     (int) Math.round(defense * multiplier),
                     (int) Math.round(strength * multiplier),
-                    (int) Math.round(intelligence * multiplier)
+                    (int) Math.round(intelligence * multiplier),
+                    (int) Math.round(critChance * multiplier),
+                    (int) Math.round(critDamage * multiplier)
             );
         }
     }
