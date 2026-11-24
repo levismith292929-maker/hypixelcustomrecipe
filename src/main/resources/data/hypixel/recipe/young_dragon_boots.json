@@ -7,8 +7,12 @@
     "f f"
   ],
   "key": {
-    "n": "minecraft:netherite_scrap",
-    "f": "hypixel:young_dragon_fragment"
+    "n": [
+      "minecraft:netherite_scrap"
+    ],
+    "f": [
+      "hypixel:young_dragon_fragment"
+    ]
   },
   "result": {
     "id": "hypixel:young_dragon_boots",
