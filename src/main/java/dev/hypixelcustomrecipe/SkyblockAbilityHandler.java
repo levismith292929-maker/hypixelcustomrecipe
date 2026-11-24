@@ -320,13 +320,15 @@ public final class SkyblockAbilityHandler {
         BlockPos nearest = null;
         double nearestDistance = 32.0 * 32.0 + 1.0;
 
+        BlockPos.MutableBlockPos candidate = new BlockPos.MutableBlockPos();
         for (int x = -32; x <= 32; x++) {
             for (int y = -32; y <= 32; y++) {
                 for (int z = -32; z <= 32; z++) {
                     double distance = (double) x * x + (double) y * y + (double) z * z;
                     if (distance > 32.0 * 32.0 || distance >= nearestDistance) continue;
 
-                    BlockPos candidate = origin.offset(x, y, z);
+                    candidate.set(origin.getX() + x, origin.getY() + y, origin.getZ() + z);
+                    if (!level.hasChunkAt(candidate)) continue;
                     var block = level.getBlockState(candidate).getBlock();
                     if (block == Blocks.DIAMOND_ORE || block == Blocks.DEEPSLATE_DIAMOND_ORE
                             || block == Blocks.ANCIENT_DEBRIS) {
