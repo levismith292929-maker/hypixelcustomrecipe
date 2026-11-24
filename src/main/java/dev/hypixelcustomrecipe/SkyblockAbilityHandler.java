@@ -144,7 +144,7 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, "hyperion", 150, 100)) return;
         ServerLevel level = (ServerLevel) player.level();
         double damage = abilityDamage(player, 60.0);
-        DamageSource source = level.damageSources().playerAttack(player);
+        DamageSource source = level.damageSources().explosion(null, player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player)
                         && entity.distanceToSqr(player) <= 25.0)) {
@@ -197,7 +197,7 @@ public final class SkyblockAbilityHandler {
         }
 
         AABB area = new AABB(center, center).inflate(radius);
-        DamageSource source = level.damageSources().playerAttack(player);
+        DamageSource source = level.damageSources().dragonBreath();
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
                 entity -> isValidTarget(entity, player))) {
             if (breath.hitTargets.add(target.getUUID())) {
@@ -229,7 +229,7 @@ public final class SkyblockAbilityHandler {
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
-        DamageSource source = level.damageSources().playerAttack(player);
+        DamageSource source = level.damageSources().dragonBreath();
         float damage = (float) abilityDamage(player, 10.0);
         double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
