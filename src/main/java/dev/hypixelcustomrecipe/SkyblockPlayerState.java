@@ -431,8 +431,7 @@ public final class SkyblockPlayerState {
         if (astraeaOrbTicks > 0) {
             ServerLevel level = (ServerLevel) player.level();
             double rotation = (100 - astraeaOrbTicks) * Math.toRadians(5.0);
-            var darkDust = new net.minecraft.core.particles.DustParticleOptions(
-                    new org.joml.Vector3f(0.08F, 0.08F, 0.08F), 2.0F);
+            var darkDust = new net.minecraft.core.particles.DustParticleOptions(0x141414, 2.0F);
             for (int i = 0; i < 4; i++) {
                 double angle = rotation + i * (Math.PI / 2.0);
                 double x = player.getX() + Math.cos(angle) * 2.2;
