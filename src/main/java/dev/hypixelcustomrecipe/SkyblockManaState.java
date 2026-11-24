@@ -1,5 +1,8 @@
 package dev.hypixelcustomrecipe;
 
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -69,6 +72,33 @@ public final class SkyblockManaState {
     public void startCooldown(String abilityId, int ticks) {
         if (ticks <= 0) return;
         abilityCooldowns.merge(abilityId, ticks, Math::max);
+    }
+
+
+    public void savePersistentData(ValueOutput output) {
+        output.putInt("hypixel_mana", currentMana);
+        output.putInt("hypixel_mana_max", maximumMana);
+        output.putInt("hypixel_mana_regen", regenerationPerSecond);
+        output.putInt("hypixel_mana_delay", regenerationDelayTicks);
+        output.putInt("hypixel_mana_progress", regenerationProgressTicks);
+        for (Map.Entry<String, Integer> entry : abilityCooldowns.entrySet()) {
+            output.putInt("hypixel_cooldown_" + entry.getKey(), entry.getValue());
+        }
+    }
+
+    public void loadPersistentData(ValueInput input) {
+        currentMana = Math.max(0, input.getIntOr("hypixel_mana", currentMana));
+        maximumMana = Math.max(1, input.getIntOr("hypixel_mana_max", maximumMana));
+        regenerationPerSecond = Math.max(0, input.getIntOr("hypixel_mana_regen", regenerationPerSecond));
+        regenerationDelayTicks = Math.max(0, input.getIntOr("hypixel_mana_delay", 0));
+        regenerationProgressTicks = Math.max(0, input.getIntOr("hypixel_mana_progress", 0));
+        abilityCooldowns.clear();
+        for (String id : new String[]{"aote", "aotv", "hyperion", "astraea", "aotd",
+                "necrons_scythe", "zombie_sword", "ore_tracker"}) {
+            int remaining = Math.max(0, input.getIntOr("hypixel_cooldown_" + id, 0));
+            if (remaining > 0) abilityCooldowns.put(id, remaining);
+        }
+        currentMana = Math.min(currentMana, maximumMana);
     }
 
     public void tick() {
