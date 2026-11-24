@@ -7,12 +7,8 @@
     "f f"
   ],
   "key": {
-    "n": [
-      "minecraft:netherite_scrap"
-    ],
-    "f": [
-      "hypixel:protector_dragon_fragment"
-    ]
+    "n": "minecraft:netherite_scrap",
+    "f": "hypixel:protector_dragon_fragment"
   },
   "result": {
     "id": "hypixel:protector_dragon_boots",
