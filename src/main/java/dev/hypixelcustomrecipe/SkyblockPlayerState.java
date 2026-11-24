@@ -3,6 +3,8 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -39,6 +41,7 @@ public final class SkyblockPlayerState {
     private final SkyblockManaState mana = new SkyblockManaState();
     private SkyblockStats stats = SkyblockStats.BASE;
     private Pet activePet = Pet.NONE;
+    private int hudUpdateTicks;
 
     private SkyblockPlayerState() {}
 
@@ -72,5 +75,14 @@ public final class SkyblockPlayerState {
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
+
+        if (++hudUpdateTicks >= 10) {
+            hudUpdateTicks = 0;
+            String hud = String.format(java.util.Locale.ROOT,
+                    "Health: %.1f/%.1f | Defense: %d | Mana: %d/%d",
+                    player.getHealth(), player.getMaxHealth(), stats.defense(),
+                    mana.currentMana(), mana.maximumMana());
+            player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
+        }
     }
 }
