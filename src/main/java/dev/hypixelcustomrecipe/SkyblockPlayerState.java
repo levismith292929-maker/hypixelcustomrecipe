@@ -53,6 +53,7 @@ public final class SkyblockPlayerState {
     private int currentHealth;
     private int maximumHealth;
     private boolean healthInitialized;
+    private boolean statViewerGiven;
 
     private SkyblockPlayerState() {}
 
@@ -118,6 +119,10 @@ public final class SkyblockPlayerState {
     }
 
     private void tick(ServerPlayer player) {
+        if (!statViewerGiven) {
+            player.getInventory().setItem(8, new ItemStack(DatapackItems.STAT_VIEWER));
+            statViewerGiven = true;
+        }
         stripVanillaArmorAttributes(player);
         stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
 
