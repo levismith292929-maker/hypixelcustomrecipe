@@ -95,14 +95,30 @@ public abstract class LivingEntityMixin {
             float amount,
             CallbackInfoReturnable<Boolean> cir
     ) {
+        LivingEntity target = (LivingEntity) (Object) this;
+        if (!cir.getReturnValue()) {
+            hypixelcustomrecipe$trackingPlayerDamage = false;
+            return;
+        }
+
+        // A successful player attack against an entity counts as combat too.
+        if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
+            SkyblockPlayerState.get(attacker).markCombat();
+        }
+
         if (!hypixelcustomrecipe$trackingPlayerDamage) return;
         hypixelcustomrecipe$trackingPlayerDamage = false;
 
-        LivingEntity target = (LivingEntity) (Object) this;
-        if (!(target instanceof ServerPlayer defender) || !cir.getReturnValue()) return;
+        if (!(target instanceof ServerPlayer defender)) return;
 
         float actualDamage = Math.max(0.0F, hypixelcustomrecipe$healthBeforeHit - defender.getHealth());
         if (actualDamage <= 0.0F) return;
+
+        // Environmental damage (falling, cactus, fire, etc.) does not start
+        // the combat regeneration delay; only damage caused by an entity does.
+        if (source.getEntity() != null) {
+            SkyblockPlayerState.get(defender).markCombat();
+        }
 
         SkyblockPlayerState state = SkyblockPlayerState.get(defender);
         boolean defeated = state.applyIncomingDamage(actualDamage);
