@@ -207,7 +207,6 @@ public final class SkyblockPlayerState {
         petDisplay = new ArmorStand(level, player.getX(), player.getY() - 0.6, player.getZ());
         petDisplay.setInvisible(true);
         petDisplay.setNoGravity(true);
-        petDisplay.setNoPhysics(true);
         petDisplay.setNoBasePlate(true);
         petDisplay.setInvulnerable(true);
         petDisplay.addTag("hypixel_pet_display");
