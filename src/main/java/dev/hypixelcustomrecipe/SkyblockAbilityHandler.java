@@ -1,17 +1,11 @@
 package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.InteractionResultHolder;
 
 /**
  * First migrated item-ability handler. Abilities are activated directly from
@@ -25,22 +19,21 @@ public final class SkyblockAbilityHandler {
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getItemInHand(hand);
             if (world.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) {
-                return InteractionResultHolder.pass(stack);
+                return InteractionResult.PASS;
             }
 
             if (stack.is(ModItems.AOTE)) {
                 useAote(serverPlayer);
-                return InteractionResultHolder.success(stack);
+                return InteractionResult.SUCCESS;
             }
 
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         });
     }
 
     /**
      * Aspect of the End: spend 35 mana, teleport five blocks forward,
-     * apply one second of slow falling, and use a four-tick cooldown.
-     * The vertical velocity is explicitly cleared after teleporting.
+     * clear vertical velocity, and use a four-tick cooldown.
      */
     private static void useAote(ServerPlayer player) {
         SkyblockManaState mana = SkyblockPlayerState.get(player).mana();
@@ -48,8 +41,7 @@ public final class SkyblockAbilityHandler {
             return;
         }
         if (!mana.spend(35)) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                    "Not enough mana! (35 required)"), true);
+            player.sendSystemMessage(Component.literal("Not enough mana! (35 required)"));
             return;
         }
 
@@ -61,8 +53,6 @@ public final class SkyblockAbilityHandler {
         Vec3 velocity = player.getDeltaMovement();
         player.setDeltaMovement(velocity.x, 0.0, velocity.z);
         player.fallDistance = 0.0F;
-        player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                net.minecraft.world.effect.MobEffects.SLOW_FALLING, 20, 0, false, false, true));
         player.level().playSound(null, player.blockPosition(),
                 net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT,
                 net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
