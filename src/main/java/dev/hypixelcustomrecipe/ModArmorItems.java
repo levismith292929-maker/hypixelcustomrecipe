@@ -190,6 +190,21 @@ public final class ModArmorItems {
         );
     }
 
+    /** True only when all four Necron armor slots are equipped. */
+    public static boolean isWearingFullNecronSet(net.minecraft.world.entity.player.Player player) {
+        return isSetPiece(player, EquipmentSlot.HEAD, "necron_helmet")
+                && isSetPiece(player, EquipmentSlot.CHEST, "necron_chestplate")
+                && isSetPiece(player, EquipmentSlot.LEGS, "necron_leggings")
+                && isSetPiece(player, EquipmentSlot.FEET, "necron_boots");
+    }
+
+    private static boolean isSetPiece(net.minecraft.world.entity.player.Player player,
+                                      EquipmentSlot slot, String baseId) {
+        String path = BuiltInRegistries.ITEM.getKey(player.getItemBySlot(slot).getItem()).getPath();
+        return path.equals(baseId) || (path.startsWith(baseId + "_")
+                && path.substring((baseId + "_").length()).matches("[0-9]+star"));
+    }
+
     private static Stats getStats(ItemStack stack) {
         if (stack.isEmpty()) return null;
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
