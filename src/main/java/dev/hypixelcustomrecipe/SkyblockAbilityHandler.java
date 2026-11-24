@@ -94,7 +94,7 @@ public final class SkyblockAbilityHandler {
         Vec3 destination = Vec3.atBottomCenterOf(blockHit.getBlockPos()).add(0.0, 1.0, 0.0);
         player.teleportTo(destination.x, destination.y, destination.z);
         player.fallDistance = 0.0F;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = (ServerLevel) player.level();
         level.sendParticles(ParticleTypes.PORTAL, destination.x, destination.y + 1.0, destination.z,
                 45, 0.45, 0.8, 0.45, 0.15);
         level.sendParticles(ParticleTypes.REVERSE_PORTAL, destination.x, destination.y + 1.0, destination.z,
@@ -105,7 +105,7 @@ public final class SkyblockAbilityHandler {
     /** Hyperion: 60 ability damage to living non-player targets within five blocks. */
     private static void useHyperion(ServerPlayer player) {
         if (!beginAbility(player, "hyperion", 150, 100)) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = (ServerLevel) player.level();
         double damage = abilityDamage(player, 60.0);
         DamageSource source = level.damageSources().playerAttack(player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
@@ -117,7 +117,7 @@ public final class SkyblockAbilityHandler {
                 1, 0.0, 0.0, 0.0, 0.0);
         level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(),
                 30, 1.5, 0.6, 1.5, 0.05);
-        playSound(player, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, 1.0F, 1.2F);
+        playSound(player, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.2F);
     }
 
     /** Astraea: Resistance II and Absorption IV for ten seconds. */
@@ -131,7 +131,7 @@ public final class SkyblockAbilityHandler {
     /** Aspect of the Dragon: a widening five-block breath dealing ability damage. */
     private static void useAotd(ServerPlayer player) {
         if (!beginAbility(player, "aotd", 80, 12)) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(direction.scale(0.3));
         Set<UUID> hitTargets = new HashSet<>();
@@ -158,7 +158,7 @@ public final class SkyblockAbilityHandler {
     /** Necron's Scythe: a three-block forward slash, hitting each target once. */
     private static void useNecronsScythe(ServerPlayer player) {
         if (!beginAbility(player, "necrons_scythe", 35, 15)) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
@@ -195,7 +195,7 @@ public final class SkyblockAbilityHandler {
 
     private static void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
                                   float volume, float pitch) {
-        player.serverLevel().playSound(null, player.blockPosition(), sound,
+        (ServerLevel) player.level().playSound(null, player.blockPosition(), sound,
                 net.minecraft.sounds.SoundSource.PLAYERS, volume, pitch);
     }
 }
