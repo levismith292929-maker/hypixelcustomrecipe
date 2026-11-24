@@ -38,26 +38,31 @@ public final class DatapackItems {
             "Ability: Instant Transmission  RIGHT CLICK",
             "Hold it in your main hand to see where you are aiming.",
             "Right-click to teleport onto that block (up to 64 blocks away).",
-            "Mana Cost: 50");
+            "Mana Cost: 50",
+            "Cooldown: 3 seconds");
     public static final Item AOTD = register("aotd", "Aspect of the Dragon", Items.NETHERITE_SWORD,
             "Ability: Dragon Rage  RIGHT CLICK",
             "Breathe fire 5 blocks in the direction you look.",
             "Each mob is hit once for 18 base damage, increased by Strength and Intelligence.",
-            "Mana Cost: 80");
+            "Mana Cost: 80",
+            "Cooldown: 12 ticks");
     public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, ChatFormatting.LIGHT_PURPLE,
             "Ability: Wither Shield  RIGHT CLICK",
             "Gain Resistance II and Absorption IV for 10 seconds,",
             "with wither orbs spinning around you.",
-            "Mana Cost: 40");
+            "Mana Cost: 40",
+            "Cooldown: 10 seconds");
     public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, ChatFormatting.GOLD,
             "Ability: Implosion  RIGHT CLICK",
             "Deal 60 base ability damage to every target within 5 blocks.",
             "Damage scales with Strength and Intelligence.",
-            "Mana Cost: 150");
+            "Mana Cost: 150",
+            "Cooldown: 5 seconds");
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
             "Ability: Wither Impact  RIGHT CLICK",
             "Slash forward with a sweeping strike, damaging nearby enemies.",
-            "Mana Cost: 35");
+            "Mana Cost: 35",
+            "Cooldown: 15 ticks");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
             "Ability: Instant Healing  RIGHT CLICK",
             "Instantly heals 1 heart.",
