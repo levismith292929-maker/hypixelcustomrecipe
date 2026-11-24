@@ -79,6 +79,8 @@ public final class SkyblockPlayerState {
     private int currentHealth;
     private int maximumHealth;
     private boolean healthInitialized;
+    private int combatTicksRemaining;
+    private int healthRegenerationTicks;
 
     private ArmorStand petDisplay;
 
@@ -129,6 +131,12 @@ public final class SkyblockPlayerState {
         int effective = (int) Math.round(stats.applyDefense(vanillaDamage) * 10.0);
         if (effective > 0) currentHealth = Math.max(0, currentHealth - effective);
         return currentHealth <= 0;
+    }
+
+    /** Keeps Health regeneration paused for five seconds after entity combat. */
+    public void markCombat() {
+        combatTicksRemaining = 100;
+        healthRegenerationTicks = 0;
     }
 
     /** Restores custom Health points; one vanilla heart is 20 custom points. */
@@ -312,6 +320,37 @@ public final class SkyblockPlayerState {
         }
     }
 
+    private static boolean wearingFullSet(ServerPlayer player, String setId) {
+        String[] suffixes = {"_helmet", "_chestplate", "_leggings", "_boots"};
+        EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+        for (int i = 0; i < slots.length; i++) {
+            ItemStack piece = player.getItemBySlot(slots[i]);
+            String path = BuiltInRegistries.ITEM.getKey(piece.getItem()).getPath();
+            if (!path.equals(setId + suffixes[i])
+                    && !(path.startsWith(setId + suffixes[i] + "_")
+                    && path.substring((setId + suffixes[i] + "_").length()).matches("[0-9]+star"))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void tickHealthRegeneration(ServerPlayer player) {
+        if (combatTicksRemaining > 0) {
+            combatTicksRemaining--;
+            healthRegenerationTicks = 0;
+            return;
+        }
+
+        if (++healthRegenerationTicks < 80) return;
+        healthRegenerationTicks = 0;
+
+        int amount = 25;
+        if (wearingFullSet(player, "protector_dragon")) amount += 75;
+        else if (wearingFullSet(player, "necron")) amount += 375;
+        heal(amount);
+    }
+
     private void tick(ServerPlayer player) {
         // Keep one permanent Stat Viewer in hotbar slot 9, matching the datapack.
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
@@ -353,6 +392,7 @@ public final class SkyblockPlayerState {
             player.addEffect(new MobEffectInstance(
                     MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
         }
+        tickHealthRegeneration(player);
         mana.configure(maximumManaFor(activePet), manaRegenerationFor(activePet));
         mana.tick();
         renderAotvPreview(player);
