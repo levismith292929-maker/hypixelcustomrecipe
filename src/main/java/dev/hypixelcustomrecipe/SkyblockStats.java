@@ -35,7 +35,7 @@ public record SkyblockStats(
 
     /** Strength and armor Strength jointly scale the held weapon's damage. */
     public double strengthMultiplier() {
-        return 1.0 + (strength + armorStrength) / 200.0;
+        return 1.0 + (strength + armorStrength) / 100.0;
     }
 
     /** Expected critical multiplier, before checking the random crit roll. */
