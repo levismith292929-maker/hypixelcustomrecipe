@@ -18,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 
@@ -46,13 +45,13 @@ public final class DatapackItems {
             "Each mob is hit once for 18 base damage, increased by Strength and Intelligence.",
             "Mana Cost: 80",
             "Cooldown: 12 ticks");
-    public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, ChatFormatting.LIGHT_PURPLE,
+    public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, 0xFF55FF,
             "Ability: Wither Shield  RIGHT CLICK",
             "Gain Resistance II and Absorption IV for 10 seconds,",
             "with wither orbs spinning around you.",
             "Mana Cost: 40",
             "Cooldown: 10 seconds");
-    public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, ChatFormatting.GOLD,
+    public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, 0xFFAA00,
             "Ability: Implosion  RIGHT CLICK",
             "Deal 60 base ability damage to every target within 5 blocks.",
             "Damage scales with Strength and Intelligence.",
@@ -97,16 +96,16 @@ public final class DatapackItems {
     }
 
     private static Item registerColored(String path, String name, Item fallback,
-                                        ChatFormatting color, String... loreLines) {
+                                        Integer color, String... loreLines) {
         return register(path, name, fallback, color, loreLines);
     }
 
     private static Item register(String path, String name, Item fallback,
-                                 ChatFormatting color, String... loreLines) {
+                                 Integer color, String... loreLines) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
         Component displayName = Component.literal(name);
-        if (color != null) displayName = displayName.withColor(color.getColor());
+        if (color != null) displayName = displayName.withColor(color);
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
