@@ -12,6 +12,7 @@ public record SkyblockStats(
         int defense,
         int strength,
         int armorStrength,
+        int weaponStrength,
         int critChance,
         int critDamage,
         int intelligence,
@@ -20,7 +21,7 @@ public record SkyblockStats(
         double weaponDamage
 ) {
     public static final SkyblockStats BASE = new SkyblockStats(
-            100, 0, 0, 0, 5, 0, 0, 500, 40, 1.0
+            100, 0, 0, 0, 0, 5, 0, 0, 500, 40, 1.0
     );
 
     public SkyblockStats {
@@ -35,7 +36,7 @@ public record SkyblockStats(
 
     /** Strength and armor Strength jointly scale the held weapon's damage. */
     public double strengthMultiplier() {
-        return 1.0 + (strength + armorStrength) / 100.0;
+        return 1.0 + (strength + armorStrength) / 200.0 + weaponStrength / 100.0;
     }
 
     /** Expected critical multiplier, before checking the random crit roll. */
@@ -73,6 +74,7 @@ public record SkyblockStats(
                 this.defense + defense,
                 this.strength + strength,
                 this.armorStrength + armorStrength,
+                this.weaponStrength,
                 this.critChance + critChance,
                 this.critDamage + critDamage,
                 this.intelligence + intelligence,
@@ -82,9 +84,17 @@ public record SkyblockStats(
         );
     }
 
+    public SkyblockStats withWeaponStats(double damage, int strength) {
+        return new SkyblockStats(
+                health, defense, this.strength, armorStrength, Math.max(0, strength),
+                critChance, critDamage, intelligence, manaMaximum, manaRegeneration,
+                Math.max(0.0, damage)
+        );
+    }
+
     public SkyblockStats withWeaponDamage(double damage) {
         return new SkyblockStats(
-                health, defense, strength, armorStrength, critChance,
+                health, defense, strength, armorStrength, weaponStrength, critChance,
                 critDamage, intelligence, manaMaximum, manaRegeneration, damage
         );
     }
