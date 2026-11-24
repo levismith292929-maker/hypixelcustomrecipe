@@ -62,6 +62,14 @@ public final class ModItems {
 
     public static final Item NECRON_CORE = registerNecronCore();
 
+    // Star-upgrade crafting materials.
+    public static final Item STAR_SHARD_1 = register(
+            "star_shard1", "Star Shard 1", Items.PRISMARINE_SHARD
+    );
+    public static final Item STAR_SHARD_2 = register(
+            "star_shard2", "Star Shard 2", Items.NETHER_STAR
+    );
+
     // Unique item ID so the AOTV recipe can require an AOTE,
     // rather than accepting any ordinary diamond sword.
     public static final Item AOTE = registerUnstackable("aote", "Aspect of the End", Items.DIAMOND_SWORD);
@@ -88,8 +96,8 @@ public final class ModItems {
                 Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
         );
 
-        String textureJson = "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/"
-                + textureHash + "\"}}}";
+        String textureJson = "{\\"textures\\":{\\"SKIN\\":{\\"url\\":\\"https://textures.minecraft.net/texture/"
+                + textureHash + "\\"}}}";
         String textureValue = Base64.getEncoder().encodeToString(textureJson.getBytes(StandardCharsets.UTF_8));
         Property texture = new Property("textures", textureValue);
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
