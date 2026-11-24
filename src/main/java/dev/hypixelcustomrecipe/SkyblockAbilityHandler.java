@@ -127,7 +127,7 @@ public final class SkyblockAbilityHandler {
         double damage = abilityDamage(player, 60.0);
         DamageSource source = level.damageSources().playerAttack(player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
-                player.getBoundingBox().inflate(5.0), entity -> isValidTarget(entity, player))) {
+                player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player))) {
             target.hurtServer(level, source, (float) damage);
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
@@ -164,7 +164,7 @@ public final class SkyblockAbilityHandler {
                     18 + step * 2, radius, radius, radius, 0.01);
             AABB area = new AABB(center, center).inflate(radius);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> isValidTarget(entity, player))) {
+                    entity -> isValidCombatTarget(entity, player))) {
                 if (hitTargets.add(target.getUUID())) {
                     target.hurtServer(level, source, (float) damage);
                 }
@@ -273,13 +273,16 @@ public final class SkyblockAbilityHandler {
     }
 
 
-    /** Mirrors the datapack non-targets tag for living entities. */
+    /** Targets for breath attacks: players are excluded by the datapack selector. */
     private static boolean isValidTarget(LivingEntity entity, ServerPlayer caster) {
+        return isValidCombatTarget(entity, caster) && !(entity instanceof Player);
+    }
+
+    /** Targets for implosion and scythe: other players can be hit too. */
+    private static boolean isValidCombatTarget(LivingEntity entity, ServerPlayer caster) {
         String type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
-        return entity != caster && !(entity instanceof Player)
-                && !type.equals("enderman")
-                && !type.equals("armor_stand")
-                && entity.isAlive();
+        return entity != caster && !type.equals("enderman")
+                && !type.equals("armor_stand") && entity.isAlive();
     }
 
     private static double abilityDamage(ServerPlayer player, double baseDamage) {
