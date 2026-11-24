@@ -1,5 +1,5 @@
 name: Build Fabric Mod
-# Rebuild after adding Unstable Dragon crit-stat lore.
+# Rebuild after applying the Dragon Health stat increase.
 
 on:
   push:
