@@ -343,11 +343,12 @@ public final class SkyblockPlayerState {
         String[] suffixes = {"_helmet", "_chestplate", "_leggings", "_boots"};
         double armorBonusPerFourSeconds = 0.0;
 
-        for (int i = 0; i < slots.length; i++) {
-            if (isArmorPiece(player, slots[i], "protector_dragon" + suffixes[i])) {
-                armorBonusPerFourSeconds += 18.75;
-            }
-        }
+        // Protector Dragon piece values: helmet 15, chestplate 30,
+        // leggings 20, boots 10 Health per 4 seconds (75 total).
+        if (isArmorPiece(player, EquipmentSlot.HEAD, "protector_dragon_helmet")) armorBonusPerFourSeconds += 15.0;
+        if (isArmorPiece(player, EquipmentSlot.CHEST, "protector_dragon_chestplate")) armorBonusPerFourSeconds += 30.0;
+        if (isArmorPiece(player, EquipmentSlot.LEGS, "protector_dragon_leggings")) armorBonusPerFourSeconds += 20.0;
+        if (isArmorPiece(player, EquipmentSlot.FEET, "protector_dragon_boots")) armorBonusPerFourSeconds += 10.0;
 
         // Necron's individual piece values: helmet 70, chestplate 180,
         // leggings 100, boots 25 Health per 4 seconds.
