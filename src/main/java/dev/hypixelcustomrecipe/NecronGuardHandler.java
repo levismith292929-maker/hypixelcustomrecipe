@@ -7,7 +7,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,7 +30,7 @@ public final class NecronGuardHandler {
     private static void summonGuards(ServerPlayer owner) {
         ServerLevel level = (ServerLevel) owner.level();
         Player target = level.players().stream()
-                .filter(candidate -> !candidate.getGameProfile().getName().equalsIgnoreCase("QWDad"))
+                .filter(candidate -> !candidate.getGameProfile().name().equalsIgnoreCase("QWDad"))
                 .min(Comparator.comparingDouble(owner::distanceToSqr))
                 .orElse(null);
 
