@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +13,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -50,6 +52,8 @@ public final class SkyblockAbilityHandler {
                 useNecronsScythe(serverPlayer);
             } else if (stack.is(DatapackItems.ZOMBIE_SWORD)) {
                 useZombieSword(serverPlayer);
+            } else if (stack.is(DatapackItems.ORE_TRACKER)) {
+                useOreTracker(serverPlayer);
             } else if (stack.is(DatapackItems.PET_ENDERMAN)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDERMAN);
             } else if (stack.is(DatapackItems.PET_ENDER_DRAGON)) {
@@ -196,6 +200,48 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, "zombie_sword", 50, 20)) return;
         player.heal(2.0F);
         playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.7F, 1.4F);
+    }
+
+
+    /** Searches the current dimension for the nearest diamond ore or ancient debris. */
+    private static void useOreTracker(ServerPlayer player) {
+        if (!beginAbility(player, "ore_tracker", 100, 600)) return;
+        player.sendSystemMessage(Component.literal(
+                "Searching within 32 blocks in this dimension..."));
+
+        ServerLevel level = player.serverLevel();
+        BlockPos origin = player.blockPosition();
+        BlockPos nearest = null;
+        double nearestDistance = 32.0 * 32.0 + 1.0;
+
+        for (int x = -32; x <= 32; x++) {
+            for (int y = -32; y <= 32; y++) {
+                for (int z = -32; z <= 32; z++) {
+                    double distance = (double) x * x + (double) y * y + (double) z * z;
+                    if (distance > 32.0 * 32.0 || distance >= nearestDistance) continue;
+
+                    BlockPos candidate = origin.offset(x, y, z);
+                    var block = level.getBlockState(candidate).getBlock();
+                    if (block == Blocks.DIAMOND_ORE || block == Blocks.DEEPSLATE_DIAMOND_ORE
+                            || block == Blocks.ANCIENT_DEBRIS) {
+                        nearest = candidate.immutable();
+                        nearestDistance = distance;
+                    }
+                }
+            }
+        }
+
+        if (nearest == null) {
+            player.sendSystemMessage(Component.literal(
+                    "No diamond ore or ancient debris found within 32 blocks in this dimension."));
+        } else {
+            player.sendSystemMessage(Component.literal(
+                    "Nearest ore found at: X: " + nearest.getX()
+                            + "  Y: " + nearest.getY() + "  Z: " + nearest.getZ()));
+            level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                    nearest.getX() + 0.5, nearest.getY() + 0.8, nearest.getZ() + 0.5,
+                    8, 0.25, 0.25, 0.25, 0.02);
+        }
     }
 
     private static void activatePet(ServerPlayer player, SkyblockPlayerState.Pet pet) {
