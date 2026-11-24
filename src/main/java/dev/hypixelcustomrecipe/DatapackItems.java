@@ -33,19 +33,40 @@ public final class DatapackItems {
     private static final String NAMESPACE = "hypixel";
 
     public static final Item AOTV = register("aotv", "Aspect of the Void", Items.DIAMOND_SWORD,
-            "Ability: Instant Transmission", "Teleport to the block you are aiming at (up to 64 blocks).", "Mana Cost: 50");
+            "Ability: Instant Transmission  RIGHT CLICK",
+            "Hold it in your main hand to see where you are aiming.",
+            "Right-click to teleport onto that block (up to 64 blocks away).",
+            "Mana Cost: 50");
     public static final Item AOTD = register("aotd", "Aspect of the Dragon", Items.NETHERITE_SWORD,
-            "Ability: Dragon Rage", "Breathe fire 5 blocks forward; each mob hit takes 10 damage.", "Mana Cost: 80");
+            "Ability: Dragon Rage  RIGHT CLICK",
+            "Breathe fire 5 blocks in the direction you look.",
+            "Each mob is hit once; damage scales with Strength and Intelligence.",
+            "Mana Cost: 80");
     public static final Item ASTRAEA = register("astraea", "Astraea", Items.NETHERITE_SWORD,
-            "Ability: Wither Shield", "Reduce incoming damage and gain an absorption shield for 10 seconds.", "Mana Cost: 40");
+            "Ability: Wither Shield  RIGHT CLICK",
+            "Gain Resistance II and Absorption IV for 10 seconds,",
+            "with wither orbs spinning around you.",
+            "Mana Cost: 40");
     public static final Item HYPERION = register("hyperion", "Hyperion", Items.NETHERITE_SWORD,
-            "Ability: Implosion", "Deal 60 damage to every mob within 5 blocks.", "Mana Cost: 50");
+            "Ability: Implosion  RIGHT CLICK",
+            "Deal 60 base ability damage to every target within 5 blocks.",
+            "Damage scales with Strength and Intelligence.",
+            "Mana Cost: 150");
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
-            "Ability: Wither Impact", "Slash forward, damaging nearby enemies in front of you.", "Mana Cost: 35");
+            "Ability: Wither Impact  RIGHT CLICK",
+            "Slash forward with a sweeping strike, damaging nearby enemies.",
+            "Mana Cost: 35");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
-            "Ability: Instant Healing", "Instantly heals 1 heart.", "Mana Cost: 50", "Cooldown: 1 second");
+            "Ability: Instant Healing  RIGHT CLICK",
+            "Instantly heals 1 heart.",
+            "Mana Cost: 50",
+            "Cooldown: 1 second");
     public static final Item ORE_TRACKER = register("ore_tracker", "Ore Tracker", Items.COMPASS,
-            "Ability: Ore Search", "Find the nearest diamond ore or ancient debris within 32 blocks.", "Mana Cost: 100", "Cooldown: 30 seconds");
+            "Ability: Ore Search  RIGHT CLICK",
+            "Find the nearest diamond ore or ancient debris",
+            "within 32 blocks in your current dimension.",
+            "Mana Cost: 100",
+            "Cooldown: 30 seconds");
     public static final Item STAT_VIEWER = register("stat_viewer", "View Stats", Items.NETHER_STAR,
             "Right-click to view your current SkyBlock stats.");
 
