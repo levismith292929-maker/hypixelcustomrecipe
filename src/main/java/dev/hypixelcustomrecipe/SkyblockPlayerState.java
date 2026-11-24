@@ -383,7 +383,7 @@ public final class SkyblockPlayerState {
         stripVanillaArmorAttributes(player);
         stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
 
-        int recalculatedMaximum = Math.max(1, stats.health() * 10);
+        int recalculatedMaximum = Math.max(1, stats.health());
         if (!healthInitialized) {
             maximumHealth = recalculatedMaximum;
             currentHealth = maximumHealth;
