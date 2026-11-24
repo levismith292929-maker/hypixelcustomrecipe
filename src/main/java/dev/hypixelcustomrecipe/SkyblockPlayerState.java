@@ -11,8 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
@@ -32,6 +35,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -280,6 +285,23 @@ public final class SkyblockPlayerState {
                 ItemAttributeModifiers modifiers = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
                 if (modifiers == null || !modifiers.equals(ItemAttributeModifiers.EMPTY)) {
                     stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+                }
+
+                String itemPath = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+                int defense = ModArmorItems.getVanillaArmorDefense(itemPath);
+                int strength = ModArmorItems.getVanillaArmorStrength(itemPath);
+                if (defense > 0) {
+                    ItemLore existingLore = stack.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
+                    boolean hasDefenseLore = existingLore.lines().stream()
+                            .anyMatch(line -> line.getString().startsWith("Defense:"));
+                    if (!hasDefenseLore) {
+                        List<Component> lines = new ArrayList<>(existingLore.lines());
+                        lines.add(Component.literal("Defense: " + defense).withStyle(ChatFormatting.GREEN));
+                        if (strength > 0) {
+                            lines.add(Component.literal("Strength: " + strength).withStyle(ChatFormatting.RED));
+                        }
+                        stack.set(DataComponents.LORE, new ItemLore(lines));
+                    }
                 }
             }
         }
