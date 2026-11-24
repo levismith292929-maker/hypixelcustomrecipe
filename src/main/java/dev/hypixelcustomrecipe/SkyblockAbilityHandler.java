@@ -47,6 +47,7 @@ public final class SkyblockAbilityHandler {
                 SlashState slash = ACTIVE_SLASHES.get(player.getUUID());
                 if (slash != null) tickScytheSlash(player, slash);
                 OreTrackerSearch.tick(player);
+                OreTrackerSearch.tick(player);
             }
             ACTIVE_BREATHS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
             ACTIVE_SLASHES.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
@@ -319,7 +320,6 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, "ore_tracker", 100, 600)) return;
         OreTrackerSearch.start(player);
     }
-
 
     private static void activatePet(ServerPlayer player, SkyblockPlayerState.Pet pet) {
         SkyblockPlayerState.get(player).activatePet(player, pet);
