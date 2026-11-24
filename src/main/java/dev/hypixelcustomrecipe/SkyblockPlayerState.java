@@ -10,6 +10,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -49,6 +50,9 @@ public final class SkyblockPlayerState {
     private Pet activePet = Pet.NONE;
     private int hudUpdateTicks;
     private int astraeaOrbTicks;
+    private int currentHealth;
+    private int maximumHealth;
+    private boolean healthInitialized;
 
     private SkyblockPlayerState() {}
 
@@ -66,6 +70,20 @@ public final class SkyblockPlayerState {
     public SkyblockStats stats() { return stats; }
     public SkyblockManaState mana() { return mana; }
     public Pet activePet() { return activePet; }
+    public int currentHealth() { return currentHealth; }
+    public int maximumHealth() { return maximumHealth; }
+
+    /** Subtracts post-vanilla-mitigation damage using the custom Defense formula. */
+    public boolean applyIncomingDamage(float vanillaDamage) {
+        int effective = (int) Math.round(stats.applyDefense(vanillaDamage) * 10.0);
+        if (effective > 0) currentHealth = Math.max(0, currentHealth - effective);
+        return currentHealth <= 0;
+    }
+
+    /** Restores custom Health points; one vanilla heart is 20 custom points. */
+    public void heal(int amount) {
+        if (amount > 0) currentHealth = Math.min(maximumHealth, currentHealth + amount);
+    }
 
     public void startAstraeaOrbs() { astraeaOrbTicks = 100; }
 
@@ -102,6 +120,27 @@ public final class SkyblockPlayerState {
     private void tick(ServerPlayer player) {
         stripVanillaArmorAttributes(player);
         stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
+
+        int recalculatedMaximum = Math.max(1, stats.health() * 10);
+        if (!healthInitialized) {
+            maximumHealth = recalculatedMaximum;
+            currentHealth = maximumHealth;
+            healthInitialized = true;
+        } else if (currentHealth <= 0 && player.isAlive()) {
+            maximumHealth = recalculatedMaximum;
+            currentHealth = maximumHealth;
+        } else {
+            int healthDifference = recalculatedMaximum - maximumHealth;
+            maximumHealth = recalculatedMaximum;
+            currentHealth = Math.max(1, Math.min(maximumHealth, currentHealth + healthDifference));
+        }
+
+        // The custom Health pool is authoritative. Keep vanilla health as a
+        // large reserve so normal damage can be measured after vanilla
+        // resistance, shields, and other mitigation have run.
+        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+        if (player.getHealth() < 1024.0F) player.setHealth(1024.0F);
+
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
@@ -124,7 +163,7 @@ public final class SkyblockPlayerState {
             hudUpdateTicks = 0;
             String hud = String.format(java.util.Locale.ROOT,
                     "Health: %.1f/%.1f | Defense: %d | Mana: %d/%d",
-                    player.getHealth(), player.getMaxHealth(), stats.defense(),
+                    currentHealth / 10.0, maximumHealth / 10.0, stats.defense(),
                     mana.currentMana(), mana.maximumMana());
             player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
         }
