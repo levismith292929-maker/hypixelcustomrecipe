@@ -11,7 +11,15 @@
     "d": [
       "minecraft:diamond_block"
     ],
-    "f": "#hypixel:fragments",
+    "f": [
+      "hypixel:old_dragon_fragment",
+      "hypixel:protector_dragon_fragment",
+      "hypixel:wise_dragon_fragment",
+      "hypixel:young_dragon_fragment",
+      "hypixel:strong_dragon_fragment",
+      "hypixel:unstable_dragon_fragment",
+      "hypixel:superior_dragon_fragment"
+    ],
     "n": [
       "minecraft:netherite_scrap"
     ],
