@@ -1,5 +1,6 @@
 package dev.hypixelcustomrecipe.mixin;
 
+import dev.hypixelcustomrecipe.ModArmorItems;
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
 import dev.hypixelcustomrecipe.VanillaWeaponStats;
@@ -20,13 +21,19 @@ public abstract class LivingEntityMixin {
     private static final ThreadLocal<Boolean> hypixelcustomrecipe$reapplyingDamage =
             ThreadLocal.withInitial(() -> false);
 
+    @Unique
+    private float hypixelcustomrecipe$healthBeforeHit;
+
+    @Unique
+    private boolean hypixelcustomrecipe$trackingPlayerDamage;
+
     /**
-     * Applies the datapack's Defense formula to player damage and the custom
-     * critical formula to player attacks. Re-entry is guarded so the adjusted
-     * amount is applied exactly once.
+     * Replaces vanilla sword/axe damage with the migrated weapon stats and
+     * applies the SkyBlock critical-hit formula. Player damage is measured
+     * after vanilla mitigation in the RETURN injection below.
      */
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-    private void hypixelcustomrecipe$applySkyblockCombat(
+    private void hypixelcustomrecipe$applySkyblockAttack(
             ServerLevel level,
             DamageSource source,
             float amount,
@@ -38,23 +45,21 @@ public abstract class LivingEntityMixin {
         float adjusted = amount;
 
         if (target instanceof ServerPlayer defender) {
-            SkyblockStats defenseStats = SkyblockPlayerState.get(defender).stats();
-            adjusted = (float) defenseStats.applyDefense(adjusted);
+            hypixelcustomrecipe$healthBeforeHit = defender.getHealth();
+            hypixelcustomrecipe$trackingPlayerDamage = true;
         }
 
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
+            SkyblockPlayerState attackerState = SkyblockPlayerState.get(attacker);
             SkyblockStats attackStats = VanillaWeaponStats.applyHeldWeapon(
-                    dev.hypixelcustomrecipe.ModArmorItems.getSkyblockStats(attacker),
-                    attacker.getMainHandItem()
+                    ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem()
             );
             VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
             if (weapon.damage() > 0) {
-                // Replace vanilla sword/axe base damage with the datapack's
-                // custom Damage and Strength values, while retaining this
-                // single combat interception point.
                 adjusted = (float) (attackStats.calculateWeaponDamage(false)
-                        * SkyblockPlayerState.get(attacker).activePet().damageMultiplier());
+                        * attackerState.activePet().damageMultiplier());
             }
+
             int chance = Math.min(100, attackStats.critChance());
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
                 adjusted *= (float) attackStats.criticalMultiplier();
@@ -75,6 +80,36 @@ public abstract class LivingEntityMixin {
             cir.setReturnValue(target.hurtServer(level, source, adjusted));
         } finally {
             hypixelcustomrecipe$reapplyingDamage.remove();
+        }
+    }
+
+    /**
+     * The datapack keeps vanilla health as a reserve and uses a custom Health
+     * pool. Measure actual health lost after vanilla mitigation, restore the
+     * reserve, and apply Defense to the custom pool.
+     */
+    @Inject(method = "hurtServer", at = @At("RETURN"))
+    private void hypixelcustomrecipe$applyCustomHealth(
+            ServerLevel level,
+            DamageSource source,
+            float amount,
+            CallbackInfoReturnable<Boolean> cir
+    ) {
+        if (!hypixelcustomrecipe$trackingPlayerDamage) return;
+        hypixelcustomrecipe$trackingPlayerDamage = false;
+
+        LivingEntity target = (LivingEntity) (Object) this;
+        if (!(target instanceof ServerPlayer defender) || !cir.getReturnValue()) return;
+
+        float actualDamage = Math.max(0.0F, hypixelcustomrecipe$healthBeforeHit - defender.getHealth());
+        if (actualDamage <= 0.0F) return;
+
+        SkyblockPlayerState state = SkyblockPlayerState.get(defender);
+        boolean defeated = state.applyIncomingDamage(actualDamage);
+        defender.setHealth(Math.min(hypixelcustomrecipe$healthBeforeHit, defender.getMaxHealth()));
+
+        if (defeated) {
+            defender.die(source);
         }
     }
 }
