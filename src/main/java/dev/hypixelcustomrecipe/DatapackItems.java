@@ -49,15 +49,15 @@ public final class DatapackItems {
     public static final Item STAT_VIEWER = register("stat_viewer", "View Stats", Items.NETHER_STAR,
             "Right-click to view your current SkyBlock stats.");
 
-    public static final Item PET_ENDERMAN = registerProfileHead("pet_enderman", "Enderman Pet", "MHF_Enderman", null,
+    public static final Item PET_ENDERMAN = registerProfileHead("pet_enderman", "Enderman", "MHF_Enderman", null,
             "Ability: Summon Pet", "Max Mana: 1000", "Mana Regeneration: 50/sec", "Damage: -20%");
-    public static final Item PET_ENDER_DRAGON = registerProfileHead("pet_ender_dragon", "Ender Dragon Pet", null,
+    public static final Item PET_ENDER_DRAGON = registerProfileHead("pet_ender_dragon", "Ender Dragon", null,
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=",
             "Ability: Summon Pet", "Max Mana: 300", "Mana Regeneration: 20/sec", "Damage: +15%");
-    public static final Item PET_GOLDEN_DRAGON = registerProfileHead("pet_golden_dragon", "Golden Dragon Pet", null,
+    public static final Item PET_GOLDEN_DRAGON = registerProfileHead("pet_golden_dragon", "Golden Dragon", null,
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU5ZjliMWZjMDE0MTY2Y2I0NmEwOTNlNTM0OWIyYmY2ZWRkMjAxYjY4MGQ2MmU0OGRiZjNhZjliMDQ1OTExNiJ9fX0=",
             "Ability: Summon Pet", "Damage: +40%", "Max Mana: 750", "Mana Regeneration: 10/sec");
-    public static final Item PET_IRON_GOLEM = registerProfileHead("pet_iron_golem", "Iron Golem Pet", "MHF_Golem", null,
+    public static final Item PET_IRON_GOLEM = registerProfileHead("pet_iron_golem", "Iron Golem", "MHF_Golem", null,
             "Ability: Summon Pet", "Damage: +5%", "Max Mana: 600", "Mana Regeneration: 30/sec", "Permanent Resistance I");
     public static final Item PET_REMOVER = registerProfileHead("pet_remover", "Pet Remover", "MHF_TNT2", null,
             "Ability: Dismiss Pet", "Removes your active pet and restores your normal mana stats.");
