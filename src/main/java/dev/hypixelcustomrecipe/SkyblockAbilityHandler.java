@@ -46,11 +46,16 @@ public final class SkyblockAbilityHandler {
                 if (breath != null) tickDragonBreath(player, breath);
                 SlashState slash = ACTIVE_SLASHES.get(player.getUUID());
                 if (slash != null) tickScytheSlash(player, slash);
+                OreTrackerSearch.tick(player);
             }
             ACTIVE_BREATHS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
             ACTIVE_SLASHES.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
         });
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> { ACTIVE_BREATHS.clear(); ACTIVE_SLASHES.clear(); });
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            ACTIVE_BREATHS.clear();
+            ACTIVE_SLASHES.clear();
+            OreTrackerSearch.clear();
+        });
 
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getItemInHand(hand);
@@ -312,45 +317,9 @@ public final class SkyblockAbilityHandler {
     /** Searches the current dimension for the nearest diamond ore or ancient debris. */
     private static void useOreTracker(ServerPlayer player) {
         if (!beginAbility(player, "ore_tracker", 100, 600)) return;
-        player.sendSystemMessage(Component.literal(
-                "Searching within 32 blocks in this dimension..."));
-
-        ServerLevel level = (ServerLevel) player.level();
-        BlockPos origin = player.blockPosition();
-        BlockPos nearest = null;
-        double nearestDistance = 32.0 * 32.0 + 1.0;
-
-        BlockPos.MutableBlockPos candidate = new BlockPos.MutableBlockPos();
-        for (int x = -32; x <= 32; x++) {
-            for (int y = -32; y <= 32; y++) {
-                for (int z = -32; z <= 32; z++) {
-                    double distance = (double) x * x + (double) y * y + (double) z * z;
-                    if (distance > 32.0 * 32.0 || distance >= nearestDistance) continue;
-
-                    candidate.set(origin.getX() + x, origin.getY() + y, origin.getZ() + z);
-                    if (!level.hasChunkAt(candidate)) continue;
-                    var block = level.getBlockState(candidate).getBlock();
-                    if (block == Blocks.DIAMOND_ORE || block == Blocks.DEEPSLATE_DIAMOND_ORE
-                            || block == Blocks.ANCIENT_DEBRIS) {
-                        nearest = candidate.immutable();
-                        nearestDistance = distance;
-                    }
-                }
-            }
-        }
-
-        if (nearest == null) {
-            player.sendSystemMessage(Component.literal(
-                    "No diamond ore or ancient debris found within 32 blocks in this dimension."));
-        } else {
-            player.sendSystemMessage(Component.literal(
-                    "Nearest ore found at: X: " + nearest.getX()
-                            + "  Y: " + nearest.getY() + "  Z: " + nearest.getZ()));
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                    nearest.getX() + 0.5, nearest.getY() + 0.8, nearest.getZ() + 0.5,
-                    8, 0.25, 0.25, 0.25, 0.02);
-        }
+        OreTrackerSearch.start(player);
     }
+
 
     private static void activatePet(ServerPlayer player, SkyblockPlayerState.Pet pet) {
         SkyblockPlayerState.get(player).activatePet(player, pet);
