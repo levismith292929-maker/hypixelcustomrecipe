@@ -1,8 +1,9 @@
 name: Build Fabric Mod
-# Rebuild after correcting Superior and Unstable Dragon crit scaling.
 
 on:
   push:
+    branches: [ "main", "merge-datapack-into-mod" ]
+  pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 
