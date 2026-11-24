@@ -88,8 +88,8 @@ public final class ModItems {
                 Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
         );
 
-        String textureJson = "{\\"textures\\":{\\"SKIN\\":{\\"url\\":\\"https://textures.minecraft.net/texture/"
-                + textureHash + "\\"}}}";
+        String textureJson = "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/"
+                + textureHash + "\"}}}";
         String textureValue = Base64.getEncoder().encodeToString(textureJson.getBytes(StandardCharsets.UTF_8));
         Property texture = new Property("textures", textureValue);
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
