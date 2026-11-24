@@ -342,6 +342,7 @@ public final class SkyblockPlayerState {
         // large reserve so normal damage can be measured after vanilla
         // resistance, shields, and other mitigation have run.
         player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+        player.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
         if (player.isAlive() && player.getHealth() < 1024.0F) player.setHealth(1024.0F);
 
         if (activePet == Pet.IRON_GOLEM && !player.hasEffect(MobEffects.RESISTANCE)) {
