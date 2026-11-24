@@ -3,9 +3,8 @@
   "show_notification": true,
   "category": "misc",
   "pattern": [
-    "sss",
-    "sss",
-    "sss"
+    "ss",
+    "ss"
   ],
   "key": {
     "s": [
