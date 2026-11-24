@@ -10,6 +10,11 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ResolvableProfile;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -54,6 +59,7 @@ public final class SkyblockPlayerState {
     private int maximumHealth;
     private boolean healthInitialized;
     private boolean statViewerGiven;
+    private ArmorStand petDisplay;
 
     private SkyblockPlayerState() {}
 
@@ -61,7 +67,10 @@ public final class SkyblockPlayerState {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) get(player).tick(player);
         });
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> PLAYERS.clear());
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            PLAYERS.values().forEach(SkyblockPlayerState::removePetDisplay);
+            PLAYERS.clear();
+        });
     }
 
     public static SkyblockPlayerState get(Player player) {
@@ -90,12 +99,63 @@ public final class SkyblockPlayerState {
 
     public void activatePet(ServerPlayer player, Pet pet) {
         if (activePet == Pet.IRON_GOLEM) player.removeEffect(MobEffects.RESISTANCE);
+        removePetDisplay();
         activePet = pet;
         if (pet == Pet.IRON_GOLEM) {
             player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
         }
         mana.configure(pet.manaMaximum() + stats.intelligence(),
                 pet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
+        if (pet != Pet.NONE) spawnPetDisplay(player, pet);
+    }
+
+    private void spawnPetDisplay(ServerPlayer player, Pet pet) {
+        ItemStack head = new ItemStack(Items.PLAYER_HEAD);
+        switch (pet) {
+            case ENDERMAN -> head.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved("MHF_Enderman"));
+            case IRON_GOLEM -> head.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved("MHF_Golem"));
+            case ENDER_DRAGON -> setHeadTexture(head,
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=");
+            case GOLDEN_DRAGON -> setHeadTexture(head,
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU5ZjliMWZjMDE0MTY2Y2I0NmEwOTNlNTM0OWIyYmY2ZWRkMjAxYjY4MGQ2MmU0OGRiZjNhZjliMDQ1OTExNiJ9fX0=");
+            default -> { return; }
+        }
+
+        ServerLevel level = (ServerLevel) player.level();
+        petDisplay = new ArmorStand(level, player.getX(), player.getY() + 0.2, player.getZ());
+        petDisplay.setInvisible(true);
+        petDisplay.setNoGravity(true);
+        petDisplay.setSmall(true);
+        petDisplay.setNoBasePlate(true);
+        petDisplay.setInvulnerable(true);
+        petDisplay.addTag("hypixel_pet_display");
+        petDisplay.setItemSlot(EquipmentSlot.HEAD, head);
+        level.addFreshEntity(petDisplay);
+    }
+
+    private static void setHeadTexture(ItemStack head, String texture) {
+        GameProfile profile = new GameProfile(UUID.randomUUID(), "SkyBlockPet");
+        profile.getProperties().put("textures", new Property("textures", texture));
+        head.set(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
+    }
+
+    private void removePetDisplay() {
+        if (petDisplay != null) {
+            petDisplay.discard();
+            petDisplay = null;
+        }
+    }
+
+    private void updatePetDisplay(ServerPlayer player) {
+        if (activePet == Pet.NONE) return;
+        if (petDisplay == null || petDisplay.isRemoved() || petDisplay.level() != player.level()) {
+            removePetDisplay();
+            spawnPetDisplay(player, activePet);
+            return;
+        }
+        double bob = Math.sin(player.tickCount * 0.12) * 0.12;
+        petDisplay.setPos(player.getX(), player.getY() + 0.2 + bob, player.getZ());
+        petDisplay.setYRot(player.getYRot());
     }
 
 
@@ -168,6 +228,7 @@ public final class SkyblockPlayerState {
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
+        updatePetDisplay(player);
 
         if (astraeaOrbTicks > 0) {
             ServerLevel level = (ServerLevel) player.level();
