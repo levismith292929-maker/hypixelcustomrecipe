@@ -46,6 +46,22 @@ public final class ModArmorItems {
     private static final ArmorMaterial MATERIAL = createMaterial();
     private static final Map<String, Item> REGISTERED = new java.util.LinkedHashMap<>();
     private static final Map<String, Stats> REGISTERED_STATS = new java.util.LinkedHashMap<>();
+    private static final Map<String, Integer> VANILLA_ARMOR_DEFENSE = Map.ofEntries(
+            Map.entry("leather_helmet", 5), Map.entry("leather_chestplate", 10),
+            Map.entry("leather_leggings", 7), Map.entry("leather_boots", 3),
+            Map.entry("golden_helmet", 10), Map.entry("golden_chestplate", 18),
+            Map.entry("golden_leggings", 15), Map.entry("golden_boots", 7),
+            Map.entry("chainmail_helmet", 11), Map.entry("chainmail_chestplate", 19),
+            Map.entry("chainmail_leggings", 16), Map.entry("chainmail_boots", 8),
+            Map.entry("iron_helmet", 13), Map.entry("iron_chestplate", 21),
+            Map.entry("iron_leggings", 18), Map.entry("iron_boots", 10),
+            Map.entry("diamond_helmet", 17), Map.entry("diamond_chestplate", 30),
+            Map.entry("diamond_leggings", 24), Map.entry("diamond_boots", 13),
+            Map.entry("netherite_helmet", 23), Map.entry("netherite_chestplate", 36),
+            Map.entry("netherite_leggings", 30), Map.entry("netherite_boots", 19),
+            Map.entry("copper_helmet", 9), Map.entry("copper_chestplate", 17),
+            Map.entry("copper_leggings", 14), Map.entry("copper_boots", 6)
+    );
 
     private ModArmorItems() {
     }
@@ -143,14 +159,19 @@ public final class ModArmorItems {
         for (EquipmentSlot slot : new EquipmentSlot[]{
                 EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
         }) {
-            Stats piece = getStats(player.getItemBySlot(slot));
-            if (piece == null) continue;
-            health += piece.health();
-            defense += piece.defense();
-            strength += piece.strength();
-            intelligence += piece.intelligence();
-            critChance += piece.critChance();
-            critDamage += piece.critDamage();
+            ItemStack equipped = player.getItemBySlot(slot);
+            Stats piece = getStats(equipped);
+            if (piece != null) {
+                health += piece.health();
+                defense += piece.defense();
+                strength += piece.strength();
+                intelligence += piece.intelligence();
+                critChance += piece.critChance();
+                critDamage += piece.critDamage();
+            } else if (!equipped.isEmpty()) {
+                Identifier itemId = BuiltInRegistries.ITEM.getKey(equipped.getItem());
+                defense += VANILLA_ARMOR_DEFENSE.getOrDefault(itemId.getPath(), 0);
+            }
         }
 
         return new SkyblockStats(
