@@ -11,8 +11,9 @@ public final class HypixelCustomRecipe implements ModInitializer {
     @Override
     public void onInitialize() {
         ModItems.initialize();
+        DatapackItems.initialize();
         ModArmorItems.initialize();
         RecipeUnlocker.initialize();
-        LOGGER.info("Registered Dragon Fragments, Star Shards, custom Dragon and Necron armor, the Necron Core, and the Aspect of the End.");
+        LOGGER.info("Registered the existing custom armor, fragments, shards, and the first migrated datapack item set.");
     }
 }
