@@ -201,7 +201,7 @@ public final class SkyblockAbilityHandler {
     /** Zombie Sword: restore one heart, with its one-second cooldown. */
     private static void useZombieSword(ServerPlayer player) {
         if (!beginAbility(player, "zombie_sword", 50, 20)) return;
-        player.heal(2.0F);
+        SkyblockPlayerState.get(player).heal(20);
         playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.7F, 1.4F);
     }
 
