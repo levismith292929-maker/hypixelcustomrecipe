@@ -40,7 +40,7 @@ public final class DatapackItems {
     public static final Item AOTD = register("aotd", "Aspect of the Dragon", Items.NETHERITE_SWORD,
             "Ability: Dragon Rage  RIGHT CLICK",
             "Breathe fire 5 blocks in the direction you look.",
-            "Each mob is hit once; damage scales with Strength and Intelligence.",
+            "Each mob is hit once for 18 base damage, increased by Strength and Intelligence.",
             "Mana Cost: 80");
     public static final Item ASTRAEA = register("astraea", "Astraea", Items.NETHERITE_SWORD,
             "Ability: Wither Shield  RIGHT CLICK",
