@@ -18,8 +18,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.item.component.ResolvableProfile;
+import com.google.common.collect.ImmutableMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -145,7 +147,6 @@ public final class SkyblockPlayerState {
         petDisplay = new ArmorStand(level, player.getX(), player.getY() + 0.2, player.getZ());
         petDisplay.setInvisible(true);
         petDisplay.setNoGravity(true);
-        petDisplay.setSmall(true);
         petDisplay.setNoBasePlate(true);
         petDisplay.setInvulnerable(true);
         petDisplay.addTag("hypixel_pet_display");
@@ -154,8 +155,9 @@ public final class SkyblockPlayerState {
     }
 
     private static void setHeadTexture(ItemStack head, String texture) {
-        GameProfile profile = new GameProfile(UUID.randomUUID(), "SkyBlockPet");
-        profile.getProperties().put("textures", new Property("textures", texture));
+        Property textureProperty = new Property("textures", texture);
+        PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", textureProperty));
+        GameProfile profile = new GameProfile(UUID.randomUUID(), "SkyBlockPet", properties);
         head.set(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
     }
 
