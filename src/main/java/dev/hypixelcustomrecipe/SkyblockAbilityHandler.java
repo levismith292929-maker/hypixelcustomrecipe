@@ -122,7 +122,7 @@ public final class SkyblockAbilityHandler {
     }
 
     private static void useAote(ServerPlayer player) {
-        if (!beginAbility(player, "aote", 35, 4)) return;
+        if (!beginAbility(player, "aote", 15, 5)) return;
 
         Vec3 destination = player.position().add(player.getLookAngle().scale(5.0));
         player.teleportTo(destination.x, destination.y, destination.z);
@@ -164,7 +164,7 @@ public final class SkyblockAbilityHandler {
 
     /** Aspect of the Void: raycast up to 64 blocks and land above the hit block. */
     private static void useAotv(ServerPlayer player) {
-        if (!beginAbility(player, "aote", 50, 60)) return;
+        if (!beginAbility(player, "aotv", 50, 3)) return;
         BlockPos target = findRaycastTarget(player);
         if (target == null) return;
         Vec3 destination = Vec3.atBottomCenterOf(target).add(0.0, 1.0, 0.0);
