@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "nsn",
+    "sas",
+    "nsn"
+  ],
+  "key": {
+    "n": [
+      "minecraft:netherite_scrap"
+    ],
+    "s": [
+      "hypixel:star_shard1"
+    ],
+    "a": [
+      "hypixel:necron_helmet_1star"
+    ]
+  },
+  "result": {
+    "id": "hypixel:necron_helmet_2star",
+    "count": 1
+  }
+}

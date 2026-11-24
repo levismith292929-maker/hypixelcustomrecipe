@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "n n",
+    "f f"
+  ],
+  "key": {
+    "n": [
+      "minecraft:netherite_scrap"
+    ],
+    "f": [
+      "hypixel:superior_dragon_fragment"
+    ]
+  },
+  "result": {
+    "id": "hypixel:superior_dragon_boots",
+    "count": 1
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "fff",
+    "faf",
+    "fff"
+  ],
+  "key": {
+    "f": [
+      "hypixel:superior_dragon_fragment"
+    ],
+    "a": [
+      "hypixel:wise_dragon_chestplate"
+    ]
+  },
+  "result": {
+    "id": "hypixel:wise_dragon_chestplate_1star",
+    "count": 1
+  }
+}
