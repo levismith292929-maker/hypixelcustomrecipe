@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -42,6 +44,7 @@ public final class SkyblockPlayerState {
     private SkyblockStats stats = SkyblockStats.BASE;
     private Pet activePet = Pet.NONE;
     private int hudUpdateTicks;
+    private int astraeaOrbTicks;
 
     private SkyblockPlayerState() {}
 
@@ -60,6 +63,8 @@ public final class SkyblockPlayerState {
     public SkyblockManaState mana() { return mana; }
     public Pet activePet() { return activePet; }
 
+    public void startAstraeaOrbs() { astraeaOrbTicks = 100; }
+
     public void activatePet(ServerPlayer player, Pet pet) {
         if (activePet == Pet.IRON_GOLEM) player.removeEffect(MobEffects.RESISTANCE);
         activePet = pet;
@@ -75,6 +80,20 @@ public final class SkyblockPlayerState {
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
+
+        if (astraeaOrbTicks > 0) {
+            ServerLevel level = (ServerLevel) player.level();
+            double rotation = (100 - astraeaOrbTicks) * 0.12;
+            for (int i = 0; i < 3; i++) {
+                double angle = rotation + i * (Math.PI * 2.0 / 3.0);
+                double x = player.getX() + Math.cos(angle) * 1.0;
+                double y = player.getY() + 1.0 + Math.sin(angle * 2.0) * 0.2;
+                double z = player.getZ() + Math.sin(angle) * 1.0;
+                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 1, 0.02, 0.02, 0.02, 0.0);
+                level.sendParticles(ParticleTypes.SMOKE, x, y, z, 1, 0.04, 0.04, 0.04, 0.0);
+            }
+            astraeaOrbTicks--;
+        }
 
         if (++hudUpdateTicks >= 10) {
             hudUpdateTicks = 0;
