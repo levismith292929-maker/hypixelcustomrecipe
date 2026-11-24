@@ -30,7 +30,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
     private boolean hypixelcustomrecipe$starUpgrade;
 
     protected AnvilMenuMixin(int containerId, ContainerLevelAccess access) {
-        super(null, containerId, null, access);
+        super(null, containerId, null, access, null);
     }
 
     @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
