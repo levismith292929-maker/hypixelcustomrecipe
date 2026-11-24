@@ -90,8 +90,11 @@ public final class SkyblockPlayerState {
                 EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
         }) {
             ItemStack stack = player.getItemBySlot(slot);
-            if (!stack.isEmpty() && !stack.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
-                stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+            if (!stack.isEmpty()) {
+                ItemAttributeModifiers modifiers = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+                if (modifiers == null || !modifiers.equals(ItemAttributeModifiers.EMPTY)) {
+                    stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+                }
             }
         }
     }
