@@ -46,7 +46,9 @@ public final class SkyblockPlayerState {
     }
 
     private void tick(ServerPlayer player) {
-        stats = ModArmorItems.getSkyblockStats(player);
+        stats = VanillaWeaponStats.applyHeldWeapon(
+                ModArmorItems.getSkyblockStats(player), player.getMainHandItem()
+        );
         mana.configure(stats.manaMaximum(), stats.manaRegeneration());
         mana.tick();
     }
