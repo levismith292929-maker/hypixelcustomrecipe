@@ -347,7 +347,7 @@ public final class SkyblockAbilityHandler {
         SkyblockStats stats = state.stats();
         double base = baseDamage + (stats.strength() + stats.armorStrength()) * 0.1
                 + stats.intelligence() * 0.2;
-        return base * state.activePet().damageMultiplier();
+        return Math.round(base * state.activePet().damageMultiplier());
     }
 
     private static void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
