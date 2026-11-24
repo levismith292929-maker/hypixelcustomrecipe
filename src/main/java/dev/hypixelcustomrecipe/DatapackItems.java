@@ -39,7 +39,7 @@ public final class DatapackItems {
             "Hold it in your main hand to see where you are aiming.",
             "Right-click to teleport onto that block (up to 64 blocks away).",
             "Mana Cost: 50",
-            "Cooldown: 3 seconds");
+            "Cooldown: 3 ticks");
     public static final Item AOTD = register("aotd", "Aspect of the Dragon", Items.NETHERITE_SWORD,
             "Ability: Dragon Rage  RIGHT CLICK",
             "Breathe fire 5 blocks in the direction you look.",
