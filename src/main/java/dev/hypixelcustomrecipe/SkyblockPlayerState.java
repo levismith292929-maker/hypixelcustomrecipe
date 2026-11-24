@@ -283,7 +283,7 @@ public final class SkyblockPlayerState {
         String ability = null;
         String label = null;
         if (held.is(ModItems.AOTE)) { ability = "aote"; label = "AOTE"; }
-        else if (held.is(DatapackItems.AOTV)) { ability = "aote"; label = "AOTV"; }
+        else if (held.is(DatapackItems.AOTV)) { ability = "aotv"; label = "AOTV"; }
         else if (held.is(DatapackItems.HYPERION)) { ability = "hyperion"; label = "Hyperion"; }
         else if (held.is(DatapackItems.ASTRAEA)) { ability = "astraea"; label = "Astraea"; }
         else if (held.is(DatapackItems.AOTD)) { ability = "aotd"; label = "AOTD"; }
