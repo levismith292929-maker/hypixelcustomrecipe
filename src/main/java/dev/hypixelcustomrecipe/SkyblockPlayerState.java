@@ -24,6 +24,8 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -116,6 +118,35 @@ public final class SkyblockPlayerState {
     /** Restores custom Health points; one vanilla heart is 20 custom points. */
     public void heal(int amount) {
         if (amount > 0) currentHealth = Math.min(maximumHealth, currentHealth + amount);
+    }
+
+
+    public void savePersistentData(ValueOutput output) {
+        output.putInt("hypixel_health", currentHealth);
+        output.putInt("hypixel_max_health", maximumHealth);
+        output.putInt("hypixel_pet", activePet.ordinal());
+        mana.savePersistentData(output);
+    }
+
+    public void loadPersistentData(ServerPlayer player, ValueInput input) {
+        int savedMaximum = input.getIntOr("hypixel_max_health", 0);
+        int savedHealth = input.getIntOr("hypixel_health", -1);
+        if (savedMaximum > 0 && savedHealth >= 0) {
+            maximumHealth = savedMaximum;
+            currentHealth = Math.min(savedHealth, savedMaximum);
+            healthInitialized = true;
+        }
+
+        mana.loadPersistentData(input);
+        int petIndex = input.getIntOr("hypixel_pet", 0);
+        Pet[] pets = Pet.values();
+        if (petIndex >= 0 && petIndex < pets.length) {
+            activePet = pets[petIndex];
+            if (activePet == Pet.IRON_GOLEM) {
+                player.addEffect(new MobEffectInstance(
+                        MobEffects.RESISTANCE, Integer.MAX_VALUE, 0, false, false, true));
+            }
+        }
     }
 
     public void startAstraeaOrbs() { astraeaOrbTicks = 100; }
