@@ -5,7 +5,8 @@ package dev.hypixelcustomrecipe;
  *
  * This is the common data model for the migrated stat calculator, HUD,
  * Stat Viewer, and ability damage calculations. Values are expressed in
- * whole stat points (for example, 25 means 25% Crit Chance).
+ * whole stat points (for example, 25 means 25% Crit Chance). Health is stored
+ * in tenths to match the datapack's custom Health pool.
  */
 public record SkyblockStats(
         int health,
@@ -21,7 +22,7 @@ public record SkyblockStats(
         double weaponDamage
 ) {
     public static final SkyblockStats BASE = new SkyblockStats(
-            100, 0, 0, 0, 0, 5, 0, 0, 500, 40, 1.0
+            1000, 0, 0, 0, 0, 5, 0, 0, 500, 40, 1.0
     );
 
     public SkyblockStats {
