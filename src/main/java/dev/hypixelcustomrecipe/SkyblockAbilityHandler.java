@@ -164,7 +164,7 @@ public final class SkyblockAbilityHandler {
                     18 + step * 2, radius, radius, radius, 0.01);
             AABB area = new AABB(center, center).inflate(radius);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> isValidCombatTarget(entity, player))) {
+                    entity -> isValidTarget(entity, player))) {
                 if (hitTargets.add(target.getUUID())) {
                     target.hurtServer(level, source, (float) damage);
                 }
@@ -189,7 +189,7 @@ public final class SkyblockAbilityHandler {
                     5, 0.35, 0.25, 0.35, 0.01);
             AABB area = new AABB(center, center).inflate(1.5);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> isValidTarget(entity, player))) {
+                    entity -> isValidCombatTarget(entity, player))) {
                 if (hitTargets.add(target.getUUID())) {
                     target.hurtServer(level, source, (float) damage);
                 }
