@@ -50,6 +50,17 @@ public final class SkyblockAbilityHandler {
                 useNecronsScythe(serverPlayer);
             } else if (stack.is(DatapackItems.ZOMBIE_SWORD)) {
                 useZombieSword(serverPlayer);
+            } else if (stack.is(DatapackItems.PET_ENDERMAN)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDERMAN);
+            } else if (stack.is(DatapackItems.PET_ENDER_DRAGON)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDER_DRAGON);
+            } else if (stack.is(DatapackItems.PET_GOLDEN_DRAGON)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.GOLDEN_DRAGON);
+            } else if (stack.is(DatapackItems.PET_IRON_GOLEM)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.IRON_GOLEM);
+            } else if (stack.is(DatapackItems.PET_REMOVER)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.NONE);
+                serverPlayer.sendSystemMessage(Component.literal("Your pet has been removed. Your normal stats have been restored."));
             } else {
                 return InteractionResult.PASS;
             }
@@ -187,10 +198,19 @@ public final class SkyblockAbilityHandler {
         playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.7F, 1.4F);
     }
 
+    private static void activatePet(ServerPlayer player, SkyblockPlayerState.Pet pet) {
+        SkyblockPlayerState.get(player).activatePet(player, pet);
+        if (pet != SkyblockPlayerState.Pet.NONE) {
+            player.sendSystemMessage(Component.literal(pet.name().replace('_', ' ') + " pet activated!"));
+        }
+    }
+
     private static double abilityDamage(ServerPlayer player, double baseDamage) {
-        SkyblockStats stats = SkyblockPlayerState.get(player).stats();
-        return (baseDamage + (stats.strength() + stats.armorStrength()) * 0.1
-                + stats.intelligence() * 0.2);
+        SkyblockPlayerState state = SkyblockPlayerState.get(player);
+        SkyblockStats stats = state.stats();
+        double base = baseDamage + (stats.strength() + stats.armorStrength()) * 0.1
+                + stats.intelligence() * 0.2;
+        return base * state.activePet().damageMultiplier();
     }
 
     private static void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
