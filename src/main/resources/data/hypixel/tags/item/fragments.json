@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "hypixel:old_dragon_fragment",
+    "hypixel:protector_dragon_fragment",
+    "hypixel:wise_dragon_fragment",
+    "hypixel:young_dragon_fragment",
+    "hypixel:strong_dragon_fragment",
+    "hypixel:unstable_dragon_fragment",
+    "hypixel:superior_dragon_fragment",
+    "hypixel:holy_dragon_fragment"
+  ]
+}
