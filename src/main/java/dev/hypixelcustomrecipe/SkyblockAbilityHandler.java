@@ -229,7 +229,7 @@ public final class SkyblockAbilityHandler {
         player.sendSystemMessage(Component.literal(
                 "Searching within 32 blocks in this dimension..."));
 
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = (ServerLevel) player.level();
         BlockPos origin = player.blockPosition();
         BlockPos nearest = null;
         double nearestDistance = 32.0 * 32.0 + 1.0;
