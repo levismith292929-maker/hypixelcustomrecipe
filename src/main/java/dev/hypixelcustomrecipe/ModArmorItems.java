@@ -172,7 +172,7 @@ public final class ModArmorItems {
             if (piece != null) {
                 health += piece.health();
                 defense += piece.defense();
-                armorStrength += piece.strength();
+                strength += piece.strength();
                 intelligence += piece.intelligence();
                 critChance += piece.critChance();
                 critDamage += piece.critDamage();
@@ -235,7 +235,7 @@ public final class ModArmorItems {
             String displayName = set.displayName + " " + slotName + (stars == 0 ? "" : " " + "★".repeat(stars));
             Stats scaled = baseStats.scale(stars);
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.literal("Health: " + String.format(java.util.Locale.ROOT, "%.1f", scaled.health / 10.0)).withStyle(ChatFormatting.RED));
+            lore.add(Component.literal("Health: " + Integer.toString((int) Math.round(scaled.health / 10.0))).withStyle(ChatFormatting.RED));
             lore.add(Component.literal("Defense: " + scaled.defense).withStyle(ChatFormatting.GREEN));
             if (scaled.strength != 0) {
                 lore.add(Component.literal("Strength: " + scaled.strength).withStyle(ChatFormatting.RED));
