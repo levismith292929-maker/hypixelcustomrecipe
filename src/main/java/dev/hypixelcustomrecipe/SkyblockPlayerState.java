@@ -15,6 +15,8 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.item.component.ResolvableProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -183,6 +185,19 @@ public final class SkyblockPlayerState {
      * vanilla armor does not apply a second, separate armor reduction.
      */
 
+
+    /** Shows the datapack's end-rod preview at the block AOTV would target. */
+    private static void renderAotvPreview(ServerPlayer player) {
+        if (!player.getMainHandItem().is(DatapackItems.AOTV)) return;
+        var hit = player.pick(64.0, 0.0F, false);
+        if (hit instanceof BlockHitResult blockHit && hit.getType() == HitResult.Type.BLOCK) {
+            var pos = blockHit.getBlockPos();
+            ((ServerLevel) player.level()).sendParticles(ParticleTypes.END_ROD,
+                    pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5,
+                    2, 0.15, 0.0, 0.15, 0.01);
+        }
+    }
+
     private String abilityCooldownHud(ServerPlayer player) {
         ItemStack held = player.getMainHandItem();
         String ability = null;
@@ -254,6 +269,7 @@ public final class SkyblockPlayerState {
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
         mana.tick();
+        renderAotvPreview(player);
         if (!manaBossBar.getPlayers().contains(player)) manaBossBar.addPlayer(player);
         manaBossBar.setName(Component.literal(
                 "Mana: " + mana.currentMana() + " / " + mana.maximumMana()));
