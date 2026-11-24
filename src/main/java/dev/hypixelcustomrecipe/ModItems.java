@@ -55,9 +55,9 @@ public final class ModItems {
             "6f89b150be9c4c5249f355f68ea0c4391300a9be1f260d750fc35a1817ad796e"
     );
 
-    // Holy Dragon Fragment is left on its existing fallback item until its exact Hypixel texture is verified.
-    public static final Item HOLY_DRAGON_FRAGMENT = register(
-            "holy_dragon_fragment", "Holy Dragon Fragment", Items.EMERALD
+    public static final Item HOLY_DRAGON_FRAGMENT = registerTexturedFragment(
+            "holy_dragon_fragment", "Holy Dragon Fragment",
+            "d6d203caffdb4400d70815f3f0d5f6822ffdc3a9b2cffb386bdb46b6509b8a2e"
     );
 
     public static final Item NECRON_CORE = registerNecronCore();
