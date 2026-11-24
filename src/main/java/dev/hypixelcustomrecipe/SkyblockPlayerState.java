@@ -59,6 +59,7 @@ public final class SkyblockPlayerState {
     private static final Map<UUID, SkyblockPlayerState> PLAYERS = new ConcurrentHashMap<>();
     private final SkyblockManaState mana = new SkyblockManaState();
     private final ServerBossEvent manaBossBar = new ServerBossEvent(
+            UUID.randomUUID(),
             Component.literal("Mana: 500 / 500"),
             BossEvent.BossBarColor.BLUE,
             BossEvent.BossBarOverlay.PROGRESS
