@@ -121,12 +121,6 @@ public final class ModArmorItems {
                 new Stats(39,110,0,0), new Stats(66,160,0,0), new Stats(56,140,0,0), new Stats(34,90,0,0)
         ));
 
-        registerSet(new ArmorSet(
-                "holy_dragon", "Holy Dragon", 0x55FF55, 0x47D147,
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWE5Y2ExNmViMDhlYzVmNmVhZWE4NTU0YmFkMzJjMjRiMTYzNjM4ZGE1NmVkNTU1OThjMTkxNzczYmJlY2YwIn19fQ==",
-                new Stats(143,110,0,0), new Stats(234,160,0,0), new Stats(202,140,0,0), new Stats(130,90,0,0)
-        ));
-
         // Necron armor keeps its custom player-head helmet and its per-piece leather dye colours.
         registerSet(new ArmorSet(
                 "necron", "Necron's", 0xFFD000, 15155516,
