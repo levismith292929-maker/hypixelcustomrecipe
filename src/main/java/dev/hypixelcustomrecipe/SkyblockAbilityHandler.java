@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class SkyblockAbilityHandler {
     private static final Map<UUID, BreathState> ACTIVE_BREATHS = new ConcurrentHashMap<>();
+    private static final Map<UUID, SlashState> ACTIVE_SLASHES = new ConcurrentHashMap<>();
 
     private SkyblockAbilityHandler() {
     }
@@ -43,10 +44,13 @@ public final class SkyblockAbilityHandler {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 BreathState breath = ACTIVE_BREATHS.get(player.getUUID());
                 if (breath != null) tickDragonBreath(player, breath);
+                SlashState slash = ACTIVE_SLASHES.get(player.getUUID());
+                if (slash != null) tickScytheSlash(player, slash);
             }
             ACTIVE_BREATHS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
+            ACTIVE_SLASHES.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
         });
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> ACTIVE_BREATHS.clear());
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> { ACTIVE_BREATHS.clear(); ACTIVE_SLASHES.clear(); });
 
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getItemInHand(hand);
@@ -217,7 +221,7 @@ public final class SkyblockAbilityHandler {
         }
     }
 
-    /** Necron's Scythe: a three-block forward slash, hitting each target once. */
+    /** Necron's Scythe: seven close-range hit checks and a four-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
         if (!beginAbility(player, "necrons_scythe", 35, 15)) return;
         ServerLevel level = (ServerLevel) player.level();
@@ -225,21 +229,57 @@ public final class SkyblockAbilityHandler {
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
         DamageSource source = level.damageSources().playerAttack(player);
-        double damage = abilityDamage(player, 10.0);
+        float damage = (float) abilityDamage(player, 10.0);
+        double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
-        for (int step = 1; step <= 7; step++) {
-            Vec3 center = origin.add(direction.scale(step * 0.5));
-            level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z,
-                    5, 0.35, 0.25, 0.35, 0.01);
+        for (double distance : scanDistances) {
+            Vec3 center = origin.add(direction.scale(distance));
             AABB area = new AABB(center, center).inflate(1.5);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
-                    entity -> isValidCombatTarget(entity, player))) {
+                    entity -> isValidCombatTarget(entity, player)
+                            && entity.distanceToSqr(center) <= 2.25)) {
                 if (hitTargets.add(target.getUUID())) {
-                    target.hurtServer(level, source, (float) damage);
+                    target.hurtServer(level, source, damage);
                 }
             }
         }
+
+        Vec3 slashCenter = origin.add(direction.scale(3.0));
+        Vec3 right = direction.cross(new Vec3(0.0, 1.0, 0.0));
+        if (right.lengthSqr() < 1.0E-6) right = new Vec3(1.0, 0.0, 0.0);
+        ACTIVE_SLASHES.put(player.getUUID(), new SlashState(slashCenter, right.normalize()));
         playSound(player, net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 0.8F);
+    }
+
+    private static void tickScytheSlash(ServerPlayer player, SlashState slash) {
+        int tick = ++slash.age;
+        if (tick == 1 || tick == 2 || tick == 3) {
+            double first = -0.9 + (tick - 1) * 0.6;
+            double second = first + 0.3;
+            spawnSlashParticle(player, slash, first);
+            spawnSlashParticle(player, slash, second);
+        } else if (tick == 4) {
+            spawnSlashParticle(player, slash, 0.9);
+        } else {
+            ACTIVE_SLASHES.remove(player.getUUID());
+        }
+    }
+
+    private static void spawnSlashParticle(ServerPlayer player, SlashState slash, double offset) {
+        Vec3 point = slash.center.add(slash.right.scale(offset));
+        ((ServerLevel) player.level()).sendParticles(ParticleTypes.END_ROD,
+                point.x, point.y, point.z, 1, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    private static final class SlashState {
+        private final Vec3 center;
+        private final Vec3 right;
+        private int age;
+
+        private SlashState(Vec3 center, Vec3 right) {
+            this.center = center;
+            this.right = right;
+        }
     }
 
     /** Zombie Sword: restore one heart, with its one-second cooldown. */
