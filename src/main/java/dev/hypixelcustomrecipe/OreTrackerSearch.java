@@ -27,7 +27,7 @@ public final class OreTrackerSearch {
     private OreTrackerSearch() {}
 
     public static void start(ServerPlayer player) {
-        ACTIVE.put(player.getUUID(), new Search(player.serverLevel(), player.blockPosition().immutable()));
+        ACTIVE.put(player.getUUID(), new Search((ServerLevel) player.level(), player.blockPosition().immutable()));
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "Searching within 32 blocks in this dimension..."));
     }
@@ -35,7 +35,7 @@ public final class OreTrackerSearch {
     public static void tick(ServerPlayer player) {
         Search search = ACTIVE.get(player.getUUID());
         if (search == null) return;
-        if (player.serverLevel() != search.level) {
+        if ((ServerLevel) player.level() != search.level) {
             ACTIVE.remove(player.getUUID());
             return;
         }
