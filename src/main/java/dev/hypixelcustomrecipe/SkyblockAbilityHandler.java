@@ -122,12 +122,11 @@ public final class SkyblockAbilityHandler {
     }
 
     private static void useAote(ServerPlayer player) {
-        if (!beginAbility(player, "aote", 15, 5)) return;
+        if (!beginAbility(player, "aote", 15, 2)) return;
 
         Vec3 destination = player.position().add(player.getLookAngle().scale(5.0));
         player.teleportTo(destination.x, destination.y, destination.z);
-        Vec3 velocity = player.getDeltaMovement();
-        player.setDeltaMovement(velocity.x, 0.0, velocity.z);
+        player.setDeltaMovement(Vec3.ZERO);
         player.fallDistance = 0.0F;
         playSound(player, net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
     }
@@ -337,7 +336,7 @@ public final class SkyblockAbilityHandler {
         SkyblockStats stats = state.stats();
         SkyblockManaState mana = state.mana();
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
-        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.1f", stats.calculateWeaponDamage(false))));
+        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.0f", stats.calculateWeaponDamage(false))));
         player.sendSystemMessage(Component.literal("Strength: " + stats.strength()));
         player.sendSystemMessage(Component.literal("Armor Strength: " + stats.armorStrength()));
         player.sendSystemMessage(Component.literal("Crit Chance: " + stats.critChance() + "%"));
