@@ -187,14 +187,13 @@ public final class SkyblockPlayerState {
 
 
     private int maximumManaFor(Pet pet) {
-        int armorBonus = stats.manaMaximum() - SkyblockStats.BASE.manaMaximum();
-        return Math.max(1, pet.manaMaximum() + armorBonus + stats.intelligence());
+        int intelligenceBonus = stats.manaMaximum() - SkyblockStats.BASE.manaMaximum();
+        return Math.max(1, pet.manaMaximum() + intelligenceBonus);
     }
 
     private int manaRegenerationFor(Pet pet) {
-        int armorBonus = stats.manaRegeneration() - SkyblockStats.BASE.manaRegeneration();
-        return Math.max(0, pet.manaRegeneration() + armorBonus
-                + Math.max(0, (stats.intelligence() + 2) / 4));
+        int intelligenceBonus = stats.manaRegeneration() - SkyblockStats.BASE.manaRegeneration();
+        return Math.max(0, pet.manaRegeneration() + intelligenceBonus);
     }
 
     public void activatePet(ServerPlayer player, Pet pet) {
