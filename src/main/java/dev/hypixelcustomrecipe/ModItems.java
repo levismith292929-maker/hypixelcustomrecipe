@@ -95,7 +95,7 @@ public final class ModItems {
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
         GameProfile profile = new GameProfile(
                 UUID.nameUUIDFromBytes(("hypixel:" + path).getBytes(StandardCharsets.UTF_8)),
-                displayName.replace(" ", ""),
+                "Hypixel",
                 properties
         );
 
