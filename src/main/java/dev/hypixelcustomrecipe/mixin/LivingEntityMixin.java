@@ -52,7 +52,8 @@ public abstract class LivingEntityMixin {
                 // Replace vanilla sword/axe base damage with the datapack's
                 // custom Damage and Strength values, while retaining this
                 // single combat interception point.
-                adjusted = (float) attackStats.calculateWeaponDamage(false);
+                adjusted = (float) (attackStats.calculateWeaponDamage(false)
+                        * SkyblockPlayerState.get(attacker).activePet().damageMultiplier());
             }
             int chance = Math.min(100, attackStats.critChance());
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
