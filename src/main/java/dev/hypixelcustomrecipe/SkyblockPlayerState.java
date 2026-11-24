@@ -6,6 +6,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -75,7 +79,25 @@ public final class SkyblockPlayerState {
                 pet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
     }
 
+
+    /**
+     * The datapack removes vanilla armor attributes and calculates Defense
+     * through its own stat formula instead. Keep that behavior in the mod so
+     * vanilla armor does not apply a second, separate armor reduction.
+     */
+    private static void stripVanillaArmorAttributes(ServerPlayer player) {
+        for (EquipmentSlot slot : new EquipmentSlot[]{
+                EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+        }) {
+            ItemStack stack = player.getItemBySlot(slot);
+            if (!stack.isEmpty() && !stack.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
+                stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+            }
+        }
+    }
+
     private void tick(ServerPlayer player) {
+        stripVanillaArmorAttributes(player);
         stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
         mana.configure(activePet.manaMaximum() + stats.intelligence(),
                 activePet.manaRegeneration() + Math.max(0, (stats.intelligence() + 2) / 4));
