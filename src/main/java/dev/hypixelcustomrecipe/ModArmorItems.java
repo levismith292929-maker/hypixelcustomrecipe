@@ -46,6 +46,10 @@ public final class ModArmorItems {
     private static final ArmorMaterial MATERIAL = createMaterial();
     private static final Map<String, Item> REGISTERED = new java.util.LinkedHashMap<>();
     private static final Map<String, Stats> REGISTERED_STATS = new java.util.LinkedHashMap<>();
+    private static final Map<String, Integer> VANILLA_ARMOR_STRENGTH = Map.of(
+            "chainmail_helmet", 4, "chainmail_chestplate", 8,
+            "chainmail_leggings", 6, "chainmail_boots", 3
+    );
     private static final Map<String, Integer> VANILLA_ARMOR_DEFENSE = Map.ofEntries(
             Map.entry("leather_helmet", 5), Map.entry("leather_chestplate", 10),
             Map.entry("leather_leggings", 7), Map.entry("leather_boots", 3),
@@ -152,6 +156,7 @@ public final class ModArmorItems {
         int health = SkyblockStats.BASE.health();
         int defense = SkyblockStats.BASE.defense();
         int strength = SkyblockStats.BASE.strength();
+        int armorStrength = SkyblockStats.BASE.armorStrength();
         int intelligence = SkyblockStats.BASE.intelligence();
         int critChance = SkyblockStats.BASE.critChance();
         int critDamage = SkyblockStats.BASE.critDamage();
@@ -164,18 +169,19 @@ public final class ModArmorItems {
             if (piece != null) {
                 health += piece.health();
                 defense += piece.defense();
-                strength += piece.strength();
+                armorStrength += piece.strength();
                 intelligence += piece.intelligence();
                 critChance += piece.critChance();
                 critDamage += piece.critDamage();
             } else if (!equipped.isEmpty()) {
                 Identifier itemId = BuiltInRegistries.ITEM.getKey(equipped.getItem());
                 defense += VANILLA_ARMOR_DEFENSE.getOrDefault(itemId.getPath(), 0);
+                armorStrength += VANILLA_ARMOR_STRENGTH.getOrDefault(itemId.getPath(), 0);
             }
         }
 
         return new SkyblockStats(
-                health, defense, strength, 0, critChance, critDamage,
+                health, defense, strength, armorStrength, 0, critChance, critDamage,
                 intelligence, SkyblockStats.BASE.manaMaximum() + intelligence,
                 SkyblockStats.BASE.manaRegeneration() + (intelligence + 2) / 4, 1.0
         );
