@@ -103,7 +103,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
         }
 
         this.repairItemCountCost = 0;
-        this.cost.set(output.isEmpty() ? 0 : 1);
+        this.cost.set(0);
         this.access.execute((level, pos) ->
                 level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.0F));
         ci.cancel();
