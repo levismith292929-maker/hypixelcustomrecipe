@@ -19,8 +19,6 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.item.component.ResolvableProfile;
 import com.google.common.collect.ImmutableMultimap;
 import com.mojang.authlib.GameProfile;
@@ -259,12 +257,11 @@ public final class SkyblockPlayerState {
      */
 
 
-    /** Shows the datapack's end-rod preview at the block AOTV would target. */
+    /** Shows the end-rod preview using the same 0.1-block raycast as AOTV. */
     private static void renderAotvPreview(ServerPlayer player) {
         if (!player.getMainHandItem().is(DatapackItems.AOTV)) return;
-        var hit = player.pick(64.0, 0.0F, false);
-        if (hit instanceof BlockHitResult blockHit && hit.getType() == HitResult.Type.BLOCK) {
-            var pos = blockHit.getBlockPos();
+        BlockPos pos = SkyblockAbilityHandler.findRaycastTargetForPreview(player);
+        if (pos != null) {
             ((ServerLevel) player.level()).sendParticles(ParticleTypes.END_ROD,
                     pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5,
                     2, 0.15, 0.0, 0.15, 0.01);
