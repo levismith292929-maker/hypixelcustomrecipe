@@ -63,11 +63,13 @@ public final class ModItems {
     public static final Item NECRON_CORE = registerNecronCore();
 
     // Star-upgrade crafting materials.
-    public static final Item STAR_SHARD_1 = register(
-            "star_shard1", "Star Shard 1", Items.PRISMARINE_SHARD
+    public static final Item STAR_SHARD_1 = registerTexturedHeadFromValue(
+            "star_shard1", "Star Shard 1",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTIzZTUzNGE1ZDVjNmEzODBiNzRlZTJmZDAxZDllMDNkMWVhYjcxNGU5NmUwYWVlNTc5YmU5NWU1ZGM3MzFmYSJ9fX0="
     );
-    public static final Item STAR_SHARD_2 = register(
-            "star_shard2", "Star Shard 2", Items.NETHER_STAR
+    public static final Item STAR_SHARD_2 = registerTexturedHeadFromValue(
+            "star_shard2", "Star Shard 2",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTk5MGI4MTMzZmRmYzNjMDQ3NTNmYzQ0NWUwODhkYTdhZTdhNzg3MGJlNWUzNDRiZWEzMDgyOWFhNmVkY2IzMCJ9fX0="
     );
 
     // Unique item ID so the AOTV recipe can require an AOTE,
@@ -99,6 +101,14 @@ public final class ModItems {
         String textureJson = "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/"
                 + textureHash + "\"}}}";
         String textureValue = Base64.getEncoder().encodeToString(textureJson.getBytes(StandardCharsets.UTF_8));
+        return registerTexturedHeadFromValue(path, displayName, textureValue);
+    }
+
+    private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue) {
+        ResourceKey<Item> key = ResourceKey.create(
+                Registries.ITEM,
+                Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
+        );
         Property texture = new Property("textures", textureValue);
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
         GameProfile profile = new GameProfile(
