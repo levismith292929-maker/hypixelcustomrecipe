@@ -105,7 +105,7 @@ public final class DatapackItems {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
         Component displayName = Component.literal(name);
-        if (color != null) displayName = displayName.withColor(color);
+        if (color != null) displayName = displayName.withStyle(style -> style.withColor(net.minecraft.network.chat.TextColor.fromRgb(color)));
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
