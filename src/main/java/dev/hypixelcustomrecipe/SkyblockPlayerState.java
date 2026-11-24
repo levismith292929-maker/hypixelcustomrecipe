@@ -80,6 +80,7 @@ public final class SkyblockPlayerState {
     private boolean healthInitialized;
     private int combatTicksRemaining;
     private double healthRegenerationProgress;
+    private int necronGuardCooldownTicks;
 
     private ArmorStand petDisplay;
 
@@ -143,11 +144,19 @@ public final class SkyblockPlayerState {
         if (amount > 0) currentHealth = Math.min(maximumHealth, currentHealth + amount);
     }
 
+    /** Starts the Necron guard set-bonus cooldown without charging mana. */
+    public boolean tryStartNecronGuardCooldown() {
+        if (necronGuardCooldownTicks > 0) return false;
+        necronGuardCooldownTicks = 600;
+        return true;
+    }
+
 
     public void savePersistentData(ValueOutput output) {
         output.putInt("hypixel_health", currentHealth);
         output.putInt("hypixel_max_health", maximumHealth);
         output.putInt("hypixel_pet", activePet.ordinal());
+        output.putInt("hypixel_necron_guard_cooldown", necronGuardCooldownTicks);
         mana.savePersistentData(output);
     }
 
@@ -165,6 +174,7 @@ public final class SkyblockPlayerState {
         }
 
         mana.loadPersistentData(input);
+        necronGuardCooldownTicks = Math.max(0, input.getIntOr("hypixel_necron_guard_cooldown", 0));
         int petIndex = input.getIntOr("hypixel_pet", 0);
         Pet[] pets = Pet.values();
         if (petIndex >= 0 && petIndex < pets.length) {
@@ -366,6 +376,7 @@ public final class SkyblockPlayerState {
     }
 
     private void tick(ServerPlayer player) {
+        if (necronGuardCooldownTicks > 0) necronGuardCooldownTicks--;
         // Keep one permanent Stat Viewer in hotbar slot 9, matching the datapack.
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             if (slot != 8 && player.getInventory().getItem(slot).is(DatapackItems.STAT_VIEWER)) {
