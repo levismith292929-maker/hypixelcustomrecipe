@@ -18,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.item.component.ItemLore;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -62,14 +63,21 @@ public final class ModItems {
 
     public static final Item NECRON_CORE = registerNecronCore();
 
-    // Star-upgrade crafting materials.
+    // Star-upgrade materials. Each shard is used for its matching anvil upgrade.
     public static final Item STAR_SHARD_1 = registerTexturedHeadFromValue(
-            "star_shard1", "Star Shard 1",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTIzZTUzNGE1ZDVjNmEzODBiNzRlZTJmZDAxZDllMDNkMWVhYjcxNGU5NmUwYWVlNTc5YmU5NWU1ZGM3MzFmYSJ9fX0=", 64
+            "star_shard1", "Master Star 1",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjEzNjcyNDc0NWM4YzlhYmM3NWNkZjIyMDVmMmNkMWQzM2U2YmZlZmE0MTVmOTk1YmU3NjkyMjkxMjE2OWVjOSJ9fX0=", 64,
+            "Used to upgrade non-vanilla armor to 1 star in an anvil."
     );
     public static final Item STAR_SHARD_2 = registerTexturedHeadFromValue(
-            "star_shard2", "Star Shard 2",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTk5MGI4MTMzZmRmYzNjMDQ3NTNmYzQ0NWUwODhkYTdhZTdhNzg3MGJlNWUzNDRiZWEzMDgyOWFhNmVkY2IzMCJ9fX0=", 64
+            "star_shard2", "Master Star 3",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDcxYjk1NGU4OWFlZDE1NmY5MGZhZmNlNmRjNzc4OGFjNzZiNjQ2NmNlY2NhM2E0ZjRlYzFlNDYzZWI5MTRhMSJ9fX0=", 64,
+            "Used to upgrade non-vanilla armor to 2 stars in an anvil."
+    );
+    public static final Item STAR_SHARD_3 = registerTexturedHeadFromValue(
+            "star_shard3", "Master Star 5",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzFjODA0MjUyN2Y4MWM4ZTI5M2UyODEwMTEzNDg5ZjQzOTRjYzZlZmUxNWQxYWZhYzQzMTU3MWM3M2I2MmRjNCJ9fX0=", 64,
+            "Used to upgrade non-vanilla armor to 3 stars in an anvil."
     );
 
     // Unique item ID so the AOTV recipe can require an AOTE,
@@ -100,6 +108,10 @@ public final class ModItems {
     }
 
     private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue, int maxStackSize) {
+        return registerTexturedHeadFromValue(path, displayName, textureValue, maxStackSize, null);
+    }
+
+    private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue, int maxStackSize, String description) {
         ResourceKey<Item> key = ResourceKey.create(
                 Registries.ITEM,
                 Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
@@ -112,14 +124,15 @@ public final class ModItems {
                 properties
         );
 
-        Item item = new SimplePolymerItem(
-                new Item.Properties()
-                        .setId(key)
-                        .stacksTo(maxStackSize)
-                        .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
-                        .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile)),
-                Items.PLAYER_HEAD
-        ) {
+        Item.Properties itemProperties = new Item.Properties()
+                .setId(key)
+                .stacksTo(maxStackSize)
+                .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
+                .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
+        if (description != null) {
+            itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(Component.literal(description))));
+        }
+        Item item = new SimplePolymerItem(itemProperties, Items.PLAYER_HEAD) {
             @Override
             public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
                 ResolvableProfile skullProfile = stack.get(DataComponents.PROFILE);
