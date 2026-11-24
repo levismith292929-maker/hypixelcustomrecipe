@@ -44,9 +44,13 @@ public record SkyblockStats(
         return 3.0 + critDamage / 50.0;
     }
 
-    /** Defense-based fraction of incoming damage that is prevented. */
+    /**
+     * Matches the datapack's integer scoreboard calculation:
+     * reductionPercent = min(100, (Defense + 50) / 100).
+     */
     public double damageReduction() {
-        return Math.min(1.0, defense / (defense + 50.0));
+        int reductionPercent = Math.min(100, (defense + 50) / 100);
+        return reductionPercent / 100.0;
     }
 
     public double applyDefense(double incomingDamage) {
