@@ -203,34 +203,24 @@ public final class ModArmorItems {
             String id,
             String displayName,
             int nameColor,
-            int dyeColor,
             String helmetTexture,
-            Stats helmet,
-            Stats chestplate,
-            Stats leggings,
-            Stats boots,
+            Stats[] pieceStats,
             int[] perPieceDyes,
             boolean necronBonus
     ) {
         ArmorSet(String id, String displayName, int nameColor, int dyeColor, String helmetTexture,
                  Stats helmet, Stats chestplate, Stats leggings, Stats boots) {
-            this(id, displayName, nameColor, dyeColor, helmetTexture, helmet, chestplate, leggings, boots,
+            this(id, displayName, nameColor, helmetTexture,
+                    new Stats[]{helmet, chestplate, leggings, boots},
                     new int[]{dyeColor, dyeColor, dyeColor, dyeColor}, false);
         }
 
         ArmorSet(String id, String displayName, int nameColor, int dyeColor, String helmetTexture,
-                 Stats helmet, Stats chestplate, Stats leggings, Stats boots, int[] perPieceDyes, boolean necronBonus) {
-            this.id = id;
-            this.displayName = displayName;
-            this.nameColor = nameColor;
-            this.dyeColor = dyeColor;
-            this.helmetTexture = helmetTexture;
-            this.pieceStats = new Stats[]{helmet, chestplate, leggings, boots};
-            this.perPieceDyes = perPieceDyes;
-            this.necronBonus = necronBonus;
+                 Stats helmet, Stats chestplate, Stats leggings, Stats boots,
+                 int[] perPieceDyes, boolean necronBonus) {
+            this(id, displayName, nameColor, helmetTexture,
+                    new Stats[]{helmet, chestplate, leggings, boots}, perPieceDyes, necronBonus);
         }
-
-        private final Stats[] pieceStats = new Stats[4];
 
         int dyeFor(int index) {
             return perPieceDyes[index];
