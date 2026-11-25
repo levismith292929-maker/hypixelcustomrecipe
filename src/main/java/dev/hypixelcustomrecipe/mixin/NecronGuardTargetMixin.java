@@ -1,5 +1,6 @@
 package dev.hypixelcustomrecipe.mixin;
 
+import dev.hypixelcustomrecipe.NecronGuardHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,11 +17,7 @@ public abstract class NecronGuardTargetMixin {
             CallbackInfoReturnable<Boolean> cir
     ) {
         Mob mob = (Mob) (Object) this;
-        if (!mob.getTags().contains("hypixel_necron_guard")) {
-            return;
-        }
-
-        if (mob.getTags().contains("hypixel_necron_guard_owner_" + target.getUUID())) {
+        if (NecronGuardHandler.isGuardOwner(mob, target)) {
             cir.setReturnValue(false);
         }
     }
