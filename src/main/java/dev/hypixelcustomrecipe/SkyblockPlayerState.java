@@ -109,6 +109,15 @@ public final class SkyblockPlayerState {
                 state.manaBossBar.addPlayer(newPlayer);
             }
         });
+        // Run the same cleanup after the new player has actually been installed
+        // by the server's respawn flow, not only while copying the old player.
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+            newPlayer.removeAllEffects();
+            SkyblockPlayerState state = PLAYERS.get(newPlayer.getUUID());
+            if (state != null) {
+                state.resetAfterRespawn(newPlayer);
+            }
+        });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             SkyblockPlayerState state = PLAYERS.get(handler.player.getUUID());
             if (state != null) {
