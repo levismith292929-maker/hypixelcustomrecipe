@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "ddd",
+    "dsd",
+    "ddd"
+  ],
+  "key": {
+    "d": [
+      "minecraft:ancient_debris"
+    ],
+    "s": [
+      "minecraft:stick"
+    ]
+  },
+  "result": {
+    "id": "hypixel:blade_handle",
+    "count": 1
+  }
+}
