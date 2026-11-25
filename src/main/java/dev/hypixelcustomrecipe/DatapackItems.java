@@ -82,8 +82,8 @@ public final class DatapackItems {
             "Damage: 140", "Strength: 115");
     public static final Item BLADE_HANDLE = register("blade_handle", "Blade Handle", Items.STICK);
     public static final Item IRON_ALLOY = registerStackableGlint("iron_alloy", "Iron Alloy", Items.IRON_BLOCK);
-    public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND);
-    public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK);
+    public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND, "Needs 160 diamonds to craft");
+    public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK, "Needs 80 enchanted diamonds to craft");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
             "Damage: 100", "Strength: 50", "Intelligence: 50",
             "Ability: Instant Healing  RIGHT CLICK",
@@ -116,7 +116,7 @@ public final class DatapackItems {
 
     private DatapackItems() {}
 
-    private static Item registerStackableGlint(String path, String name, Item fallback) {
+    private static Item registerStackableGlint(String path, String name, Item fallback, String... loreLines) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
         Item.Properties properties = new Item.Properties()
@@ -125,6 +125,12 @@ public final class DatapackItems {
                 .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(name, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        if (loreLines.length > 0) {
+            List<Component> lore = Arrays.stream(loreLines)
+                    .<Component>map(ItemFormatting::lore)
+                    .toList();
+            properties.component(DataComponents.LORE, new ItemLore(lore));
+        }
         Item item = new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, fallback);
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
