@@ -39,7 +39,8 @@ public final class DamageNumberHandler {
     public static void show(ServerLevel level, Entity target, float damage, boolean critical) {
         if (damage <= 0.0F) return;
 
-        ArmorStand display = EntityType.ARMOR_STAND.create(level, EntitySpawnReason.TRIGGERED);
+        ArmorStand display = (ArmorStand) EntityType.byString("minecraft:armor_stand")
+                .map(type -> type.create(level, EntitySpawnReason.TRIGGERED)).orElse(null);
         if (display == null) return;
 
         String amount = String.format(Locale.ROOT, "%,.0f", damage);
