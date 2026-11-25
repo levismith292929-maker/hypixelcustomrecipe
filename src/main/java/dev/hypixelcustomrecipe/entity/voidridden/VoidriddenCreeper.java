@@ -15,10 +15,6 @@ public final class VoidriddenCreeper extends Creeper {
         setHealth(getMaxHealth());
     }
 
-    @Override
-    public float getMaxHealth() {
-        return 100000.0F;
-    }
 
     public void explodeVoid() {
         if (!(level() instanceof ServerLevel serverLevel)) {
