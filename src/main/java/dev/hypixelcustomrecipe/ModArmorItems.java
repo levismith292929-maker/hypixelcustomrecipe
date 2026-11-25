@@ -88,7 +88,7 @@ public final class ModArmorItems {
         registerSet(new ArmorSet(
                 "old_dragon", "Old Dragon", 0xAA00AA, 11184810,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI0YzRkYTZhYjI3ZTljOTNmYmY0OWVhMWIxZmVmYWVmYmUyZDRjMGM4YjIyMmUyZmY2YjE4MTc5ZmI1YWRkZiJ9fX0=",
-                new Stats(1100,90,0,0), new Stats(1600,150,0,0), new Stats(1300,140,0,0), new Stats(800,90,0,0)
+                new Stats(900,110,0,0), new Stats(1500,160,0,0), new Stats(1300,140,0,0), new Stats(800,90,0,0)
         ));
         registerSet(new ArmorSet(
                 "protector_dragon", "Protector Dragon", 0xAA00AA, 10066329,
