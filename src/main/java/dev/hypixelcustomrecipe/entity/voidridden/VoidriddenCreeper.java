@@ -35,7 +35,7 @@ public final class VoidriddenCreeper extends Creeper {
                     || target.distanceToSqr(x, y, z) > radiusSquared) {
                 continue;
             }
-            target.hurtServer(serverLevel, serverLevel.damageSources().outOfWorld(), 300.0F);
+            target.hurtServer(serverLevel, serverLevel.damageSources().fellOutOfWorld(), 300.0F);
             VoidriddenEffects.applyVoid(target, 3);
         }
 
