@@ -7,7 +7,8 @@
     "LivingEntityMixin",
     "ServerPlayerMixin",
     "TextDisplayAccessor",
-    "VoidriddenEndermanTeleportMixin"
+    "VoidriddenEndermanTeleportMixin",
+    "VoidriddenCreeperMixin"
   ],
   "injectors": {
     "defaultRequire": 1
