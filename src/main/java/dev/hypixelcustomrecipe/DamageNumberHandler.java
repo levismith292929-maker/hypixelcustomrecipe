@@ -15,6 +15,7 @@ import java.util.Locale;
 
 public final class DamageNumberHandler {
     private static final List<FloatingNumber> ACTIVE = new ArrayList<>();
+    private static long nextOffset;
 
     private DamageNumberHandler() {
     }
@@ -25,13 +26,13 @@ public final class DamageNumberHandler {
             while (iterator.hasNext()) {
                 FloatingNumber number = iterator.next();
                 number.age++;
-                if (number.display.isRemoved() || number.age >= 20) {
+                if (number.display.isRemoved() || number.age >= 24) {
                     number.display.discard();
                     iterator.remove();
                     continue;
                 }
 
-                number.display.setPos(number.x, number.y + number.age * 0.025, number.z);
+                number.display.setPos(number.x, number.y + number.age * 0.035, number.z);
             }
         });
     }
@@ -44,11 +45,18 @@ public final class DamageNumberHandler {
 
         String amount = String.format(Locale.ROOT, "%,.0f", damage);
         Component text = Component.literal(amount).withStyle(style ->
-                style.withColor(critical ? 0xFFFF55 : 0xFFFFFF).withBold(critical));
+                style.withColor(critical ? 0xFFFF55 : 0xFFFFFF).withBold(true));
 
-        double x = target.getX();
-        double y = target.getY() + target.getBbHeight() * 0.65 + 0.25;
-        double z = target.getZ();
+        // Large bosses such as the Wither can hide name tags placed inside their model.
+        // Put their damage numbers above the hitbox so the numbers remain visible.
+        double height = target.getBbHeight();
+        double y = target.getY() + (height >= 2.5 ? height + 0.35 : height * 0.65 + 0.25);
+
+        // Spread consecutive hits slightly so rapid damage ticks do not occupy one spot.
+        double angle = (nextOffset++ % 8) * (Math.PI / 4.0);
+        double radius = height >= 2.5 ? 0.38 : 0.16;
+        double x = target.getX() + Math.cos(angle) * radius;
+        double z = target.getZ() + Math.sin(angle) * radius;
 
         display.setPos(x, y, z);
         display.setNoGravity(true);
