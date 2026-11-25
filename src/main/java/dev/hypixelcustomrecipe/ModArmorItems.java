@@ -86,17 +86,17 @@ public final class ModArmorItems {
 
         // Dragon armor — Holy Dragon is intentionally excluded, matching the existing armor lineup.
         registerSet(new ArmorSet(
-                "old_dragon", "Old Dragon", 0xAAAAAA, 11184810,
+                "old_dragon", "Old Dragon", 0xAA00AA, 11184810,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI0YzRkYTZhYjI3ZTljOTNmYmY0OWVhMWIxZmVmYWVmYmUyZDRjMGM4YjIyMmUyZmY2YjE4MTc5ZmI1YWRkZiJ9fX0=",
                 new Stats(507,110,0,0), new Stats(832,160,0,0), new Stats(728,140,0,0), new Stats(442,90,0,0)
         ));
         registerSet(new ArmorSet(
-                "protector_dragon", "Protector Dragon", 0x55FF55, 10066329,
+                "protector_dragon", "Protector Dragon", 0xAA00AA, 10066329,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWYxYTFjY2JiMDI0ZWQxZDI4NDcxYmM0YjNjMjhkMDkzMjc3MTYxYTM4NzFkMjY5OWQ2OGU1ZDJjMzg3OTY0In19fQ==",
                 new Stats(390,135,0,0), new Stats(663,185,0,0), new Stats(559,165,0,0), new Stats(338,115,0,0)
         ));
         registerSet(new ArmorSet(
-                "strong_dragon", "Strong Dragon", 0xFF5555, 11141290,
+                "strong_dragon", "Strong Dragon", 0xAA00AA, 11141290,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhiYzY1NTFiZWIyMTQ4ZDkzOWI2OTkyNTE0MGQyMzc5ZmUwZmFiNmU3ZDMxZjY1ZGY1MGI1OWU5Zjc3YTBlNCJ9fX0=",
                 new Stats(390,110,25,0), new Stats(663,160,25,0), new Stats(559,140,25,0), new Stats(338,90,25,0)
         ));
@@ -116,7 +116,7 @@ public final class ModArmorItems {
                 new Stats(390,110,0,125), new Stats(663,160,0,75), new Stats(559,140,0,75), new Stats(338,90,0,75)
         ));
         registerSet(new ArmorSet(
-                "young_dragon", "Young Dragon", 0x55FFFF, 5635925,
+                "young_dragon", "Young Dragon", 0xAA00AA, 5635925,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBlODFlZDA3ZGZiMDI0NGQ1NmY0ZDVmMmIzNzU1M2VjMDI2ZmI0Nzk2ZjBmYjBjNTdhOGViMjY0OTgzZTFlMCJ9fX0=",
                 new Stats(390,110,0,0), new Stats(663,160,0,0), new Stats(559,140,0,0), new Stats(338,90,0,0)
         ));
@@ -235,24 +235,24 @@ public final class ModArmorItems {
             String displayName = set.displayName + " " + slotName + (stars == 0 ? "" : " " + "★".repeat(stars));
             Stats scaled = baseStats.scale(stars);
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.literal("Health: " + Integer.toString((int) Math.round(scaled.health / 10.0))).withStyle(ChatFormatting.RED));
-            lore.add(Component.literal("Defense: " + scaled.defense).withStyle(ChatFormatting.GREEN));
+            lore.add(ItemFormatting.lore("Health: " + Integer.toString((int) Math.round(scaled.health / 10.0))));
+            lore.add(ItemFormatting.lore("Defense: " + scaled.defense));
             if (scaled.strength != 0) {
-                lore.add(Component.literal("Strength: " + scaled.strength).withStyle(ChatFormatting.RED));
+                lore.add(ItemFormatting.lore("Strength: " + scaled.strength));
             }
             if (scaled.intelligence != 0) {
-                lore.add(Component.literal("Intelligence: " + scaled.intelligence).withStyle(ChatFormatting.AQUA));
+                lore.add(ItemFormatting.lore("Intelligence: " + scaled.intelligence));
             }
             if (scaled.critChance != 0) {
-                lore.add(Component.literal("Crit Chance: " + scaled.critChance + "%").withStyle(ChatFormatting.BLUE));
+                lore.add(ItemFormatting.lore("Crit Chance: " + scaled.critChance + "%"));
             }
             if (scaled.critDamage != 0) {
-                lore.add(Component.literal("Crit Damage: " + scaled.critDamage + "%").withStyle(ChatFormatting.BLUE));
+                lore.add(ItemFormatting.lore("Crit Damage: " + scaled.critDamage + "%"));
             }
             if (set.necronBonus) {
-                lore.add(Component.literal("Full Set Bonus: Necron's Guards").withStyle(ChatFormatting.GOLD));
-                lore.add(Component.literal("When hit, summons two armored wither skeletons.").withStyle(ChatFormatting.GRAY));
-                lore.add(Component.literal("Cooldown: 30 seconds").withStyle(ChatFormatting.BLUE));
+                lore.add(ItemFormatting.lore("Full Set Bonus: Necron's Guards"));
+                lore.add(ItemFormatting.lore("When hit, summons two armored wither skeletons."));
+                lore.add(ItemFormatting.lore("Cooldown: 30 seconds"));
             }
 
             ResourceKey<Item> key = ResourceKey.create(
@@ -271,7 +271,7 @@ public final class ModArmorItems {
             }
             properties.component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
                     .component(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, new LinkedHashSet<>(Set.of(DataComponents.UNBREAKABLE))))
-                    .component(DataComponents.CUSTOM_NAME, Component.literal(displayName).withColor(set.nameColor))
+                    .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(displayName, set.nameColor))
                     .component(DataComponents.LORE, new ItemLore(lore));
             if (type != ArmorType.HELMET) {
                 properties.component(DataComponents.DYED_COLOR, new DyedItemColor(dye));
