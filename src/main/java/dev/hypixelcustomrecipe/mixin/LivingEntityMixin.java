@@ -44,7 +44,7 @@ public abstract class LivingEntityMixin {
             float amount,
             CallbackInfoReturnable<Boolean> cir
     ) {
-        if (hypixelcustomrecipe$reapplyingDamage.get() || amount <= 0.0F) return;
+        if (hypixelcustomrecipe$reapplyingDamage.get()) return;
 
         LivingEntity target = (LivingEntity) (Object) this;
         hypixelcustomrecipe$healthBeforeHit = target.getHealth();
