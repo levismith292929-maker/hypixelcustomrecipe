@@ -131,7 +131,7 @@ public final class ModArmorItems {
     }
 
     public static int getCriticalChance(net.minecraft.world.entity.player.Player player) {
-        int chance = 5;
+        int chance = SkyblockPlayerState.get(player).level();
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = player.getItemBySlot(slot);
             Stats stats = getStats(stack);
