@@ -23,6 +23,9 @@ import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.server.level.ServerLevel;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 
 public final class VoidriddenMobs {
     public static final EntityType<VoidriddenZombie> VOIDRIDDEN_ZOMBIE = register(
@@ -78,6 +81,19 @@ public final class VoidriddenMobs {
         FabricDefaultAttributeRegistry.register(
                 VOIDRIDDEN_CREEPER, Creeper.createAttributes().add(Attributes.MAX_HEALTH, 100000.0)
         );
+
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
+            EntityType<?> type = entity.getType();
+            if (type == VOIDRIDDEN_ZOMBIE || type == VOIDRIDDEN_SKELETON
+                    || type == VOIDRIDDEN_ENDERMAN || type == VOIDRIDDEN_SPIDER
+                    || type == VOIDRIDDEN_CREEPER) {
+                if (entity.level() instanceof ServerLevel level) {
+                    ItemEntity fragment = new ItemEntity(level, entity.getX(), entity.getY() + 0.5,
+                            entity.getZ(), new ItemStack(ModItems.VOID_FRAGMENT));
+                    level.addFreshEntity(fragment);
+                }
+            }
+        });
 
         // Existing mobs restored from world saves are deliberately not rerolled.
         ServerEntityEvents.ALLOW_LOAD.register(VoidriddenMobs::replaceVanillaMob);
