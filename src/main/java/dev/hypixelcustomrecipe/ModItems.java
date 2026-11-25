@@ -137,13 +137,11 @@ public final class ModItems {
                                 .withBold(true)
                                 .withUnderlined(true)
                                 .withItalic(false))
-                        : Component.literal(displayName))
+                        : ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
         if (description != null) {
             itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(
-                    Component.literal(description).withStyle(style -> style
-                            .withColor(net.minecraft.ChatFormatting.GRAY)
-                            .withItalic(false)))));
+                    ItemFormatting.lore(description))));
         }
         Item item = new SimplePolymerItem(itemProperties, Items.PLAYER_HEAD) {
             @Override
@@ -171,12 +169,12 @@ public final class ModItems {
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
-                .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
+                .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         if (loreLines.length > 0) {
             ItemLore lore = new ItemLore(java.util.Arrays.stream(loreLines)
-                    .<Component>map(Component::literal).toList());
+                    .<Component>map(ItemFormatting::lore).toList());
             properties.component(DataComponents.LORE, lore);
         }
         Item item = new SimplePolymerItem(properties, vanillaFallback);
