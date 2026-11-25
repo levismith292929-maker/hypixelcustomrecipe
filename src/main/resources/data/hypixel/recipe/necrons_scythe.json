@@ -3,16 +3,19 @@
   "show_notification": true,
   "category": "equipment",
   "pattern": [
-    "dd",
-    " b",
-    " b"
+    "fnf",
+    "nhn",
+    "fnf"
   ],
   "key": {
-    "d": [
-      "minecraft:netherite_scrap"
+    "f": [
+      "hypixel:superior_dragon_fragment"
     ],
-    "b": [
-      "minecraft:breeze_rod"
+    "n": [
+      "hypixel:necron_core"
+    ],
+    "h": [
+      "minecraft:netherite_hoe"
     ]
   },
   "result": {
