@@ -82,7 +82,7 @@ public final class ModItems {
             "Ability: Instant Transmission  RIGHT CLICK",
             "Teleports you 5 blocks in the direction you are facing.",
             "Mana Cost: 15",
-            "Cooldown: 5 ticks");
+            "Cooldown: 2 ticks");
 
     private ModItems() {
     }
