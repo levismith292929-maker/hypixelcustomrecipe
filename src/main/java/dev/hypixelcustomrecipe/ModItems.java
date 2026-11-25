@@ -60,6 +60,12 @@ public final class ModItems {
             "6f89b150be9c4c5249f355f68ea0c4391300a9be1f260d750fc35a1817ad796e"
     );
 
+    public static final Item VOID_FRAGMENT = registerTexturedHeadFromValue(
+            "void_fragment", "Void Fragment",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIwMWFlMWE4YTA0ZGY1MjY1NmY1ZTQ4MTNlMWZiY2Y5Nzg3N2RiYmZiYzQyNjhkMDQzMTZkNmY5Zjc1MyJ9fX0=", 64,
+            "Dropped by Voidridden enemies."
+    );
+
     public static final Item NECRON_CORE = registerNecronCore();
 
     // Star-upgrade materials. Each shard is used for its matching anvil upgrade.
