@@ -82,6 +82,8 @@ public final class DatapackItems {
             "Damage: 140", "Strength: 115");
     public static final Item BLADE_HANDLE = register("blade_handle", "Blade Handle", Items.STICK);
     public static final Item IRON_ALLOY = registerStackableGlint("iron_alloy", "Iron Alloy", Items.IRON_BLOCK);
+    public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND);
+    public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK);
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
             "Damage: 100", "Strength: 50", "Intelligence: 50",
             "Ability: Instant Healing  RIGHT CLICK",
