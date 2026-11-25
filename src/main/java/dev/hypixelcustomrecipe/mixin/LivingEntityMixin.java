@@ -1,5 +1,6 @@
 package dev.hypixelcustomrecipe.mixin;
 
+import dev.hypixelcustomrecipe.DamageNumberHandler;
 import dev.hypixelcustomrecipe.ModArmorItems;
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
@@ -26,11 +27,12 @@ public abstract class LivingEntityMixin {
     @Unique
     private boolean hypixelcustomrecipe$trackingPlayerDamage;
 
-    /**
-     * Replaces vanilla sword/axe damage with the migrated weapon stats and
-     * applies the SkyBlock critical-hit formula. Player damage is measured
-     * after vanilla mitigation in the RETURN injection below.
-     */
+    @Unique
+    private boolean hypixelcustomrecipe$trackingDamageNumber;
+
+    @Unique
+    private boolean hypixelcustomrecipe$criticalHit;
+
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
     private void hypixelcustomrecipe$applySkyblockAttack(
             ServerLevel level,
@@ -41,12 +43,14 @@ public abstract class LivingEntityMixin {
         if (hypixelcustomrecipe$reapplyingDamage.get() || amount <= 0.0F) return;
 
         LivingEntity target = (LivingEntity) (Object) this;
-        float adjusted = amount;
+        hypixelcustomrecipe$healthBeforeHit = target.getHealth();
+        hypixelcustomrecipe$trackingPlayerDamage = target instanceof ServerPlayer;
+        hypixelcustomrecipe$trackingDamageNumber =
+                source.getEntity() instanceof ServerPlayer attacker && attacker != target
+                        && !(target instanceof ServerPlayer);
+        hypixelcustomrecipe$criticalHit = false;
 
-        if (target instanceof ServerPlayer defender) {
-            hypixelcustomrecipe$healthBeforeHit = defender.getHealth();
-            hypixelcustomrecipe$trackingPlayerDamage = true;
-        }
+        float adjusted = amount;
 
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target
                 && source.getDirectEntity() == attacker) {
@@ -62,12 +66,13 @@ public abstract class LivingEntityMixin {
             int chance = Math.min(100, attackStats.critChance());
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
                 adjusted *= (float) attackStats.criticalMultiplier();
+                hypixelcustomrecipe$criticalHit = true;
                 level.sendParticles(
                         dev.hypixelcustomrecipe.ModParticles.CRIT,
                         target.getX(),
                         target.getY() + target.getBbHeight() * 0.5,
                         target.getZ(),
-                        8, 0.22, 0.22, 0.22, 0.015
+                        14, 0.38, 0.38, 0.38, 0.22
                 );
             }
         }
@@ -82,11 +87,6 @@ public abstract class LivingEntityMixin {
         }
     }
 
-    /**
-     * The datapack keeps vanilla health as a reserve and uses a custom Health
-     * pool. Measure actual health lost after vanilla mitigation, restore the
-     * reserve, and apply Defense to the custom pool.
-     */
     @Inject(method = "hurtServer", at = @At("RETURN"))
     private void hypixelcustomrecipe$applyCustomHealth(
             ServerLevel level,
@@ -94,13 +94,23 @@ public abstract class LivingEntityMixin {
             float amount,
             CallbackInfoReturnable<Boolean> cir
     ) {
+        if (hypixelcustomrecipe$reapplyingDamage.get()) return;
+
         LivingEntity target = (LivingEntity) (Object) this;
         if (!cir.getReturnValue()) {
             hypixelcustomrecipe$trackingPlayerDamage = false;
+            hypixelcustomrecipe$trackingDamageNumber = false;
             return;
         }
 
-        // A successful player attack against an entity counts as combat too.
+        if (hypixelcustomrecipe$trackingDamageNumber) {
+            hypixelcustomrecipe$trackingDamageNumber = false;
+            float dealt = Math.max(0.0F, hypixelcustomrecipe$healthBeforeHit - target.getHealth());
+            if (dealt > 0.0F) {
+                DamageNumberHandler.show(level, target, dealt, hypixelcustomrecipe$criticalHit);
+            }
+        }
+
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
             SkyblockPlayerState.get(attacker).markCombat();
         }
@@ -113,11 +123,8 @@ public abstract class LivingEntityMixin {
         float actualDamage = Math.max(0.0F, hypixelcustomrecipe$healthBeforeHit - defender.getHealth());
         if (actualDamage <= 0.0F) return;
 
-        // Necron's Guards is an automatic full-set bonus; it has no mana cost.
         dev.hypixelcustomrecipe.NecronGuardHandler.onPlayerHit(defender);
 
-        // Environmental damage (falling, cactus, fire, etc.) does not start
-        // the combat regeneration delay; only damage caused by an entity does.
         if (source.getEntity() != null) {
             SkyblockPlayerState.get(defender).markCombat();
         }
