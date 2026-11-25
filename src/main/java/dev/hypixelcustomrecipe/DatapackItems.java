@@ -11,7 +11,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
@@ -105,11 +104,9 @@ public final class DatapackItems {
                                  Integer color, String... loreLines) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
-        MutableComponent displayName = Component.literal(name);
-        displayName = displayName.withStyle(style -> style.withColor(color != null
-                ? net.minecraft.network.chat.TextColor.fromRgb(color)
-                : net.minecraft.network.chat.TextColor.fromLegacyFormat(ItemFormatting.rarityColor(path)))
-                .withItalic(false));
+        Component displayName = color != null
+                ? ItemFormatting.name(name, color)
+                : ItemFormatting.name(name, ItemFormatting.rarityColor(path));
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
