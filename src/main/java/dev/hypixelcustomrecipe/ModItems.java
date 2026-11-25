@@ -171,7 +171,9 @@ public final class ModItems {
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
-                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+                .component(DataComponents.ATTRIBUTE_MODIFIERS,
+                        vanillaFallback.getDefaultInstance().getOrDefault(
+                                DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY));
         if (loreLines.length > 0) {
             ItemLore lore = new ItemLore(java.util.Arrays.stream(loreLines)
                     .<Component>map(ItemFormatting::lore).toList());
