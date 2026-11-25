@@ -86,7 +86,7 @@ public final class VoidTrailManager {
             double along = Math.max(0.0, Math.min(1.0, fromStart.dot(line) / lengthSquared));
             Vec3 closestPoint = trail.start.add(line.scale(along));
             if (player.position().distanceToSqr(closestPoint) <= 1.0) {
-                player.hurtServer(level, level.damageSources().outOfWorld(), 50.0F);
+                player.hurtServer(level, level.damageSources().fellOutOfWorld(), 50.0F);
             }
         }
     }
