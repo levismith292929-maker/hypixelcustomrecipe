@@ -513,12 +513,21 @@ public final class SkyblockPlayerState {
 
         if (++hudUpdateTicks >= 1) {
             hudUpdateTicks = 0;
-            String hud = String.format(java.util.Locale.ROOT,
-                    "Health: %d/%d | Defense: %d | Level: %d (%d/%d XP)",
-                    (int) Math.round(currentHealth / 10.0), (int) Math.round(maximumHealth / 10.0), stats.defense(),
-                    skyblockLevel, levelExperience, levelExperienceRequired())
-                    + abilityCooldownHud(player);
-            player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
+            Component hud = Component.literal("Health: ")
+                    .withStyle(ChatFormatting.RED)
+                    .append(Component.literal(String.format(java.util.Locale.ROOT, "%d/%d",
+                            (int) Math.round(currentHealth / 10.0),
+                            (int) Math.round(maximumHealth / 10.0)))
+                            .withStyle(ChatFormatting.RED))
+                    .append(Component.literal(" | ").withStyle(ChatFormatting.WHITE))
+                    .append(Component.literal("Defense: ").withStyle(ChatFormatting.GREEN))
+                    .append(Component.literal(Integer.toString(stats.defense()))
+                            .withStyle(ChatFormatting.GREEN))
+                    .append(Component.literal(String.format(java.util.Locale.ROOT,
+                            " | Level: %d (%d/%d XP)", skyblockLevel, levelExperience,
+                            levelExperienceRequired())).withStyle(ChatFormatting.WHITE))
+                    .append(Component.literal(abilityCooldownHud(player)).withStyle(ChatFormatting.WHITE));
+            player.connection.send(new ClientboundSetActionBarTextPacket(hud));
         }
     }
 }
