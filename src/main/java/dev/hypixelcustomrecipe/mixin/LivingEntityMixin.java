@@ -104,6 +104,16 @@ public abstract class LivingEntityMixin {
             return;
         }
 
+        // Apply the custom Void status after successful Voidridden attacks.
+        if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenZombie) {
+            dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 10);
+        } else if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSkeleton
+                && source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow) {
+            dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 5);
+        } else if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenCreeper) {
+            dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 3);
+        }
+
         if (hypixelcustomrecipe$trackingDamageNumber) {
             hypixelcustomrecipe$trackingDamageNumber = false;
             float dealt = hypixelcustomrecipe$damageNumberAmount;
