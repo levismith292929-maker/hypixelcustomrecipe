@@ -43,13 +43,13 @@ public final class VoidTrailManager {
         Iterator<Trail> iterator = trails.iterator();
         while (iterator.hasNext()) {
             Trail trail = iterator.next();
-            if (now % 4L == 0L) {
-                Entity owner = level.getEntity(trail.ownerId);
+            Entity owner = level.getEntity(trail.ownerId);
             if (owner instanceof net.minecraft.world.entity.LivingEntity living && !living.isAlive()) {
                 iterator.remove();
                 continue;
             }
-            spawnTrailParticles(level, trail);
+            if (now % 4L == 0L) {
+                spawnTrailParticles(level, trail);
             }
             if (now % 20L == 0L) {
                 damageNearbyPlayers(level, trail);
