@@ -45,7 +45,7 @@ public final class DatapackItems {
     public static final Item AOTD = register("aotd", "Aspect of the Dragon", Items.NETHERITE_SWORD,
             "Ability: Dragon Rage  RIGHT CLICK",
             "Breathe fire 5 blocks in the direction you look.",
-            "Each mob is hit once for 18 base damage, increased by Strength and Intelligence.",
+            "Each mob is hit once for 350 base ability damage, increased by Strength and Intelligence.",
             "Mana Cost: 80",
             "Cooldown: 12 ticks");
     public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, 0xFF55FF,
@@ -56,10 +56,13 @@ public final class DatapackItems {
             "Cooldown: 10 seconds");
     public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, 0xFFAA00,
             "Ability: Implosion  RIGHT CLICK",
-            "Deal 60 base ability damage to every target within 5 blocks.",
+            "Deal 800 base ability damage to every target within 5 blocks.",
             "Damage scales with Strength and Intelligence.",
             "Mana Cost: 150",
             "Cooldown: 5 seconds");
+    public static final Item VOIDSPLIT_KATANA = register("voidsplit_katana", "Voidsplit Katana", Items.NETHERITE_SWORD,
+            "A blade forged using the power of the Void.",
+            "Crafted with 8 Void Fragments and an Aspect of the Void.");
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
             "Ability: Wither Impact  RIGHT CLICK",
             "Slash forward with a sweeping strike, damaging nearby enemies.",
