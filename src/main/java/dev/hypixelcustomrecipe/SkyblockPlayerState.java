@@ -93,11 +93,17 @@ public final class SkyblockPlayerState {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) get(player).tick(player);
         });
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+            // A respawn must start with a clean effect list and a restored custom
+            // Health pool. Otherwise a copied Void effect can leave the new
+            // player permanently blinded/damaged, while the depleted SkyBlock
+            // Health pool prevents further interaction or deaths.
+            newPlayer.removeAllEffects();
             newPlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
             newPlayer.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
             newPlayer.setHealth(1024.0F);
             SkyblockPlayerState state = PLAYERS.get(oldPlayer.getUUID());
             if (state != null) {
+                state.resetAfterRespawn(newPlayer);
                 state.removePetDisplay();
                 state.manaBossBar.removePlayer(oldPlayer);
                 state.manaBossBar.addPlayer(newPlayer);
@@ -117,6 +123,17 @@ public final class SkyblockPlayerState {
             });
             PLAYERS.clear();
         });
+    }
+
+    private void resetAfterRespawn(ServerPlayer player) {
+        if (maximumHealth <= 0) {
+            maximumHealth = SkyblockStats.BASE.health();
+        }
+        currentHealth = maximumHealth;
+        healthInitialized = true;
+        combatTicksRemaining = 0;
+        healthRegenerationProgress = 0.0;
+        player.setHealth(1024.0F);
     }
 
     public static SkyblockPlayerState get(Player player) {
