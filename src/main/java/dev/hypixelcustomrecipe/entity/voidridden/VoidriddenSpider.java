@@ -14,11 +14,13 @@ public final class VoidriddenSpider extends Spider implements PolymerEntity {
     public VoidriddenSpider(EntityType<? extends Spider> type, Level level) {
         super(type, level);
 
+
+        setHealth(getMaxHealth());
+    }
+
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityTypes.SPIDER;
-    }
-        setHealth(getMaxHealth());
     }
 
 
