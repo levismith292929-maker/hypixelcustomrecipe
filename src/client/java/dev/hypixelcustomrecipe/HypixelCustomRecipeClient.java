@@ -7,5 +7,6 @@ public final class HypixelCustomRecipeClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Damage numbers are rendered by vanilla text display entities.
         VoidriddenMobRenderers.initialize();
+        VoidEffectOverlay.initialize();
     }
 }
