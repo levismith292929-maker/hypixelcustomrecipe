@@ -85,7 +85,7 @@ public final class DatapackItems {
             "Mana Cost: 100",
             "Cooldown: 30 seconds");
     public static final Item STAT_VIEWER = register("stat_viewer", "View Stats", Items.NETHER_STAR,
-            "Right-click to view your current SkyBlock stats.");
+            "Click in your inventory to view your stats, including your held weapon.");
 
     public static final Item PET_ENDERMAN = registerProfileHead("pet_enderman", "Enderman", "MHF_Enderman", null,
             "Ability: Summon Pet", "Max Mana: 1000", "Mana Regeneration: 50/sec", "Damage: -20%");
