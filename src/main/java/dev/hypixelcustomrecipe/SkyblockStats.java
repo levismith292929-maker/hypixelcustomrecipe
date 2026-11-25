@@ -90,10 +90,18 @@ public record SkyblockStats(
     }
 
     public SkyblockStats withWeaponStats(double damage, int strength) {
+        return withWeaponStats(damage, strength, 0, 0, 0);
+    }
+
+    public SkyblockStats withWeaponStats(double damage, int strength,
+                                         int weaponCritChance, int weaponCritDamage,
+                                         int weaponIntelligence) {
         return new SkyblockStats(
                 health, defense, this.strength, armorStrength, Math.max(0, strength),
-                critChance, critDamage, intelligence, manaMaximum, manaRegeneration,
-                Math.max(0.0, damage)
+                critChance + Math.max(0, weaponCritChance),
+                critDamage + Math.max(0, weaponCritDamage),
+                intelligence + Math.max(0, weaponIntelligence),
+                manaMaximum, manaRegeneration, Math.max(0.0, damage)
         );
     }
 
