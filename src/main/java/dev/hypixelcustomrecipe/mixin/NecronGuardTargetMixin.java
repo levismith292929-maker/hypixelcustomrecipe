@@ -17,7 +17,9 @@ public abstract class NecronGuardTargetMixin {
             CallbackInfoReturnable<Boolean> cir
     ) {
         Mob mob = (Mob) (Object) this;
-        if (NecronGuardHandler.isGuardOwner(mob, target)) {
+        if (NecronGuardHandler.isNecronGuard(mob)
+                && (NecronGuardHandler.isNecronGuard(target)
+                || NecronGuardHandler.isGuardOwner(mob, target))) {
             cir.setReturnValue(false);
         }
     }
