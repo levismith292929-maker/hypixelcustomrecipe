@@ -157,6 +157,12 @@ public final class DatapackItems {
                 .component(DataComponents.CUSTOM_NAME, displayName)
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, fallbackAttributeModifiers(fallback));
+        // Explicitly point the client at this mod's item definition so Polymer
+        // sends the custom weapon model instead of only the vanilla fallback.
+        if (isTexturedWeapon(path)) {
+            properties.component(DataComponents.ITEM_MODEL,
+                    Identifier.fromNamespaceAndPath(NAMESPACE, path));
+        }
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
                     .<Component>map(ItemFormatting::lore)
@@ -167,6 +173,14 @@ public final class DatapackItems {
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
+
+    private static boolean isTexturedWeapon(String path) {
+        return switch (path) {
+            case "aotv", "aotd", "astraea", "hyperion", "voidsplit_katana",
+                    "livid_dagger", "dark_claymore", "halberd_of_the_shredded" -> true;
+            default -> false;
+        };
+    }
 
     private static ItemAttributeModifiers fallbackAttributeModifiers(Item fallback) {
         // Never inspect fallback.components() during item registration: the component

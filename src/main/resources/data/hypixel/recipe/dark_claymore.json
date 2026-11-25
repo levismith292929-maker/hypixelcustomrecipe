@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "ene",
+    "lhl",
+    "ene"
+  ],
+  "key": {
+    "e": ["hypixel:enchanted_diamond_block"],
+    "n": ["minecraft:netherite_ingot"],
+    "l": ["hypixel:livid_dagger"],
+    "h": ["hypixel:blade_handle"]
+  },
+  "result": {
+    "id": "hypixel:dark_claymore",
+    "count": 1
+  }
+}
