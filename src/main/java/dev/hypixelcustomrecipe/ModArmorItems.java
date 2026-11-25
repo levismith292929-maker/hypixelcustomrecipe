@@ -88,44 +88,44 @@ public final class ModArmorItems {
         registerSet(new ArmorSet(
                 "old_dragon", "Old Dragon", 0xAA00AA, 11184810,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI0YzRkYTZhYjI3ZTljOTNmYmY0OWVhMWIxZmVmYWVmYmUyZDRjMGM4YjIyMmUyZmY2YjE4MTc5ZmI1YWRkZiJ9fX0=",
-                new Stats(507,110,0,0), new Stats(832,160,0,0), new Stats(728,140,0,0), new Stats(442,90,0,0)
+                new Stats(1100,90,0,0), new Stats(1600,150,0,0), new Stats(1300,140,0,0), new Stats(800,90,0,0)
         ));
         registerSet(new ArmorSet(
                 "protector_dragon", "Protector Dragon", 0xAA00AA, 10066329,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWYxYTFjY2JiMDI0ZWQxZDI4NDcxYmM0YjNjMjhkMDkzMjc3MTYxYTM4NzFkMjY5OWQ2OGU1ZDJjMzg3OTY0In19fQ==",
-                new Stats(390,135,0,0), new Stats(663,185,0,0), new Stats(559,165,0,0), new Stats(338,115,0,0)
+                new Stats(700,135,0,0), new Stats(1200,185,0,0), new Stats(1000,165,0,0), new Stats(600,115,0,0)
         ));
         registerSet(new ArmorSet(
                 "strong_dragon", "Strong Dragon", 0xAA00AA, 11141290,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhiYzY1NTFiZWIyMTQ4ZDkzOWI2OTkyNTE0MGQyMzc5ZmUwZmFiNmU3ZDMxZjY1ZGY1MGI1OWU5Zjc3YTBlNCJ9fX0=",
-                new Stats(390,110,25,0), new Stats(663,160,25,0), new Stats(559,140,25,0), new Stats(338,90,25,0)
+                new Stats(700,110,25,0), new Stats(1200,160,25,0), new Stats(1000,140,25,0), new Stats(600,90,25,0)
         ));
         registerSet(new ArmorSet(
                 "superior_dragon", "Superior Dragon", 0xFFAA00, 16766720,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWUwMzI5ZjQyMTkyZWU3YzFhMGM3MDRmODJkYmJiZTdjMDBmYmZhM2YwMjBjMTA2N2EyMDg2MzBiOTkxYjk4OCJ9fX0=",
-                new Stats(507,130,10,25,2,3), new Stats(832,190,10,25,2,3), new Stats(728,170,10,25,2,3), new Stats(442,110,10,25,2,3)
+                new Stats(900,130,10,25,2,10), new Stats(1500,190,10,25,2,10), new Stats(1300,170,10,25,2,10), new Stats(800,110,10,25,2,10)
         ));
         registerSet(new ArmorSet(
                 "unstable_dragon", "Unstable Dragon", 0xAA00AA, 5570634,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjA1ZmM0ZTJiNjhjNDUwNTlhZmVmMzk5OWU5YTk1YWEzZDg5NDM1OTdhNzg5NGU1NjkzOTdkNmNmNWQxNjcyYSJ9fX0=",
-                new Stats(390,110,0,25,1,4), new Stats(663,160,0,0,1,4), new Stats(559,140,0,0,1,4), new Stats(338,90,0,0,1,4)
+                new Stats(700,110,0,25,5,15), new Stats(1200,160,0,0,5,15), new Stats(1000,140,0,0,5,15), new Stats(600,90,0,0,5,15)
         ));
         registerSet(new ArmorSet(
                 "wise_dragon", "Wise Dragon", 0xAA00AA, 5636095,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTc5N2M3N2NjZWUzYzA0YzNkZWVkNzcwNTk1ZWE4M2VhMWU4NGM5YTQ2MjliNzUzYWY1ZDM1MWMwY2MxMWE3NCJ9fX0=",
-                new Stats(390,110,0,125), new Stats(663,160,0,75), new Stats(559,140,0,75), new Stats(338,90,0,75)
+                new Stats(700,110,0,125), new Stats(1200,160,0,75), new Stats(1000,140,0,75), new Stats(600,90,0,75)
         ));
         registerSet(new ArmorSet(
                 "young_dragon", "Young Dragon", 0xAA00AA, 5635925,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBlODFlZDA3ZGZiMDI0NGQ1NmY0ZDVmMmIzNzU1M2VjMDI2ZmI0Nzk2ZjBmYjBjNTdhOGViMjY0OTgzZTFlMCJ9fX0=",
-                new Stats(390,110,0,0), new Stats(663,160,0,0), new Stats(559,140,0,0), new Stats(338,90,0,0)
+                new Stats(700,110,0,0), new Stats(1200,160,0,0), new Stats(1000,140,0,0), new Stats(600,90,0,0)
         ));
 
         // Necron armor keeps its custom player-head helmet and its per-piece leather dye colours.
         registerSet(new ArmorSet(
                 "necron", "Necron's", 0xFFD000, 15155516,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmJiYjJmYTdhNmNhMDg3MjgwZWEwY2I1NjRiNDFlZjFhZTQwNGExOWY3YTgxMjhkM2QyOGM1MTlhODVlMDYzZiJ9fX0=",
-                new Stats(500,150,38,90,15,80), new Stats(650,200,38,90,15,90), new Stats(550,175,38,90,15,85), new Stats(350,125,38,90,15,75),
+                new Stats(1800,100,40,30,0,30), new Stats(2600,140,40,10,0,30), new Stats(2300,125,40,10,0,30), new Stats(1450,85,40,10,0,30),
                 new int[]{15155516,15162428,15162428,15167036}, true
         ));
     }
