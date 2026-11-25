@@ -20,7 +20,7 @@ public final class VoidTrailManager {
     }
 
     public static void initialize() {
-        ServerTickEvents.END_WORLD_TICK.register(VoidTrailManager::tick);
+        ServerTickEvents.END_LEVEL_TICK.register(VoidTrailManager::tick);
     }
 
     public static void add(ServerLevel level, Vec3 start, Vec3 end) {
