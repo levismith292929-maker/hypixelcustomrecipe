@@ -8,7 +8,10 @@
   "contact": {"sources": "https://github.com/levismith292929-maker/hypixelcustomrecipe"},
   "license": "MIT",
   "environment": "*",
-  "entrypoints": {"main": ["dev.hypixelcustomrecipe.HypixelCustomRecipe"]},
+  "entrypoints": {
+    "main": ["dev.hypixelcustomrecipe.HypixelCustomRecipe"],
+    "client": ["dev.hypixelcustomrecipe.HypixelCustomRecipeClient"]
+  },
   "mixins": ["hypixelcustomrecipe.mixins.json"],
   "depends": {
     "fabricloader": ">=0.19.3",
