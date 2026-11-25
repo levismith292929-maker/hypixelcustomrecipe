@@ -29,9 +29,7 @@ public final class CritParticle extends TextureSheetParticle {
     @Override
     public void tick() {
         super.tick();
-        if (!this.isRemoved()) {
-            this.setSpriteFromAge(this.sprites);
-        }
+        this.setSpriteFromAge(this.sprites);
     }
 
     @Override
