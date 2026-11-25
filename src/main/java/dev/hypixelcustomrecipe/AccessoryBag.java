@@ -10,7 +10,6 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
@@ -29,6 +28,22 @@ public final class AccessoryBag {
 
     public static boolean isAccessory(ItemStack stack) {
         return !stack.isEmpty() && stack.is(DatapackItems.ADMIN_RING);
+    }
+
+    public static SkyblockStats applyAdminRing(ServerPlayer player, SkyblockStats stats) {
+        if (!hasAdminRing(player)) return stats;
+        return new SkyblockStats(timesFive(stats.health()), timesFive(stats.defense()),
+                timesFive(stats.strength()), timesFive(stats.armorStrength()), timesFive(stats.weaponStrength()),
+                timesFive(stats.critChance()), timesFive(stats.critDamage()), timesFive(stats.intelligence()),
+                timesFive(stats.manaMaximum()), timesFive(stats.manaRegeneration()), stats.weaponDamage() * 5.0);
+    }
+
+    public static double damageBonusMultiplier(ServerPlayer player) {
+        return hasAdminRing(player) ? 2.0 : 1.0;
+    }
+
+    private static int timesFive(int value) {
+        return (int) Math.min(Integer.MAX_VALUE, (long) value * 5L);
     }
 
     public static boolean hasAdminRing(ServerPlayer player) {
