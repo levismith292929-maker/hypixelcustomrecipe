@@ -13,11 +13,13 @@ public final class VoidriddenSkeleton extends Skeleton implements PolymerEntity 
     public VoidriddenSkeleton(EntityType<? extends Skeleton> type, Level level) {
         super(type, level);
 
+
+        setHealth(getMaxHealth());
+    }
+
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityTypes.SKELETON;
-    }
-        setHealth(getMaxHealth());
     }
 
 
