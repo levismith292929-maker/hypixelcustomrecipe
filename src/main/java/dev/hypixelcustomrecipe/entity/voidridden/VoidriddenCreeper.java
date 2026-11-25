@@ -12,6 +12,12 @@ import net.minecraft.world.level.Level;
 public final class VoidriddenCreeper extends Creeper {
     public VoidriddenCreeper(EntityType<? extends Creeper> type, Level level) {
         super(type, level);
+        setHealth(getMaxHealth());
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return 100000.0F;
     }
 
     public void explodeVoid() {
