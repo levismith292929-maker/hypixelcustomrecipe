@@ -108,7 +108,7 @@ public abstract class LivingEntityMixin {
         if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenZombie) {
             dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 10);
         } else if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSkeleton
-                && source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow) {
+                && source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow) {
             dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 5);
         } else if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenCreeper) {
             dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 3);
