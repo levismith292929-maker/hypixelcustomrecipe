@@ -13,8 +13,6 @@ import net.minecraft.world.level.Level;
 public final class VoidriddenZombie extends Zombie implements PolymerEntity {
     public VoidriddenZombie(EntityType<? extends Zombie> type, Level level) {
         super(type, level);
-
-
         setHealth(getMaxHealth());
     }
 
