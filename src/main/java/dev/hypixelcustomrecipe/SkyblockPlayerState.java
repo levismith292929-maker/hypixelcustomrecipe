@@ -132,7 +132,7 @@ public final class SkyblockPlayerState {
     public int levelExperience() { return levelExperience; }
     public int levelExperienceRequired() { return requiredExperienceForLevel(skyblockLevel); }
 
-    /** Adds raw Minecraft XP points to the separate SkyBlock level progression. */
+    /** Adds gained Minecraft XP levels to the separate SkyBlock level progression. */
     public void addLevelExperience(ServerPlayer player, int amount) {
         if (amount <= 0) return;
         levelExperience = Math.addExact(levelExperience, amount);
@@ -226,7 +226,6 @@ public final class SkyblockPlayerState {
     }
 
     private int manaRegenerationFor(Pet pet) {
-        int intelligenceBonus = stats.manaRegeneration() - SkyblockStats.BASE.manaRegeneration();
         int levelScaledBase = SkyblockLevelBonuses.scaleGeneral(SkyblockStats.BASE.manaRegeneration(), skyblockLevel);
         int petRegeneration = SkyblockLevelBonuses.scaleGeneral(pet.manaRegeneration(), skyblockLevel);
         int intelligenceBonus = stats.manaRegeneration() - levelScaledBase;
