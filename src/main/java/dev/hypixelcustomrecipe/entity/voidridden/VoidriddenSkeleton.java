@@ -8,6 +8,12 @@ import net.minecraft.world.level.Level;
 public final class VoidriddenSkeleton extends Skeleton {
     public VoidriddenSkeleton(EntityType<? extends Skeleton> type, Level level) {
         super(type, level);
+        setHealth(getMaxHealth());
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return 100000.0F;
     }
 
     @Override
