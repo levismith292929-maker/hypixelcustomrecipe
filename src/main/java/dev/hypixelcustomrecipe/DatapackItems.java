@@ -106,7 +106,10 @@ public final class DatapackItems {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
         MutableComponent displayName = Component.literal(name);
-        if (color != null) displayName = displayName.withStyle(style -> style.withColor(net.minecraft.network.chat.TextColor.fromRgb(color)));
+        displayName = displayName.withStyle(style -> style.withColor(color != null
+                ? net.minecraft.network.chat.TextColor.fromRgb(color)
+                : net.minecraft.network.chat.TextColor.fromLegacyFormat(ItemFormatting.rarityColor(path)))
+                .withItalic(false));
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
@@ -115,7 +118,7 @@ public final class DatapackItems {
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
-                    .<Component>map(Component::literal)
+                    .<Component>map(ItemFormatting::lore)
                     .toList();
             properties.component(DataComponents.LORE, new ItemLore(lore));
         }
@@ -143,12 +146,12 @@ public final class DatapackItems {
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
-                .component(DataComponents.CUSTOM_NAME, Component.literal(name))
+                .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(name, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
                 .component(DataComponents.PROFILE, profile);
         if (loreLines.length > 0) {
-            List<Component> lore = Arrays.stream(loreLines).<Component>map(Component::literal).toList();
+            List<Component> lore = Arrays.stream(loreLines).<Component>map(ItemFormatting::lore).toList();
             properties.component(DataComponents.LORE, new ItemLore(lore));
         }
         Item item = new SimplePolymerItem(properties, Items.PLAYER_HEAD) {
