@@ -20,6 +20,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -120,9 +123,7 @@ public final class DatapackItems {
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, displayName)
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
-                .component(DataComponents.ATTRIBUTE_MODIFIERS,
-                        fallback.components().getOrDefault(
-                                DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY));
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, fallbackAttributeModifiers(fallback));
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
                     .<Component>map(ItemFormatting::lore)
@@ -133,6 +134,39 @@ public final class DatapackItems {
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
+
+    private static ItemAttributeModifiers fallbackAttributeModifiers(Item fallback) {
+        // Never inspect fallback.components() during item registration: the component
+        // registry is not bound yet at this point in startup.
+        if (fallback == Items.DIAMOND_SWORD) return swordAttributes(6.0, -2.4);
+        if (fallback == Items.NETHERITE_SWORD) return swordAttributes(7.0, -2.4);
+        if (fallback == Items.GOLDEN_SWORD) return swordAttributes(4.0, -2.4);
+        if (fallback == Items.NETHERITE_AXE) return swordAttributes(10.0, -3.1);
+        if (fallback == Items.DIAMOND_HOE) return swordAttributes(1.0, -3.0);
+        return ItemAttributeModifiers.EMPTY;
+    }
+
+    private static ItemAttributeModifiers swordAttributes(double attackDamage, double attackSpeed) {
+        return ItemAttributeModifiers.EMPTY
+                .withModifierAdded(
+                        Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(
+                                Identifier.fromNamespaceAndPath("minecraft", "base_attack_damage"),
+                                attackDamage,
+                                AttributeModifier.Operation.ADD_VALUE
+                        ),
+                        EquipmentSlotGroup.MAINHAND
+                )
+                .withModifierAdded(
+                        Attributes.ATTACK_SPEED,
+                        new AttributeModifier(
+                                Identifier.fromNamespaceAndPath("minecraft", "base_attack_speed"),
+                                attackSpeed,
+                                AttributeModifier.Operation.ADD_VALUE
+                        ),
+                        EquipmentSlotGroup.MAINHAND
+                );
+    }
 
     private static Item registerProfileHead(String path, String name, String profileName,
                                              String textureValue, String... loreLines) {
