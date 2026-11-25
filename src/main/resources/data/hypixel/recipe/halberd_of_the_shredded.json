@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "combat",
+  "pattern": [
+    "s a",
+    "aha",
+    "s a"
+  ],
+  "key": {
+    "s": [
+      "minecraft:netherite_scrap"
+    ],
+    "a": [
+      "minecraft:netherite_axe"
+    ],
+    "h": [
+      "hypixel:blade_handle"
+    ]
+  },
+  "result": {
+    "id": "hypixel:halberd_of_the_shredded",
+    "count": 1
+  }
+}
