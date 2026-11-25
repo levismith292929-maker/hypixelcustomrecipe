@@ -60,8 +60,16 @@ public final class DatapackItems {
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
             "Ability: Wither Impact  RIGHT CLICK",
             "Slash forward with a sweeping strike, damaging nearby enemies.",
-            "Mana Cost: 35",
-            "Cooldown: 15 ticks");
+            "Mana Cost: 150",
+            "Cooldown: 4 ticks");
+    public static final Item ATOMSPLIT_KATANA = register("atomsplit_katana", "Atomsplit Katana", Items.NETHERITE_SWORD,
+            "Damage: 152", "Strength: 50", "Crit Damage: 25%", "Intelligence: 150");
+    public static final Item LIVID_DAGGER = register("livid_dagger", "Livid Dagger", Items.DIAMOND_SWORD,
+            "Damage: 105", "Strength: 30", "Crit Chance: 50%", "Crit Damage: 25%");
+    public static final Item DARK_CLAYMORE = register("dark_claymore", "Dark Claymore", Items.NETHERITE_SWORD,
+            "Damage: 250", "Strength: 50", "Crit Damage: 50%");
+    public static final Item HALBERD_OF_THE_SHREDDED = register("halberd_of_the_shredded", "Halberd of the Shredded", Items.NETHERITE_AXE,
+            "Damage: 70", "Strength: 58");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
             "Ability: Instant Healing  RIGHT CLICK",
             "Instantly heals 1 heart.",
