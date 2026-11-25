@@ -16,10 +16,12 @@ public final class VoidballEntity extends DragonFireball implements PolymerEntit
     public VoidballEntity(EntityType<? extends DragonFireball> type, Level level) {
         super(type, level);
 
+
+    }
+
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityTypes.DRAGON_FIREBALL;
-    }
     }
 
     @Override
