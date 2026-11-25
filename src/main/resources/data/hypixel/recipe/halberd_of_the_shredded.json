@@ -3,9 +3,9 @@
   "show_notification": true,
   "category": "combat",
   "pattern": [
-    "s a",
+    "sas",
     "aha",
-    "s a"
+    "sas"
   ],
   "key": {
     "s": [
