@@ -20,7 +20,7 @@ public final class VoidriddenSpider extends Spider {
 
         for (Player player : serverLevel.getEntitiesOfClass(Player.class, getBoundingBox().inflate(2.0))) {
             if (player.isAlive()) {
-                player.hurtServer(serverLevel, serverLevel.damageSources().outOfWorld(), 10.0F);
+                player.hurtServer(serverLevel, serverLevel.damageSources().fellOutOfWorld(), 10.0F);
             }
         }
     }
