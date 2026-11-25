@@ -9,7 +9,8 @@
     "ServerPlayerMixin",
     "TextDisplayAccessor",
     "VoidriddenEndermanTeleportMixin",
-    "VoidriddenCreeperMixin"
+    "VoidriddenCreeperMixin",
+    "NecronGuardTargetMixin"
   ],
   "injectors": {
     "defaultRequire": 1
