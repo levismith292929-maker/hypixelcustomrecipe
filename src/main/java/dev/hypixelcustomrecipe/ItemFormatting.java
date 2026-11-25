@@ -48,7 +48,7 @@ public final class ItemFormatting {
                 case "Strength:", "Damage:" -> ChatFormatting.RED;
                 case "Intelligence:", "Mana Cost:", "Max Mana:", "Mana Regeneration:" -> ChatFormatting.AQUA;
                 case "Crit Chance:", "Crit Damage:", "Cooldown:" -> ChatFormatting.BLUE;
-                case "Ability:" -> ChatFormatting.GOLD;
+                case "Ability:", "Full Set Bonus:" -> ChatFormatting.GOLD;
                 default -> ChatFormatting.GRAY;
             };
             ChatFormatting valueColor = color == ChatFormatting.BLUE ? ChatFormatting.GRAY : color;
