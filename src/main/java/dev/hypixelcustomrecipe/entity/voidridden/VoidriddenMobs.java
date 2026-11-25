@@ -44,6 +44,11 @@ public final class VoidriddenMobs {
             "voidridden_creeper",
             EntityType.Builder.of(VoidriddenCreeper::new, MobCategory.MONSTER).sized(0.6F, 1.7F)
     );
+    public static final EntityType<VoidballEntity> VOIDBALL = register(
+            "voidball",
+            EntityType.Builder.of(VoidballEntity::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
+    );
 
     private VoidriddenMobs() {
     }
