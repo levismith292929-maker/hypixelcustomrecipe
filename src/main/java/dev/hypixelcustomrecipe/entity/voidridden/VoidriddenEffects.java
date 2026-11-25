@@ -45,7 +45,7 @@ public final class VoidriddenEffects {
         @Override
         public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
             // Out-of-world damage bypasses armor and ordinary damage reduction.
-            entity.hurtServer(level, level.damageSources().outOfWorld(), 25.0F);
+            entity.hurtServer(level, level.damageSources().fellOutOfWorld(), 25.0F);
             entity.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 40, 0, true, false, false));
             return true;
         }
