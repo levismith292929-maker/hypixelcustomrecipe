@@ -36,14 +36,23 @@ public final class NecronGuardHandler {
                 for (Map.Entry<UUID, UUID> entry : GUARD_OWNERS.entrySet()) {
                     if (!(level.getEntity(entry.getKey()) instanceof WitherSkeleton guard)) continue;
                     if (!(level.getEntity(entry.getValue()) instanceof ServerPlayer owner)) continue;
+                    LivingEntity currentTarget = guard.getTarget();
+                    if (isNecronGuard(currentTarget)) {
+                        guard.setTarget(null);
+                    }
                     LivingEntity attacker = owner.getLastHurtByMob();
                     if (attacker != null && attacker.isAlive() && attacker != owner
+                            && !isNecronGuard(attacker)
                             && attacker.level() == level && guard.canAttack(attacker)) {
                         guard.setTarget(attacker);
                     }
                 }
             }
         });
+    }
+
+    public static boolean isNecronGuard(LivingEntity entity) {
+        return entity != null && GUARD_OWNERS.containsKey(entity.getUUID());
     }
 
     public static boolean isGuardOwner(Mob guard, LivingEntity target) {
@@ -62,6 +71,7 @@ public final class NecronGuardHandler {
         ServerLevel level = (ServerLevel) owner.level();
         Player target = level.players().stream()
                 .filter(candidate -> candidate != owner
+                        && !isNecronGuard(candidate)
                         && !candidate.getGameProfile().name().equalsIgnoreCase("QWDad"))
                 .min(Comparator.comparingDouble(owner::distanceToSqr))
                 .orElse(null);
