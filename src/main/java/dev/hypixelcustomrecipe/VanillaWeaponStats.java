@@ -54,7 +54,11 @@ public final class VanillaWeaponStats {
         );
     }
 
-    public record WeaponStats(int damage, int strength) {
-        public static final WeaponStats NONE = new WeaponStats(0, 0);
+    public record WeaponStats(int damage, int strength, int critChance, int critDamage, int intelligence) {
+        public WeaponStats(int damage, int strength) {
+            this(damage, strength, 0, 0, 0);
+        }
+
+        public static final WeaponStats NONE = new WeaponStats(0, 0, 0, 0, 0);
     }
 }
