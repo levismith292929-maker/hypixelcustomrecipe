@@ -111,6 +111,10 @@ public final class ModItems {
         return registerTexturedHeadFromValue(path, displayName, textureValue, maxStackSize, null);
     }
 
+    private static boolean isStarShard(String path) {
+        return path.equals("star_shard1") || path.equals("star_shard2") || path.equals("star_shard3");
+    }
+
     private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue, int maxStackSize, String description) {
         ResourceKey<Item> key = ResourceKey.create(
                 Registries.ITEM,
@@ -127,10 +131,19 @@ public final class ModItems {
         Item.Properties itemProperties = new Item.Properties()
                 .setId(key)
                 .stacksTo(maxStackSize)
-                .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
+                .component(DataComponents.CUSTOM_NAME, isStarShard(path)
+                        ? Component.literal(displayName).withStyle(style -> style
+                                .withColor(net.minecraft.ChatFormatting.GOLD)
+                                .withBold(true)
+                                .withUnderlined(true)
+                                .withItalic(false))
+                        : Component.literal(displayName))
                 .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
         if (description != null) {
-            itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(Component.literal(description))));
+            itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(
+                    Component.literal(description).withStyle(style -> style
+                            .withColor(net.minecraft.ChatFormatting.GRAY)
+                            .withItalic(false)))));
         }
         Item item = new SimplePolymerItem(itemProperties, Items.PLAYER_HEAD) {
             @Override
