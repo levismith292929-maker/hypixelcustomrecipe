@@ -33,7 +33,10 @@ public final class VoidriddenZombie extends Zombie {
         double dx = target.getX() - getX();
         double dy = target.getEyeY() - getEyeY();
         double dz = target.getZ() - getZ();
-        voidball.shoot(dx, dy, dz, 1.35F, 0.0F);
+        double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (length > 1.0E-6) {
+            voidball.setDeltaMovement(dx / length * 1.35, dy / length * 1.35, dz / length * 1.35);
+        }
         serverLevel.addFreshEntity(voidball);
     }
 }
