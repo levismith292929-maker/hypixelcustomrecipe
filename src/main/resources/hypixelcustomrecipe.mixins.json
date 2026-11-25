@@ -1,6 +1,15 @@
 {
   "required": true,
   "package": "dev.hypixelcustomrecipe.mixin",
-  "mixins": ["AnvilMenuMixin", "DisplayAccessor", "LivingEntityMixin", "ServerPlayerMixin", "TextDisplayAccessor"],
-  "injectors": {"defaultRequire": 1}
+  "mixins": [
+    "AnvilMenuMixin",
+    "DisplayAccessor",
+    "LivingEntityMixin",
+    "ServerPlayerMixin",
+    "TextDisplayAccessor",
+    "VoidriddenEndermanTeleportMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
