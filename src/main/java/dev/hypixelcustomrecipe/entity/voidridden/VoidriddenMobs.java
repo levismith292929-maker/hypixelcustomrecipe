@@ -75,6 +75,7 @@ public final class VoidriddenMobs {
 
         // Existing mobs restored from world saves are deliberately not rerolled.
         ServerEntityEvents.ALLOW_LOAD.register(VoidriddenMobs::replaceVanillaMob);
+        VoidTrailManager.initialize();
         HypixelCustomRecipe.LOGGER.info("Registered the five Voidridden mob types.");
     }
 
