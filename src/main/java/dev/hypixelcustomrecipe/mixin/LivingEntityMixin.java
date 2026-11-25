@@ -37,6 +37,22 @@ public abstract class LivingEntityMixin {
     @Unique
     private float hypixelcustomrecipe$damageNumberAmount;
 
+    @Inject(method = "getMaxHealth", at = @At("RETURN"), cancellable = true)
+    private void hypixelcustomrecipe$useVoidriddenMaxHealth(
+            CallbackInfoReturnable<Float> cir
+    ) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        if (entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenZombie
+                || entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSkeleton
+                || entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenCreeper) {
+            cir.setReturnValue(100000.0F);
+        } else if (entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEnderman) {
+            cir.setReturnValue(200000.0F);
+        } else if (entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSpider) {
+            cir.setReturnValue(80000.0F);
+        }
+    }
+
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
     private void hypixelcustomrecipe$applySkyblockAttack(
             ServerLevel level,
