@@ -4,6 +4,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Entity;
+import java.util.UUID;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,12 +25,12 @@ public final class VoidTrailManager {
         ServerTickEvents.END_LEVEL_TICK.register(VoidTrailManager::tick);
     }
 
-    public static void add(ServerLevel level, Vec3 start, Vec3 end) {
+    public static void add(ServerLevel level, UUID ownerId, Vec3 start, Vec3 end) {
         if (start.distanceToSqr(end) < 1.0) {
             return;
         }
         TRAILS.computeIfAbsent(level, ignored -> new ArrayList<>())
-                .add(new Trail(start, end, level.getGameTime() + 100L));
+                .add(new Trail(ownerId, start, end));
     }
 
     private static void tick(ServerLevel level) {
@@ -41,13 +43,13 @@ public final class VoidTrailManager {
         Iterator<Trail> iterator = trails.iterator();
         while (iterator.hasNext()) {
             Trail trail = iterator.next();
-            if (now >= trail.expiresAt) {
+            if (now % 4L == 0L) {
+                Entity owner = level.getEntity(trail.ownerId);
+            if (owner instanceof net.minecraft.world.entity.LivingEntity living && !living.isAlive()) {
                 iterator.remove();
                 continue;
             }
-
-            if (now % 4L == 0L) {
-                spawnTrailParticles(level, trail);
+            spawnTrailParticles(level, trail);
             }
             if (now % 20L == 0L) {
                 damageNearbyPlayers(level, trail);
@@ -64,8 +66,8 @@ public final class VoidTrailManager {
         int count = Math.max(1, (int) Math.ceil(line.length() * 2.0));
         for (int i = 0; i <= count; i++) {
             Vec3 point = trail.start.add(line.scale(i / (double) count));
-            level.sendParticles(ParticleTypes.REVERSE_PORTAL, point.x, point.y, point.z,
-                    1, 0.08, 0.08, 0.08, 0.0);
+            level.sendParticles(ParticleTypes.REVERSE_PORTAL, true, false,
+                    point.x, point.y, point.z, 1, 0.08, 0.08, 0.08, 0.0);
         }
     }
 
@@ -91,6 +93,6 @@ public final class VoidTrailManager {
         }
     }
 
-    private record Trail(Vec3 start, Vec3 end, long expiresAt) {
+    private record Trail(UUID ownerId, Vec3 start, Vec3 end) {
     }
 }
