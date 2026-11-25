@@ -12,10 +12,6 @@ public final class VoidriddenZombie extends Zombie {
         setHealth(getMaxHealth());
     }
 
-    @Override
-    public float getMaxHealth() {
-        return 100000.0F;
-    }
 
     @Override
     public void tick() {
