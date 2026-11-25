@@ -260,7 +260,7 @@ public final class SkyblockAbilityHandler {
         }
     }
 
-    /** Necron's Scythe: seven close-range hit checks and a four-tick slash visual. */
+    /** Necron's Scythe: seven close-range hit checks and a five-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
         if (!beginAbility(player, "necrons_scythe", 35, 15)) return;
         ServerLevel level = (ServerLevel) player.level();
@@ -298,6 +298,8 @@ public final class SkyblockAbilityHandler {
             spawnSlashParticle(player, slash, first);
             spawnSlashParticle(player, slash, second);
         } else if (tick == 4) {
+            spawnSlashParticle(player, slash, 0.75);
+        } else if (tick == 5) {
             spawnSlashParticle(player, slash, 0.9);
         } else {
             ACTIVE_SLASHES.remove(player.getUUID());
