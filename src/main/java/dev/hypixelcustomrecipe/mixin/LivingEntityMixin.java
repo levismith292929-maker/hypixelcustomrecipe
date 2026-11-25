@@ -4,6 +4,7 @@ import dev.hypixelcustomrecipe.DamageNumberHandler;
 import dev.hypixelcustomrecipe.ModArmorItems;
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
+import dev.hypixelcustomrecipe.SkyblockLevelBonuses;
 import dev.hypixelcustomrecipe.VanillaWeaponStats;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
