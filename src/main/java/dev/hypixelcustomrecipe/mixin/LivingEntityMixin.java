@@ -4,7 +4,6 @@ import dev.hypixelcustomrecipe.ModArmorItems;
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
 import dev.hypixelcustomrecipe.VanillaWeaponStats;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -64,7 +63,7 @@ public abstract class LivingEntityMixin {
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
                 adjusted *= (float) attackStats.criticalMultiplier();
                 level.sendParticles(
-                        ParticleTypes.FLAME,
+                        dev.hypixelcustomrecipe.ModParticles.CRIT,
                         target.getX(),
                         target.getY() + target.getBbHeight() * 0.5,
                         target.getZ(),
