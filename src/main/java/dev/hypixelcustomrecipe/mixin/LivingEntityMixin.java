@@ -67,13 +67,6 @@ public abstract class LivingEntityMixin {
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
                 adjusted *= (float) attackStats.criticalMultiplier();
                 hypixelcustomrecipe$criticalHit = true;
-                level.sendParticles(
-                        dev.hypixelcustomrecipe.ModParticles.CRIT,
-                        target.getX(),
-                        target.getY() + target.getBbHeight() * 0.5,
-                        target.getZ(),
-                        14, 0.38, 0.38, 0.38, 0.22
-                );
             }
         }
 
