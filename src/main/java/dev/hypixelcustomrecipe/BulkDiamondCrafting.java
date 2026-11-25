@@ -40,20 +40,29 @@ public final class BulkDiamondCrafting {
                 || output == DatapackItems.ENCHANTED_DIAMOND_BLOCK;
     }
 
-    public static void consume(Container input, Item output) {
+    /**
+     * Vanilla's ResultSlot handling consumes one item from each ingredient
+     * stack after this HEAD injection runs. Remove only the additional amount
+     * here, allowing vanilla to consume the final item and run its normal
+     * crafting hooks and result handling.
+     */
+    public static void consumeExtra(Container input, Item output) {
         Item ingredient;
-        int amount;
+        int extraAmount;
+        int requiredAmount;
         if (output == DatapackItems.ENCHANTED_DIAMOND) {
             ingredient = Items.DIAMOND;
-            amount = 32;
+            requiredAmount = 32;
+            extraAmount = 31;
         } else if (output == DatapackItems.ENCHANTED_DIAMOND_BLOCK) {
             ingredient = DatapackItems.ENCHANTED_DIAMOND;
-            amount = 16;
+            requiredAmount = 16;
+            extraAmount = 15;
         } else {
             return;
         }
 
-        if (!matches(input, ingredient, amount)) {
+        if (!matches(input, ingredient, requiredAmount)) {
             return;
         }
 
@@ -61,7 +70,7 @@ public final class BulkDiamondCrafting {
         for (int slot = 0; slot < input.getContainerSize() && consumedSlots < REQUIRED_SLOTS; slot++) {
             ItemStack stack = input.getItem(slot);
             if (!stack.isEmpty() && stack.is(ingredient)) {
-                stack.shrink(amount);
+                stack.shrink(extraAmount);
                 input.setItem(slot, stack);
                 consumedSlots++;
             }

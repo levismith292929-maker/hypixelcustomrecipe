@@ -11,12 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ResultSlot.class)
 public abstract class ResultSlotMixin {
-    @Inject(method = "onTake", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onTake", at = @At("HEAD"))
     private void hypixelcustomrecipe$consumeBulkDiamondIngredients(Player player, ItemStack stack, CallbackInfo ci) {
         if (BulkDiamondCrafting.isBulkOutput(stack.getItem())) {
             var resultSlot = (ResultSlotAccessor) this;
-            BulkDiamondCrafting.consume(resultSlot.hypixelcustomrecipe$getCraftSlots(), stack.getItem());
-            ci.cancel();
+            BulkDiamondCrafting.consumeExtra(resultSlot.hypixelcustomrecipe$getCraftSlots(), stack.getItem());
         }
     }
 }
