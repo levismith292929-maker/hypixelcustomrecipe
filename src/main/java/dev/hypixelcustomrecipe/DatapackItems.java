@@ -120,7 +120,9 @@ public final class DatapackItems {
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, displayName)
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
-                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+                .component(DataComponents.ATTRIBUTE_MODIFIERS,
+                        fallback.getDefaultInstance().getOrDefault(
+                                DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY));
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
                     .<Component>map(ItemFormatting::lore)
