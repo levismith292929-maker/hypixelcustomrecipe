@@ -32,7 +32,8 @@ public final class NecronGuardHandler {
     private static void summonGuards(ServerPlayer owner) {
         ServerLevel level = (ServerLevel) owner.level();
         Player target = level.players().stream()
-                .filter(candidate -> !candidate.getGameProfile().name().equalsIgnoreCase("QWDad"))
+                .filter(candidate -> candidate != owner
+                        && !candidate.getGameProfile().name().equalsIgnoreCase("QWDad"))
                 .min(Comparator.comparingDouble(owner::distanceToSqr))
                 .orElse(null);
 
@@ -56,6 +57,7 @@ public final class NecronGuardHandler {
             guard.setPersistenceRequired();
             guard.setCanPickUpLoot(false);
             guard.addTag("hypixel_necron_guard");
+            guard.addTag("hypixel_necron_guard_owner_" + owner.getUUID());
             guard.setCustomName(net.minecraft.network.chat.Component.literal("Necron's Guard"));
 
             ItemStack helmet = enchantedNetherite(level, Items.NETHERITE_HELMET);
