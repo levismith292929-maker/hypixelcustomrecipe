@@ -9,6 +9,12 @@ import net.minecraft.world.level.Level;
 public final class VoidriddenSpider extends Spider {
     public VoidriddenSpider(EntityType<? extends Spider> type, Level level) {
         super(type, level);
+        setHealth(getMaxHealth());
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return 80000.0F;
     }
 
     @Override
