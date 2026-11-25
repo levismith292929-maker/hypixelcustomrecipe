@@ -7,16 +7,21 @@ public final class RecipeUnlocker {
     }
 
     public static void initialize() {
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+        // Wait until the player has fully joined and the server recipe manager is ready.
+        // Award the complete mod recipe set so it is available in the recipe book for autofill.
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> server.execute(() -> {
+            if (handler.player.isRemoved()) {
+                return;
+            }
+
             var recipes = server.getRecipeManager().getRecipes().stream()
                     .filter(recipe -> recipe.id().identifier().getNamespace().equals("hypixel")
-                            || (recipe.id().identifier().getNamespace().equals("hypixelrecipes")
-                            && recipe.id().identifier().getPath().contains("_dragon_")))
+                            || recipe.id().identifier().getNamespace().equals("hypixelrecipes"))
                     .toList();
 
             if (!recipes.isEmpty()) {
                 handler.player.awardRecipes(recipes);
             }
-        });
+        }));
     }
 }
