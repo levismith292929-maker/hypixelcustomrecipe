@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "show_notification": true,
+  "category": "misc",
+  "ingredients": [
+    "hypixel:enchanted_diamond",
+    "hypixel:enchanted_diamond",
+    "hypixel:enchanted_diamond",
+    "hypixel:enchanted_diamond",
+    "hypixel:enchanted_diamond"
+  ],
+  "result": {
+    "id": "hypixel:enchanted_diamond_block",
+    "count": 1
+  }
+}
