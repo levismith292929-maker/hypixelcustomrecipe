@@ -207,7 +207,7 @@ public final class SkyblockPlayerState {
     }
 
 
-    public void savePersistentData(ValueOutput output) {
+    public void savePersistentData(ServerPlayer player, ValueOutput output) {
         output.putInt("hypixel_health", currentHealth);
         output.putInt("hypixel_max_health", maximumHealth);
         output.putInt("hypixel_pet", activePet.ordinal());
@@ -452,9 +452,9 @@ public final class SkyblockPlayerState {
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
-        stats = SkyblockLevelBonuses.apply(
+        stats = AccessoryBag.applyAdminRing(player, SkyblockLevelBonuses.apply(
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
-                skyblockLevel);
+                skyblockLevel));
 
         int recalculatedMaximum = Math.max(1, stats.health());
         if (!healthInitialized) {
