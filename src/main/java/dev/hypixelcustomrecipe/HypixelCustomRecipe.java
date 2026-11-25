@@ -2,6 +2,7 @@ package dev.hypixelcustomrecipe;
 
 import dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects;
 import dev.hypixelcustomrecipe.entity.voidridden.VoidriddenMobs;
+import dev.hypixelcustomrecipe.entity.voidridden.VoidTrailManager;
 
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         DamageNumberHandler.initialize();
         VoidriddenEffects.initialize();
         VoidriddenMobs.initialize();
+        VoidTrailManager.initialize();
         LOGGER.info("Registered the migrated SkyBlock item, recipe, stat, and ability systems. Holy Dragon content is excluded.");
     }
 }
