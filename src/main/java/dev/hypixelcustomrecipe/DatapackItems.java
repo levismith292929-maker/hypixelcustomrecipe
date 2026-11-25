@@ -172,7 +172,10 @@ public final class DatapackItems {
                     .toList();
             properties.component(DataComponents.LORE, new ItemLore(lore));
         }
-        Item item = new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, fallback);
+        Item item = isTexturedWeapon(path)
+                ? new TexturedPolymerItem(properties, fallback,
+                        Identifier.fromNamespaceAndPath(NAMESPACE, path))
+                : new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, fallback);
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
