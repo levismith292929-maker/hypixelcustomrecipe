@@ -3,6 +3,8 @@
   "package": "dev.hypixelcustomrecipe.mixin",
   "mixins": [
     "AnvilMenuMixin",
+    "CraftingMenuMixin",
+    "ResultSlotMixin",
     "DisplayAccessor",
     "LivingEntityMixin",
     "PlayerExperienceMixin",
