@@ -1,15 +1,24 @@
 package dev.hypixelcustomrecipe.entity.voidridden;
 
+import eu.pb4.polymer.core.api.entity.PolymerEntity;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
+import net.minecraft.world.entity.EntityTypes;
+
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
-public final class VoidriddenEnderman extends EnderMan {
+public final class VoidriddenEnderman extends EnderMan implements PolymerEntity {
     private int extraTeleportCooldown = 40;
     public VoidriddenEnderman(EntityType<? extends EnderMan> type, Level level) {
         super(type, level);
+
+    @Override
+    public EntityType<?> getPolymerEntityType(PacketContext context) {
+        return EntityTypes.ENDERMAN;
+    }
         setHealth(getMaxHealth());
     }
 
