@@ -333,9 +333,14 @@ public final class SkyblockAbilityHandler {
 
 
     /** Displays the same core stat categories exposed by the datapack viewer. */
-    private static void showStats(ServerPlayer player) {
+    public static void showStats(ServerPlayer player) {
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
-        SkyblockStats stats = state.stats();
+        // Recalculate at click time so the currently held weapon is included,
+        // even when the Stat Viewer itself is clicked from another inventory slot.
+        SkyblockStats stats = SkyblockLevelBonuses.apply(
+                VanillaWeaponStats.applyHeldWeapon(
+                        ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
+                state.level());
         SkyblockManaState mana = state.mana();
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
         player.sendSystemMessage(Component.literal("SkyBlock Level: " + state.level()
