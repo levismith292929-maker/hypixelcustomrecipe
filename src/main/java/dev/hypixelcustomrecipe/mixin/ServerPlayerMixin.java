@@ -15,7 +15,7 @@ public abstract class ServerPlayerMixin {
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
     private void hypixelcustomrecipe$saveSkyblockState(ValueOutput output, CallbackInfo ci) {
         ServerPlayer player = (ServerPlayer) (Object) this;
-        SkyblockPlayerState.get(player).savePersistentData(output);
+        SkyblockPlayerState.get(player).savePersistentData(player, output);
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
