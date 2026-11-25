@@ -1,5 +1,6 @@
 package dev.hypixelcustomrecipe.mixin;
 
+import dev.hypixelcustomrecipe.AccessoryBag;
 import dev.hypixelcustomrecipe.DamageNumberHandler;
 import dev.hypixelcustomrecipe.ModArmorItems;
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
