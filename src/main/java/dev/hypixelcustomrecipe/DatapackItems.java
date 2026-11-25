@@ -80,6 +80,7 @@ public final class DatapackItems {
             "Damage: 500", "Strength: 100", "Crit Damage: 100%");
     public static final Item HALBERD_OF_THE_SHREDDED = register("halberd_of_the_shredded", "Halberd of the Shredded", Items.NETHERITE_AXE,
             "Damage: 140", "Strength: 115");
+    public static final Item BLADE_HANDLE = register("blade_handle", "Blade Handle", Items.STICK);
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
             "Damage: 100", "Strength: 50", "Intelligence: 50",
             "Ability: Instant Healing  RIGHT CLICK",
