@@ -186,7 +186,7 @@ public final class SkyblockAbilityHandler {
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player)
                         && entity.distanceToSqr(player) <= 25.0)) {
-            target.hurtServer(level, source, (float) abilityDamage(player, target, baseDamage));
+            target.hurtServer(level, source, (float) scytheAbilityDamage(player, target, baseDamage));
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
                 1, 0.0, 0.0, 0.0, 0.0);
@@ -262,7 +262,7 @@ public final class SkyblockAbilityHandler {
 
     /** Necron's Scythe: seven close-range hit checks and a five-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
-        if (!beginAbility(player, "necrons_scythe", 35, 4)) return;
+        if (!beginAbility(player, "necrons_scythe", 150, 4)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
@@ -380,6 +380,17 @@ public final class SkyblockAbilityHandler {
         String type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
         return entity != caster && !type.equals("enderman")
                 && !type.equals("armor_stand") && entity.isAlive();
+    }
+
+    /** Necron's Scythe loses 3% damage for each digit in the target's maximum health. */
+    private static double scytheAbilityDamage(ServerPlayer player, LivingEntity target, double baseDamage) {
+        double damage = abilityDamage(player, target, baseDamage);
+        double maxHealth = target.getMaxHealth();
+        int digits = maxHealth >= 1.0
+                ? (int) Math.floor(Math.log10(maxHealth)) + 1
+                : 1;
+        double reduction = Math.min(1.0, digits * 0.03);
+        return damage * (1.0 - reduction);
     }
 
     private static double abilityDamage(ServerPlayer player, LivingEntity target, double baseDamage) {
