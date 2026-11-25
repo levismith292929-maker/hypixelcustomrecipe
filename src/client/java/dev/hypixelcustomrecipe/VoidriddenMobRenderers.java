@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.entity.EndermanRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.SkeletonRenderer;
 import net.minecraft.client.renderer.entity.SpiderRenderer;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.client.renderer.entity.state.EndermanRenderState;
@@ -43,6 +44,7 @@ public final class VoidriddenMobRenderers {
                 return texture("spider");
             }
         });
+        EntityRenderers.register(VoidriddenMobs.VOIDBALL, ThrownItemRenderer::new);
         EntityRenderers.register(VoidriddenMobs.VOIDRIDDEN_CREEPER, context -> new CreeperRenderer(context) {
             @Override
             public Identifier getTextureLocation(CreeperRenderState state) {
