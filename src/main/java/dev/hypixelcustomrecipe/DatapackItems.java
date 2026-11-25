@@ -94,6 +94,8 @@ public final class DatapackItems {
             "Cooldown: 30 seconds");
     public static final Item STAT_VIEWER = register("stat_viewer", "View Stats", Items.NETHER_STAR,
             "Click in your inventory to view your stats, including your held weapon.");
+    public static final Item ADMIN_RING = registerProfileHead("admin_ring", "Admin Ring", null,
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzQwZTdjMDE2YTgzYzdjNTgwNmI4ZWZmMGZhMTJmMjczYzAzNmExOGU1MDY2YmRlZDI4MGZhNmJlZGU3Y2M5ZCJ9fX0=", "Accessory", "+100% Damage", "All Stats: x5");
 
     public static final Item PET_ENDERMAN = registerProfileHead("pet_enderman", "Enderman", "MHF_Enderman", null,
             "Ability: Summon Pet", "Max Mana: 1000", "Mana Regeneration: 50/sec", "Damage: -20%");
