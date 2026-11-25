@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe;
 
-/** Applies permanent SkyBlock level bonuses to the combined equipment stats. */
+/** Applies permanent SkyBlock level bonuses to the combined equipment stats.
+ * All stat multipliers round upward to the next whole stat point. */
 public final class SkyblockLevelBonuses {
     private SkyblockLevelBonuses() {}
 
