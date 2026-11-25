@@ -268,7 +268,7 @@ public final class SkyblockAbilityHandler {
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
-        double baseDamage = 30.0;
+        double baseDamage = 90.0;
         double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
         for (double distance : scanDistances) {
