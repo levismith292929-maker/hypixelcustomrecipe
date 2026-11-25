@@ -181,12 +181,12 @@ public final class SkyblockAbilityHandler {
     private static void useHyperion(ServerPlayer player) {
         if (!beginAbility(player, "hyperion", 150, 100)) return;
         ServerLevel level = (ServerLevel) player.level();
-        double damage = abilityDamage(player, 60.0);
+        double baseDamage = 60.0;
         DamageSource source = level.damageSources().explosion(null, player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player)
                         && entity.distanceToSqr(player) <= 25.0)) {
-            target.hurtServer(level, source, (float) damage);
+            target.hurtServer(level, source, (float) abilityDamage(player, target, baseDamage));
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
                 1, 0.0, 0.0, 0.0, 0.0);
@@ -209,8 +209,8 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, "aotd", 80, 12)) return;
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(direction.scale(0.3)).add(0.0, -0.1, 0.0);
-        double damage = abilityDamage(player, 18.0);
-        ACTIVE_BREATHS.put(player.getUUID(), new BreathState(origin, direction, (float) damage));
+        double baseDamage = 18.0;
+        ACTIVE_BREATHS.put(player.getUUID(), new BreathState(origin, direction, baseDamage));
         playSound(player, net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.0F);
     }
 
@@ -239,7 +239,7 @@ public final class SkyblockAbilityHandler {
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
                 entity -> isValidTarget(entity, player))) {
             if (breath.hitTargets.add(target.getUUID())) {
-                target.hurtServer(level, source, breath.damage);
+                target.hurtServer(level, source, (float) abilityDamage(player, target, breath.baseDamage));
             }
         }
 
@@ -249,14 +249,14 @@ public final class SkyblockAbilityHandler {
     private static final class BreathState {
         private final Vec3 origin;
         private final Vec3 direction;
-        private final float damage;
+        private final double baseDamage;
         private final Set<UUID> hitTargets = new HashSet<>();
         private int step;
 
-        private BreathState(Vec3 origin, Vec3 direction, float damage) {
+        private BreathState(Vec3 origin, Vec3 direction, double baseDamage) {
             this.origin = origin;
             this.direction = direction;
-            this.damage = damage;
+            this.baseDamage = baseDamage;
         }
     }
 
@@ -268,7 +268,7 @@ public final class SkyblockAbilityHandler {
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
-        float damage = (float) abilityDamage(player, 10.0);
+        double baseDamage = 10.0;
         double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
         for (double distance : scanDistances) {
@@ -278,7 +278,7 @@ public final class SkyblockAbilityHandler {
                     entity -> isValidScytheTarget(entity, player)
                             && entity.distanceToSqr(center) <= 2.25)) {
                 if (hitTargets.add(target.getUUID())) {
-                    target.hurtServer(level, source, damage);
+                    target.hurtServer(level, source, (float) abilityDamage(player, target, baseDamage));
                 }
             }
         }
@@ -378,12 +378,24 @@ public final class SkyblockAbilityHandler {
                 && !type.equals("armor_stand") && entity.isAlive();
     }
 
-    private static double abilityDamage(ServerPlayer player, double baseDamage) {
+    private static double abilityDamage(ServerPlayer player, LivingEntity target, double baseDamage) {
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
         SkyblockStats stats = state.stats();
         double base = baseDamage + (stats.strength() + stats.armorStrength()) * 0.1
                 + stats.intelligence() * 0.2;
-        return Math.round(base * state.activePet().damageMultiplier());
+        double damage = Math.round(base * state.activePet().damageMultiplier());
+
+        int chance = Math.min(100, stats.critChance());
+        if (chance > 0 && player.getRandom().nextInt(100) < chance) {
+            damage *= stats.criticalMultiplier();
+            ServerLevel level = (ServerLevel) target.level();
+            level.sendParticles(ModParticles.CRIT,
+                    target.getX(),
+                    target.getY() + target.getBbHeight() * 0.5,
+                    target.getZ(),
+                    8, 0.22, 0.22, 0.22, 0.015);
+        }
+        return damage;
     }
 
     private static void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent sound,
