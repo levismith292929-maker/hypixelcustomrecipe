@@ -2,6 +2,7 @@ package dev.hypixelcustomrecipe.entity.voidridden;
 
 import dev.hypixelcustomrecipe.HypixelCustomRecipe;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -63,6 +64,12 @@ public final class VoidriddenMobs {
     }
 
     public static void initialize() {
+        // These entity types exist only on the server. Polymer sends vanilla mob
+        // representations to clients that do not have this mod installed.
+        PolymerEntityUtils.registerType(
+                VOIDRIDDEN_ZOMBIE, VOIDRIDDEN_SKELETON, VOIDRIDDEN_ENDERMAN,
+                VOIDRIDDEN_SPIDER, VOIDRIDDEN_CREEPER, VOIDBALL
+        );
         FabricDefaultAttributeRegistry.register(
                 VOIDRIDDEN_ZOMBIE, Zombie.createAttributes().add(Attributes.MAX_HEALTH, 100000.0)
         );
