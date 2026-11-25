@@ -125,7 +125,7 @@ public final class ModArmorItems {
         registerSet(new ArmorSet(
                 "necron", "Necron's", 0xFFD000, 15155516,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmJiYjJmYTdhNmNhMDg3MjgwZWEwY2I1NjRiNDFlZjFhZTQwNGExOWY3YTgxMjhkM2QyOGM1MTlhODVlMDYzZiJ9fX0=",
-                new Stats(500,150,15,80), new Stats(650,200,15,90), new Stats(550,175,15,85), new Stats(350,125,15,75),
+                new Stats(500,150,38,90,15,80), new Stats(650,200,38,90,15,90), new Stats(550,175,38,90,15,85), new Stats(350,125,38,90,15,75),
                 new int[]{15155516,15162428,15162428,15167036}, true
         ));
     }
