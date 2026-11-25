@@ -13,6 +13,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         ModItems.initialize();
         DatapackItems.initialize();
         ModArmorItems.initialize();
+        ModParticles.initialize();
         RecipeUnlocker.initialize();
         SkyblockPlayerState.initialize();
         SkyblockAbilityHandler.initialize();
