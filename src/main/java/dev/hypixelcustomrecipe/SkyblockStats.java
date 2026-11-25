@@ -22,7 +22,7 @@ public record SkyblockStats(
         double weaponDamage
 ) {
     public static final SkyblockStats BASE = new SkyblockStats(
-            1000, 0, 0, 0, 0, 5, 0, 0, 500, 40, 1.0
+            1000, 0, 0, 0, 0, 0, 0, 0, 500, 40, 1.0
     );
 
     public SkyblockStats {
