@@ -17,6 +17,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         SkyblockPlayerState.initialize();
         SkyblockAbilityHandler.initialize();
         DamageNumberHandler.initialize();
+        VoidriddenEffects.initialize();
         VoidriddenMobs.initialize();
         LOGGER.info("Registered the migrated SkyBlock item, recipe, stat, and ability systems. Holy Dragon content is excluded.");
     }
