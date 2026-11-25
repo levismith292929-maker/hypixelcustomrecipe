@@ -17,11 +17,13 @@ public final class VoidriddenCreeper extends Creeper implements PolymerEntity {
     public VoidriddenCreeper(EntityType<? extends Creeper> type, Level level) {
         super(type, level);
 
+
+        setHealth(getMaxHealth());
+    }
+
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityTypes.CREEPER;
-    }
-        setHealth(getMaxHealth());
     }
 
 
