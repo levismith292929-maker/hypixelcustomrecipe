@@ -15,11 +15,13 @@ public final class VoidriddenEnderman extends EnderMan implements PolymerEntity 
     public VoidriddenEnderman(EntityType<? extends EnderMan> type, Level level) {
         super(type, level);
 
+
+        setHealth(getMaxHealth());
+    }
+
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityTypes.ENDERMAN;
-    }
-        setHealth(getMaxHealth());
     }
 
     @Override
