@@ -141,7 +141,7 @@ public final class ModArmorItems {
     }
 
     public static int getCriticalDamage(net.minecraft.world.entity.player.Player player) {
-        int damage = 0;
+        int damage = SkyblockPlayerState.get(player).level() * 10;
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = player.getItemBySlot(slot);
             Stats stats = getStats(stack);
