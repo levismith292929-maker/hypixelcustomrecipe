@@ -20,9 +20,8 @@ public abstract class CraftingMenuMixin {
 
     @Inject(method = "slotsChanged", at = @At("HEAD"), cancellable = true)
     private void hypixelcustomrecipe$showBulkDiamondResult(Container container, CallbackInfo ci) {
-        ItemStack result = BulkDiamondCrafting.getResult(this.craftSlots);
-        if (!result.isEmpty()) {
-            this.resultSlots.setItem(0, result);
+        if (BulkDiamondCrafting.shouldHandle(this.craftSlots)) {
+            this.resultSlots.setItem(0, BulkDiamondCrafting.getResult(this.craftSlots));
             ci.cancel();
         }
     }
