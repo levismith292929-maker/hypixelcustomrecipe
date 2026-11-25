@@ -33,6 +33,9 @@ public abstract class LivingEntityMixin {
     @Unique
     private boolean hypixelcustomrecipe$criticalHit;
 
+    @Unique
+    private float hypixelcustomrecipe$damageNumberAmount;
+
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
     private void hypixelcustomrecipe$applySkyblockAttack(
             ServerLevel level,
@@ -49,6 +52,7 @@ public abstract class LivingEntityMixin {
                 source.getEntity() instanceof ServerPlayer attacker && attacker != target
                         && !(target instanceof ServerPlayer);
         hypixelcustomrecipe$criticalHit = false;
+        hypixelcustomrecipe$damageNumberAmount = amount;
 
         float adjusted = amount;
 
@@ -70,6 +74,9 @@ public abstract class LivingEntityMixin {
             }
         }
 
+        // Keep the full attack value for the floating number. The target's health
+        // loss can be much smaller simply because the mob has little health left.
+        hypixelcustomrecipe$damageNumberAmount = adjusted;
         if (Float.compare(adjusted, amount) == 0) return;
 
         hypixelcustomrecipe$reapplyingDamage.set(true);
@@ -93,12 +100,14 @@ public abstract class LivingEntityMixin {
         if (!cir.getReturnValue()) {
             hypixelcustomrecipe$trackingPlayerDamage = false;
             hypixelcustomrecipe$trackingDamageNumber = false;
+            hypixelcustomrecipe$damageNumberAmount = 0.0F;
             return;
         }
 
         if (hypixelcustomrecipe$trackingDamageNumber) {
             hypixelcustomrecipe$trackingDamageNumber = false;
-            float dealt = Math.max(0.0F, hypixelcustomrecipe$healthBeforeHit - target.getHealth());
+            float dealt = hypixelcustomrecipe$damageNumberAmount;
+            hypixelcustomrecipe$damageNumberAmount = 0.0F;
             if (dealt > 0.0F) {
                 DamageNumberHandler.show(level, target, dealt, hypixelcustomrecipe$criticalHit);
             }
