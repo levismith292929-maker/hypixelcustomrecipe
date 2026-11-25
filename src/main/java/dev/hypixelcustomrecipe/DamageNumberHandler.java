@@ -1,5 +1,7 @@
 package dev.hypixelcustomrecipe;
 
+import dev.hypixelcustomrecipe.mixin.DisplayAccessor;
+import dev.hypixelcustomrecipe.mixin.TextDisplayAccessor;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
