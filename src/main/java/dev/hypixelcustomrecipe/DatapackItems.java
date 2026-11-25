@@ -121,7 +121,7 @@ public final class DatapackItems {
                 .component(DataComponents.CUSTOM_NAME, displayName)
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
                 .component(DataComponents.ATTRIBUTE_MODIFIERS,
-                        fallback.getDefaultInstance().getOrDefault(
+                        fallback.components().getOrDefault(
                                 DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY));
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
