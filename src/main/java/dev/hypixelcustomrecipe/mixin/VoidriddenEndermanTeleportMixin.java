@@ -3,7 +3,7 @@ package dev.hypixelcustomrecipe.mixin;
 import dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEnderman;
 import dev.hypixelcustomrecipe.entity.voidridden.VoidTrailManager;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EnderMan.class)
+@Mixin(LivingEntity.class)
 public abstract class VoidriddenEndermanTeleportMixin {
     @Unique
     private double hypixelcustomrecipe$oldX;
@@ -20,9 +20,9 @@ public abstract class VoidriddenEndermanTeleportMixin {
     @Unique
     private double hypixelcustomrecipe$oldZ;
 
-    @Inject(method = "teleport(DDD)Z", at = @At("HEAD"))
+    @Inject(method = "randomTeleport(DDDZ)Z", at = @At("HEAD"))
     private void hypixelcustomrecipe$captureTeleportStart(
-            double x, double y, double z, CallbackInfoReturnable<Boolean> cir
+            double x, double y, double z, boolean showParticles, CallbackInfoReturnable<Boolean> cir
     ) {
         if ((Object) this instanceof VoidriddenEnderman enderman) {
             hypixelcustomrecipe$oldX = enderman.getX();
@@ -31,9 +31,9 @@ public abstract class VoidriddenEndermanTeleportMixin {
         }
     }
 
-    @Inject(method = "teleport(DDD)Z", at = @At("RETURN"))
+    @Inject(method = "randomTeleport(DDDZ)Z", at = @At("RETURN"))
     private void hypixelcustomrecipe$createVoidTrail(
-            double x, double y, double z, CallbackInfoReturnable<Boolean> cir
+            double x, double y, double z, boolean showParticles, CallbackInfoReturnable<Boolean> cir
     ) {
         if (!Boolean.TRUE.equals(cir.getReturnValue())
                 || !((Object) this instanceof VoidriddenEnderman enderman)
