@@ -12,10 +12,6 @@ public final class VoidriddenSpider extends Spider {
         setHealth(getMaxHealth());
     }
 
-    @Override
-    public float getMaxHealth() {
-        return 80000.0F;
-    }
 
     @Override
     public void tick() {
