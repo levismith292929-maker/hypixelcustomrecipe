@@ -98,11 +98,23 @@ public abstract class LivingEntityMixin {
         if (Float.compare(adjusted, amount) == 0) return;
 
         hypixelcustomrecipe$reapplyingDamage.set(true);
+        boolean successful;
         try {
-            cir.setReturnValue(target.hurtServer(level, source, adjusted));
+            successful = target.hurtServer(level, source, adjusted);
         } finally {
             hypixelcustomrecipe$reapplyingDamage.remove();
         }
+
+        // Cancelling hurtServer at HEAD skips its RETURN injection. Emit the
+        // floating number here for attacks whose custom damage differs from vanilla.
+        if (successful && hypixelcustomrecipe$trackingDamageNumber
+                && hypixelcustomrecipe$damageNumberAmount > 0.0F) {
+            DamageNumberHandler.show(level, target, hypixelcustomrecipe$damageNumberAmount,
+                    hypixelcustomrecipe$criticalHit);
+        }
+        hypixelcustomrecipe$trackingDamageNumber = false;
+        hypixelcustomrecipe$damageNumberAmount = 0.0F;
+        cir.setReturnValue(successful);
     }
 
     @Inject(method = "hurtServer", at = @At("RETURN"))
