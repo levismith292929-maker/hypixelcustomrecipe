@@ -37,24 +37,28 @@ public final class DatapackItems {
     private static final String NAMESPACE = "hypixel";
 
     public static final Item AOTV = register("aotv", "Aspect of the Void", Items.DIAMOND_SWORD,
+            "Damage: 120", "Strength: 100",
             "Ability: Instant Transmission  RIGHT CLICK",
             "Hold it in your main hand to see where you are aiming.",
             "Right-click to teleport onto that block (up to 64 blocks away).",
             "Mana Cost: 50",
             "Cooldown: 3 ticks");
     public static final Item AOTD = register("aotd", "Aspect of the Dragon", Items.NETHERITE_SWORD,
+            "Damage: 225", "Strength: 100",
             "Ability: Dragon Rage  RIGHT CLICK",
             "Breathe fire 5 blocks in the direction you look.",
             "Each mob is hit once for 350 base ability damage, increased by Strength and Intelligence.",
             "Mana Cost: 80",
             "Cooldown: 12 ticks");
     public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, 0xFF55FF,
+            "Damage: 270", "Strength: 150", "Defense: 250", "Intelligence: 50",
             "Ability: Wither Shield  RIGHT CLICK",
             "Gain Resistance II and Absorption IV for 10 seconds,",
             "with wither orbs spinning around you.",
             "Mana Cost: 40",
             "Cooldown: 10 seconds");
     public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, 0xFFAA00,
+            "Damage: 260", "Strength: 150", "Intelligence: 350",
             "Ability: Implosion  RIGHT CLICK",
             "Deal 800 base ability damage to every target within 5 blocks.",
             "Damage scales with Strength and Intelligence.",
@@ -69,14 +73,15 @@ public final class DatapackItems {
             "Mana Cost: 150",
             "Cooldown: 4 ticks");
     public static final Item ATOMSPLIT_KATANA = register("atomsplit_katana", "Atomsplit Katana", Items.NETHERITE_SWORD,
-            "Damage: 152", "Strength: 50", "Crit Damage: 25%", "Intelligence: 150");
+            "Damage: 305", "Strength: 100", "Crit Damage: 50%", "Intelligence: 300");
     public static final Item LIVID_DAGGER = register("livid_dagger", "Livid Dagger", Items.DIAMOND_SWORD,
-            "Damage: 105", "Strength: 30", "Crit Chance: 50%", "Crit Damage: 25%");
+            "Damage: 210", "Strength: 60", "Crit Chance: 100%", "Crit Damage: 50%");
     public static final Item DARK_CLAYMORE = register("dark_claymore", "Dark Claymore", Items.NETHERITE_SWORD,
-            "Damage: 250", "Strength: 50", "Crit Damage: 50%");
+            "Damage: 500", "Strength: 100", "Crit Damage: 100%");
     public static final Item HALBERD_OF_THE_SHREDDED = register("halberd_of_the_shredded", "Halberd of the Shredded", Items.NETHERITE_AXE,
-            "Damage: 70", "Strength: 58");
+            "Damage: 140", "Strength: 115");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
+            "Damage: 100", "Strength: 50", "Intelligence: 50",
             "Ability: Instant Healing  RIGHT CLICK",
             "Instantly heals 1 heart.",
             "Mana Cost: 50",
