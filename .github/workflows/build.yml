@@ -2,7 +2,7 @@ name: Build Fabric Mod
 
 on:
   push:
-    branches: [ "main", "merge-datapack-into-mod" ]
+    branches: [ "main", "merge-datapack-into-mod", "server-only-conversion" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
