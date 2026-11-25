@@ -186,7 +186,7 @@ public final class SkyblockAbilityHandler {
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player)
                         && entity.distanceToSqr(player) <= 25.0)) {
-            target.hurtServer(level, source, (float) scytheAbilityDamage(player, target, baseDamage));
+            target.hurtServer(level, source, (float) abilityDamage(player, target, baseDamage));
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 1.0, player.getZ(),
                 1, 0.0, 0.0, 0.0, 0.0);
@@ -278,7 +278,7 @@ public final class SkyblockAbilityHandler {
                     entity -> isValidScytheTarget(entity, player)
                             && entity.distanceToSqr(center) <= 2.25)) {
                 if (hitTargets.add(target.getUUID())) {
-                    target.hurtServer(level, source, (float) abilityDamage(player, target, baseDamage));
+                    target.hurtServer(level, source, (float) scytheAbilityDamage(player, target, baseDamage));
                 }
             }
         }
