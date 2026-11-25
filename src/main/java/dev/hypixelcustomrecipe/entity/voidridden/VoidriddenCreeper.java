@@ -1,5 +1,9 @@
 package dev.hypixelcustomrecipe.entity.voidridden;
 
+import eu.pb4.polymer.core.api.entity.PolymerEntity;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
+import net.minecraft.world.entity.EntityTypes;
+
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -9,9 +13,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Level;
 
-public final class VoidriddenCreeper extends Creeper {
+public final class VoidriddenCreeper extends Creeper implements PolymerEntity {
     public VoidriddenCreeper(EntityType<? extends Creeper> type, Level level) {
         super(type, level);
+
+    @Override
+    public EntityType<?> getPolymerEntityType(PacketContext context) {
+        return EntityTypes.CREEPER;
+    }
         setHealth(getMaxHealth());
     }
 
