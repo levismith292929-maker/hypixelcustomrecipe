@@ -23,16 +23,16 @@ public final class VanillaWeaponStats {
             Map.entry("golden_sword", new WeaponStats(10, 8)),
             Map.entry("diamond_sword", new WeaponStats(14, 8)),
             Map.entry("netherite_sword", new WeaponStats(17, 11)),
-            Map.entry("aote", new WeaponStats(14, 8)),
-            Map.entry("aotv", new WeaponStats(14, 8)),
-            Map.entry("aotd", new WeaponStats(17, 11)),
-            Map.entry("astraea", new WeaponStats(17, 11)),
-            Map.entry("hyperion", new WeaponStats(17, 11)),
-            Map.entry("zombie_sword", new WeaponStats(10, 8)),
-            Map.entry("atomsplit_katana", new WeaponStats(152, 50, 0, 25, 150)),
-            Map.entry("livid_dagger", new WeaponStats(105, 30, 50, 25, 0)),
-            Map.entry("dark_claymore", new WeaponStats(250, 50, 0, 50, 0)),
-            Map.entry("halberd_of_the_shredded", new WeaponStats(70, 58, 0, 0, 0)),
+            Map.entry("aote", new WeaponStats(100, 100)),
+            Map.entry("aotv", new WeaponStats(120, 100)),
+            Map.entry("aotd", new WeaponStats(225, 100)),
+            Map.entry("astraea", new WeaponStats(270, 150, 0, 0, 50, 250)),
+            Map.entry("hyperion", new WeaponStats(260, 150, 0, 0, 350)),
+            Map.entry("zombie_sword", new WeaponStats(100, 50, 0, 0, 50)),
+            Map.entry("atomsplit_katana", new WeaponStats(305, 100, 0, 50, 300)),
+            Map.entry("livid_dagger", new WeaponStats(210, 60, 100, 50, 0)),
+            Map.entry("dark_claymore", new WeaponStats(500, 100, 0, 100, 0)),
+            Map.entry("halberd_of_the_shredded", new WeaponStats(140, 115, 0, 0, 0)),
             Map.entry("wooden_axe", new WeaponStats(8, 0)),
             Map.entry("stone_axe", new WeaponStats(10, 1)),
             Map.entry("copper_axe", new WeaponStats(11, 2)),
@@ -75,15 +75,20 @@ public final class VanillaWeaponStats {
                 weapon.strength(),
                 weapon.critChance(),
                 weapon.critDamage(),
-                weapon.intelligence()
+                weapon.intelligence(),
+                weapon.defense()
         );
     }
 
-    public record WeaponStats(int damage, int strength, int critChance, int critDamage, int intelligence) {
-        public WeaponStats(int damage, int strength) {
-            this(damage, strength, 0, 0, 0);
+    public record WeaponStats(int damage, int strength, int critChance, int critDamage, int intelligence, int defense) {
+        public WeaponStats(int damage, int strength, int critChance, int critDamage, int intelligence) {
+            this(damage, strength, critChance, critDamage, intelligence, 0);
         }
 
-        public static final WeaponStats NONE = new WeaponStats(0, 0, 0, 0, 0);
+        public WeaponStats(int damage, int strength) {
+            this(damage, strength, 0, 0, 0, 0);
+        }
+
+        public static final WeaponStats NONE = new WeaponStats(0, 0, 0, 0, 0, 0);
     }
 }
