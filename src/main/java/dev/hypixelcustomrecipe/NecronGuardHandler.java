@@ -5,6 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -28,6 +29,22 @@ public final class NecronGuardHandler {
     private static final Map<UUID, UUID> GUARD_OWNERS = new ConcurrentHashMap<>();
 
     private NecronGuardHandler() {}
+
+    public static void initialize() {
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            for (ServerLevel level : server.getAllLevels()) {
+                for (Map.Entry<UUID, UUID> entry : GUARD_OWNERS.entrySet()) {
+                    if (!(level.getEntity(entry.getKey()) instanceof WitherSkeleton guard)) continue;
+                    if (!(level.getEntity(entry.getValue()) instanceof ServerPlayer owner)) continue;
+                    LivingEntity attacker = owner.getLastHurtByMob();
+                    if (attacker != null && attacker.isAlive() && attacker != owner
+                            && attacker.level() == level && guard.canAttack(attacker)) {
+                        guard.setTarget(attacker);
+                    }
+                }
+            }
+        });
+    }
 
     public static boolean isGuardOwner(Mob guard, LivingEntity target) {
         UUID owner = GUARD_OWNERS.get(guard.getUUID());
