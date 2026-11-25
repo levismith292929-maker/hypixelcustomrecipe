@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -18,9 +19,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraft.world.entity.monster.Spider;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
+import net.minecraft.world.entity.monster.spider.Spider;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.server.level.ServerLevel;
 
 public final class VoidriddenMobs {
@@ -95,15 +96,15 @@ public final class VoidriddenMobs {
         EntitySpawnReason spawnReason = reason == null ? EntitySpawnReason.MOB_SUMMONED : reason;
 
         // Exact type comparisons intentionally exclude Zombie Villagers.
-        if (originalType == EntityType.ZOMBIE) {
+        if (originalType == EntityTypes.ZOMBIE) {
             replacement = VOIDRIDDEN_ZOMBIE.create(level, spawnReason);
-        } else if (originalType == EntityType.SKELETON) {
+        } else if (originalType == EntityTypes.SKELETON) {
             replacement = VOIDRIDDEN_SKELETON.create(level, spawnReason);
-        } else if (originalType == EntityType.ENDERMAN) {
+        } else if (originalType == EntityTypes.ENDERMAN) {
             replacement = VOIDRIDDEN_ENDERMAN.create(level, spawnReason);
-        } else if (originalType == EntityType.SPIDER) {
+        } else if (originalType == EntityTypes.SPIDER) {
             replacement = VOIDRIDDEN_SPIDER.create(level, spawnReason);
-        } else if (originalType == EntityType.CREEPER) {
+        } else if (originalType == EntityTypes.CREEPER) {
             replacement = VOIDRIDDEN_CREEPER.create(level, spawnReason);
         }
 
@@ -111,7 +112,7 @@ public final class VoidriddenMobs {
             return true;
         }
 
-        replacement.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
+        replacement.snapTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
         replacement.setDeltaMovement(entity.getDeltaMovement());
         replacement.setCustomName(entity.getCustomName());
         replacement.setCustomNameVisible(entity.isCustomNameVisible());
