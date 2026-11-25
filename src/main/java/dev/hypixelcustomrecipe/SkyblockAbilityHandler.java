@@ -3,6 +3,9 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -41,6 +44,11 @@ public final class SkyblockAbilityHandler {
     }
 
     public static void initialize() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+                dispatcher.register(Commands.literal("accessorybag").executes(context -> {
+                    AccessoryBag.open(context.getSource().getPlayerOrException());
+                    return 1;
+                })));
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 BreathState breath = ACTIVE_BREATHS.get(player.getUUID());
@@ -337,10 +345,10 @@ public final class SkyblockAbilityHandler {
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
         // Recalculate at click time so the currently held weapon is included,
         // even when the Stat Viewer itself is clicked from another inventory slot.
-        SkyblockStats stats = SkyblockLevelBonuses.apply(
+        SkyblockStats stats = AccessoryBag.applyAdminRing(player, SkyblockLevelBonuses.apply(
                 VanillaWeaponStats.applyHeldWeapon(
                         ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
-                state.level());
+                state.level()));
         SkyblockManaState mana = state.mana();
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
         player.sendSystemMessage(Component.literal("SkyBlock Level: " + state.level()
@@ -354,6 +362,10 @@ public final class SkyblockAbilityHandler {
         player.sendSystemMessage(Component.literal("Mana Regeneration: " + mana.regenerationPerSecond() + " / second"));
         player.sendSystemMessage(Component.literal("Defense: " + stats.defense()));
         player.sendSystemMessage(Component.literal("Intelligence: " + stats.intelligence()));
+        player.sendSystemMessage(Component.literal("Click here to open Accessory Bag")
+                .withStyle(style -> style.withColor(0x55FFFF)
+                        .withUnderlined(true)
+                        .withClickEvent(ClickEvent.runCommand("/accessorybag"))));
     }
 
     /** Searches the current dimension for the nearest diamond ore or ancient debris. */
