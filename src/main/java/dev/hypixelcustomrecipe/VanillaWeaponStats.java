@@ -2,7 +2,11 @@ package dev.hypixelcustomrecipe;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.util.Map;
 
@@ -19,6 +23,12 @@ public final class VanillaWeaponStats {
             Map.entry("golden_sword", new WeaponStats(10, 8)),
             Map.entry("diamond_sword", new WeaponStats(14, 8)),
             Map.entry("netherite_sword", new WeaponStats(17, 11)),
+            Map.entry("aote", new WeaponStats(14, 8)),
+            Map.entry("aotv", new WeaponStats(14, 8)),
+            Map.entry("aotd", new WeaponStats(17, 11)),
+            Map.entry("astraea", new WeaponStats(17, 11)),
+            Map.entry("hyperion", new WeaponStats(17, 11)),
+            Map.entry("zombie_sword", new WeaponStats(10, 8)),
             Map.entry("atomsplit_katana", new WeaponStats(152, 50, 0, 25, 150)),
             Map.entry("livid_dagger", new WeaponStats(105, 30, 50, 25, 0)),
             Map.entry("dark_claymore", new WeaponStats(250, 50, 0, 50, 0)),
@@ -31,6 +41,21 @@ public final class VanillaWeaponStats {
             Map.entry("diamond_axe", new WeaponStats(17, 4)),
             Map.entry("netherite_axe", new WeaponStats(19, 6))
     );
+
+    /*
+     * A tiny server-side hit-registration value. LivingEntityMixin replaces it
+     * with the calculated SkyBlock damage before health is reduced.
+     */
+    public static final ItemAttributeModifiers MELEE_HIT_PLACEHOLDER =
+            ItemAttributeModifiers.builder().add(
+                    Attributes.ATTACK_DAMAGE,
+                    new AttributeModifier(
+                            Identifier.fromNamespaceAndPath("hypixelcustomrecipe", "melee_hit_placeholder"),
+                            0.01,
+                            AttributeModifier.Operation.ADD_VALUE
+                    ),
+                    EquipmentSlotGroup.MAINHAND
+            ).build();
 
     private VanillaWeaponStats() {
     }
