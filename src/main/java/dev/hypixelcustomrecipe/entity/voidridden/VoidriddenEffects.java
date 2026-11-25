@@ -1,6 +1,8 @@
 package dev.hypixelcustomrecipe.entity.voidridden;
 
 import dev.hypixelcustomrecipe.HypixelCustomRecipe;
+import eu.pb4.polymer.core.api.other.PolymerMobEffect;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,9 +34,15 @@ public final class VoidriddenEffects {
         }
     }
 
-    private static final class VoidEffect extends MobEffect {
+    private static final class VoidEffect extends MobEffect implements PolymerMobEffect {
         private VoidEffect() {
             super(MobEffectCategory.HARMFUL, 0x080808);
+        }
+
+        @Override
+        public MobEffect getPolymerReplacement(MobEffect effect, PacketContext context) {
+            // Vanilla clients display the custom Void debuff as Darkness.
+            return MobEffects.DARKNESS.value();
         }
 
         @Override
