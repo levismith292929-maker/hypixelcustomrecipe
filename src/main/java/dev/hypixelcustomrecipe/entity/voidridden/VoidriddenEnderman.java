@@ -10,8 +10,4 @@ public final class VoidriddenEnderman extends EnderMan {
         setHealth(getMaxHealth());
     }
 
-    @Override
-    public float getMaxHealth() {
-        return 200000.0F;
-    }
 }
