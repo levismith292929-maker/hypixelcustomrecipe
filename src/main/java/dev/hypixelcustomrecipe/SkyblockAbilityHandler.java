@@ -353,7 +353,7 @@ public final class SkyblockAbilityHandler {
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
         player.sendSystemMessage(Component.literal("SkyBlock Level: " + state.level()
                 + " (" + state.levelExperience() + "/" + state.levelExperienceRequired() + " XP)"));
-        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.0f", stats.calculateWeaponDamage(false))));
+        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.0f", stats.calculateWeaponDamage(false) * AccessoryBag.damageBonusMultiplier(player))));
         player.sendSystemMessage(Component.literal("Strength: " + stats.strength()));
         player.sendSystemMessage(Component.literal("Armor Strength: " + stats.armorStrength()));
         player.sendSystemMessage(Component.literal("Crit Chance: " + stats.critChance() + "%"));
@@ -415,7 +415,8 @@ public final class SkyblockAbilityHandler {
         SkyblockStats stats = state.stats();
         double base = baseDamage + (stats.strength() + stats.armorStrength()) * 0.1
                 + stats.intelligence() * 0.2;
-        double damage = Math.round(base * state.activePet().damageMultiplier());
+        double damage = Math.round(base * state.activePet().damageMultiplier()
+                * AccessoryBag.damageBonusMultiplier(player));
 
         int chance = Math.min(100, stats.critChance());
         if (chance > 0 && player.getRandom().nextInt(100) < chance) {
