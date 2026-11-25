@@ -16,7 +16,7 @@ public final class VoidriddenEnderman extends EnderMan {
     protected void customServerAiStep(ServerLevel level) {
         super.customServerAiStep(level);
         if (getTarget() != null && --extraTeleportCooldown <= 0) {
-            teleportRandomly();
+            teleport();
             extraTeleportCooldown = 40;
         }
     }
