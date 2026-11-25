@@ -43,6 +43,6 @@ public abstract class VoidriddenEndermanTeleportMixin {
 
         Vec3 start = new Vec3(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY + 1.0, hypixelcustomrecipe$oldZ);
         Vec3 end = new Vec3(enderman.getX(), enderman.getY() + 1.0, enderman.getZ());
-        VoidTrailManager.add(serverLevel, start, end);
+        VoidTrailManager.add(serverLevel, enderman.getUUID(), start, end);
     }
 }
