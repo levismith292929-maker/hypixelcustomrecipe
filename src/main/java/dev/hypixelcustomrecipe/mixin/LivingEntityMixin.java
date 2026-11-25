@@ -80,7 +80,7 @@ public abstract class LivingEntityMixin {
                             ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem()),
                     SkyblockPlayerState.get(attacker).level());
             VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
-            if (weapon.damage() > 0) {
+            if (attackStats.weaponDamage() > 0.0) {
                 float attackScale = attacker.getAttackStrengthScale(0.5F);
                 adjusted = (float) (attackStats.calculateWeaponDamage(false) * attackScale);
             }
