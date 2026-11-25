@@ -388,12 +388,6 @@ public final class SkyblockAbilityHandler {
         int chance = Math.min(100, stats.critChance());
         if (chance > 0 && player.getRandom().nextInt(100) < chance) {
             damage *= stats.criticalMultiplier();
-            ServerLevel level = (ServerLevel) target.level();
-            level.sendParticles(ModParticles.CRIT,
-                    target.getX(),
-                    target.getY() + target.getBbHeight() * 0.5,
-                    target.getZ(),
-                    8, 0.22, 0.22, 0.22, 0.015);
         }
         return damage;
     }
