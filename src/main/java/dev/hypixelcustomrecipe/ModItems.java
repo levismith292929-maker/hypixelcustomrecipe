@@ -20,6 +20,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -156,6 +159,30 @@ public final class ModItems {
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
+    private static ItemAttributeModifiers diamondSwordAttributes() {
+        // Do not create a default ItemStack while the item registry is still binding components.
+        // These are the vanilla diamond sword's main-hand modifiers.
+        return ItemAttributeModifiers.EMPTY
+                .withModifierAdded(
+                        Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(
+                                Identifier.fromNamespaceAndPath("minecraft", "base_attack_damage"),
+                                6.0,
+                                AttributeModifier.Operation.ADD_VALUE
+                        ),
+                        EquipmentSlotGroup.MAINHAND
+                )
+                .withModifierAdded(
+                        Attributes.ATTACK_SPEED,
+                        new AttributeModifier(
+                                Identifier.fromNamespaceAndPath("minecraft", "base_attack_speed"),
+                                -2.4,
+                                AttributeModifier.Operation.ADD_VALUE
+                        ),
+                        EquipmentSlotGroup.MAINHAND
+                );
+    }
+
     private static Item register(String path, String displayName, Item vanillaFallback) {
         return register(path, displayName, vanillaFallback, 64);
     }
@@ -171,9 +198,7 @@ public final class ModItems {
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
-                .component(DataComponents.ATTRIBUTE_MODIFIERS,
-                        vanillaFallback.getDefaultInstance().getOrDefault(
-                                DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY));
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, diamondSwordAttributes());
         if (loreLines.length > 0) {
             ItemLore lore = new ItemLore(java.util.Arrays.stream(loreLines)
                     .<Component>map(ItemFormatting::lore).toList());
