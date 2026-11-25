@@ -145,9 +145,9 @@ public final class SkyblockPlayerState {
         }
     }
 
-    /** Five vanilla XP levels from level zero require 55 XP points. */
+    /** Five vanilla Minecraft XP levels are required for SkyBlock Level 1. */
     private static int requiredExperienceForLevel(int currentLevel) {
-        long cost = 55L;
+        long cost = 5L;
         for (int i = 0; i < currentLevel; i++) {
             cost = (long) Math.ceil(cost * 1.65D);
             if (cost >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
