@@ -41,7 +41,7 @@ public final class VanillaWeaponStats {
 
     public static SkyblockStats applyHeldWeapon(SkyblockStats armorStats, ItemStack stack) {
         WeaponStats weapon = get(stack);
-        return armorStats.withWeaponStats(weapon.damage(), weapon.strength());
+        return armorStats.withWeaponStats(armorStats.weaponDamage() + weapon.damage(), weapon.strength());
     }
 
     public record WeaponStats(int damage, int strength) {
