@@ -81,6 +81,8 @@ public final class SkyblockPlayerState {
     private int combatTicksRemaining;
     private double healthRegenerationProgress;
     private int necronGuardCooldownTicks;
+    private int skyblockLevel;
+    private int levelExperience;
 
     private ArmorStand petDisplay;
 
@@ -96,6 +98,7 @@ public final class SkyblockPlayerState {
             newPlayer.setHealth(1024.0F);
             SkyblockPlayerState state = PLAYERS.get(oldPlayer.getUUID());
             if (state != null) {
+                state.removePetDisplay();
                 state.manaBossBar.removePlayer(oldPlayer);
                 state.manaBossBar.addPlayer(newPlayer);
             }
@@ -125,6 +128,32 @@ public final class SkyblockPlayerState {
     public Pet activePet() { return activePet; }
     public int currentHealth() { return currentHealth; }
     public int maximumHealth() { return maximumHealth; }
+    public int level() { return skyblockLevel; }
+    public int levelExperience() { return levelExperience; }
+    public int levelExperienceRequired() { return requiredExperienceForLevel(skyblockLevel); }
+
+    /** Adds raw Minecraft XP points to the separate SkyBlock level progression. */
+    public void addLevelExperience(ServerPlayer player, int amount) {
+        if (amount <= 0) return;
+        levelExperience = Math.addExact(levelExperience, amount);
+        while (levelExperience >= levelExperienceRequired()) {
+            levelExperience -= levelExperienceRequired();
+            skyblockLevel++;
+            player.sendSystemMessage(Component.literal(
+                    "SkyBlock Level Up! You are now Level " + skyblockLevel + "!")
+                    .withStyle(style -> style.withColor(0x55FFFF).withBold(true)));
+        }
+    }
+
+    /** Five vanilla XP levels from level zero require 55 XP points. */
+    private static int requiredExperienceForLevel(int currentLevel) {
+        long cost = 55L;
+        for (int i = 0; i < currentLevel; i++) {
+            cost = (long) Math.ceil(cost * 1.65D);
+            if (cost >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        }
+        return (int) cost;
+    }
 
     /** Subtracts post-vanilla-mitigation damage using the custom Defense formula. */
     public boolean applyIncomingDamage(float vanillaDamage) {
@@ -157,6 +186,8 @@ public final class SkyblockPlayerState {
         output.putInt("hypixel_max_health", maximumHealth);
         output.putInt("hypixel_pet", activePet.ordinal());
         output.putInt("hypixel_necron_guard_cooldown", necronGuardCooldownTicks);
+        output.putInt("hypixel_skyblock_level", skyblockLevel);
+        output.putInt("hypixel_skyblock_level_xp", levelExperience);
         mana.savePersistentData(output);
     }
 
@@ -175,6 +206,9 @@ public final class SkyblockPlayerState {
 
         mana.loadPersistentData(input);
         necronGuardCooldownTicks = Math.max(0, input.getIntOr("hypixel_necron_guard_cooldown", 0));
+        skyblockLevel = Math.max(0, input.getIntOr("hypixel_skyblock_level", 0));
+        levelExperience = Math.max(0, input.getIntOr("hypixel_skyblock_level_xp", 0));
+        levelExperience = Math.min(levelExperience, levelExperienceRequired() - 1);
         int petIndex = input.getIntOr("hypixel_pet", 0);
         Pet[] pets = Pet.values();
         if (petIndex >= 0 && petIndex < pets.length) {
@@ -193,7 +227,10 @@ public final class SkyblockPlayerState {
 
     private int manaRegenerationFor(Pet pet) {
         int intelligenceBonus = stats.manaRegeneration() - SkyblockStats.BASE.manaRegeneration();
-        return Math.max(0, pet.manaRegeneration() + intelligenceBonus);
+        int levelScaledBase = SkyblockLevelBonuses.scaleGeneral(SkyblockStats.BASE.manaRegeneration(), skyblockLevel);
+        int petRegeneration = SkyblockLevelBonuses.scaleGeneral(pet.manaRegeneration(), skyblockLevel);
+        int intelligenceBonus = stats.manaRegeneration() - levelScaledBase;
+        return Math.max(0, petRegeneration + intelligenceBonus);
     }
 
     public void activatePet(ServerPlayer player, Pet pet) {
@@ -228,6 +265,7 @@ public final class SkyblockPlayerState {
                         | ArmorStand.CLIENT_FLAG_NO_BASEPLATE
                         | ArmorStand.CLIENT_FLAG_MARKER));
         petDisplay.setInvulnerable(true);
+        petDisplay.setNoSave(true);
         petDisplay.addTag("hypixel_pet_display");
         petDisplay.setItemSlot(EquipmentSlot.HEAD, head);
         level.addFreshEntity(petDisplay);
@@ -365,6 +403,7 @@ public final class SkyblockPlayerState {
         if (isArmorPiece(player, EquipmentSlot.FEET, "necron_boots")) armorBonusPerFourSeconds += 25.0;
 
         double healthPerFourSeconds = 25.0 + armorBonusPerFourSeconds;
+        healthPerFourSeconds = Math.ceil(healthPerFourSeconds * SkyblockLevelBonuses.vitalityMultiplier(skyblockLevel));
         healthRegenerationProgress += healthPerFourSeconds / 80.0;
 
         int wholeHealth = (int) healthRegenerationProgress;
@@ -389,7 +428,9 @@ public final class SkyblockPlayerState {
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
-        stats = VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem());
+        stats = SkyblockLevelBonuses.apply(
+                VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
+                skyblockLevel);
 
         int recalculatedMaximum = Math.max(1, stats.health());
         if (!healthInitialized) {
@@ -447,8 +488,9 @@ public final class SkyblockPlayerState {
         if (++hudUpdateTicks >= 1) {
             hudUpdateTicks = 0;
             String hud = String.format(java.util.Locale.ROOT,
-                    "Health: %d/%d | Defense: %d",
-                    (int) Math.round(currentHealth / 10.0), (int) Math.round(maximumHealth / 10.0), stats.defense())
+                    "Health: %d/%d | Defense: %d | Level: %d (%d/%d XP)",
+                    (int) Math.round(currentHealth / 10.0), (int) Math.round(maximumHealth / 10.0), stats.defense(),
+                    skyblockLevel, levelExperience, levelExperienceRequired())
                     + abilityCooldownHud(player);
             player.connection.send(new ClientboundSetActionBarTextPacket(Component.literal(hud)));
         }

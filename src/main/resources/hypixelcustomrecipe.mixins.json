@@ -5,6 +5,7 @@
     "AnvilMenuMixin",
     "DisplayAccessor",
     "LivingEntityMixin",
+    "PlayerExperienceMixin",
     "ServerPlayerMixin",
     "TextDisplayAccessor",
     "VoidriddenEndermanTeleportMixin",

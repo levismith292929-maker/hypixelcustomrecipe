@@ -336,6 +336,8 @@ public final class SkyblockAbilityHandler {
         SkyblockStats stats = state.stats();
         SkyblockManaState mana = state.mana();
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+        player.sendSystemMessage(Component.literal("SkyBlock Level: " + state.level()
+                + " (" + state.levelExperience() + "/" + state.levelExperienceRequired() + " XP)"));
         player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.0f", stats.calculateWeaponDamage(false))));
         player.sendSystemMessage(Component.literal("Strength: " + stats.strength()));
         player.sendSystemMessage(Component.literal("Armor Strength: " + stats.armorStrength()));

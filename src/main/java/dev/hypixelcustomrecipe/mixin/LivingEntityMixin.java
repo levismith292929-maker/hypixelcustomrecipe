@@ -58,9 +58,10 @@ public abstract class LivingEntityMixin {
 
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target
                 && source.getDirectEntity() == attacker) {
-            SkyblockStats attackStats = VanillaWeaponStats.applyHeldWeapon(
-                    ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem()
-            );
+            SkyblockStats attackStats = SkyblockLevelBonuses.apply(
+                    VanillaWeaponStats.applyHeldWeapon(
+                            ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem()),
+                    SkyblockPlayerState.get(attacker).level());
             VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
             if (weapon.damage() > 0) {
                 float attackScale = attacker.getAttackStrengthScale(0.5F);
