@@ -215,6 +215,7 @@ public final class SkyblockPlayerState {
         output.putInt("hypixel_skyblock_level", skyblockLevel);
         output.putInt("hypixel_skyblock_level_xp", levelExperience);
         mana.savePersistentData(output);
+        AccessoryBag.save(player, output);
     }
 
     public void loadPersistentData(ServerPlayer player, ValueInput input) {
@@ -231,6 +232,7 @@ public final class SkyblockPlayerState {
         }
 
         mana.loadPersistentData(input);
+        AccessoryBag.load(player, input);
         necronGuardCooldownTicks = Math.max(0, input.getIntOr("hypixel_necron_guard_cooldown", 0));
         skyblockLevel = Math.max(0, input.getIntOr("hypixel_skyblock_level", 0));
         levelExperience = Math.max(0, input.getIntOr("hypixel_skyblock_level_xp", 0));
