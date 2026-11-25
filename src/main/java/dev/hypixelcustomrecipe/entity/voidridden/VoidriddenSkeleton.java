@@ -11,10 +11,6 @@ public final class VoidriddenSkeleton extends Skeleton {
         setHealth(getMaxHealth());
     }
 
-    @Override
-    public float getMaxHealth() {
-        return 100000.0F;
-    }
 
     @Override
     public void performRangedAttack(LivingEntity target, float power) {
