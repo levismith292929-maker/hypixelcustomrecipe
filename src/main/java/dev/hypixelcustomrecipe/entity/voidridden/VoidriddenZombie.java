@@ -14,11 +14,13 @@ public final class VoidriddenZombie extends Zombie implements PolymerEntity {
     public VoidriddenZombie(EntityType<? extends Zombie> type, Level level) {
         super(type, level);
 
+
+        setHealth(getMaxHealth());
+    }
+
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityTypes.ZOMBIE;
-    }
-        setHealth(getMaxHealth());
     }
 
 
