@@ -5,6 +5,7 @@
     "AbstractCraftingMenuAccessor",
     "AnvilMenuMixin",
     "CraftingMenuMixin",
+    "ResultSlotAccessor",
     "ResultSlotMixin",
     "DisplayAccessor",
     "LivingEntityMixin",
