@@ -8,11 +8,14 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Skeleton;
@@ -70,44 +73,62 @@ public final class VoidriddenMobs {
                 VOIDRIDDEN_CREEPER, Creeper.createAttributes().add(Attributes.MAX_HEALTH, 100000.0)
         );
 
-        // Replace newly created vanilla mobs before they enter the world. Existing
-        // mobs restored from world saves are deliberately left untouched.
+        // Existing mobs restored from world saves are deliberately not rerolled.
         ServerEntityEvents.ALLOW_LOAD.register(VoidriddenMobs::replaceVanillaMob);
         HypixelCustomRecipe.LOGGER.info("Registered the five Voidridden mob types.");
     }
 
     private static boolean replaceVanillaMob(Entity entity, ServerLevel level,
-                                             net.minecraft.world.entity.EntitySpawnReason reason,
-                                             boolean isLoadedFromDisk) {
+                                             EntitySpawnReason reason, boolean isLoadedFromDisk) {
         if (isLoadedFromDisk || level.getRandom().nextFloat() >= 0.05F) {
             return true;
         }
 
         EntityType<?> originalType = entity.getType();
         Entity replacement = null;
+        EntitySpawnReason spawnReason = reason == null ? EntitySpawnReason.MOB_SUMMONED : reason;
 
+        // Exact type comparisons intentionally exclude Zombie Villagers.
         if (originalType == EntityType.ZOMBIE) {
-            replacement = VOIDRIDDEN_ZOMBIE.create(level);
+            replacement = VOIDRIDDEN_ZOMBIE.create(level, spawnReason);
         } else if (originalType == EntityType.SKELETON) {
-            replacement = VOIDRIDDEN_SKELETON.create(level);
+            replacement = VOIDRIDDEN_SKELETON.create(level, spawnReason);
         } else if (originalType == EntityType.ENDERMAN) {
-            replacement = VOIDRIDDEN_ENDERMAN.create(level);
+            replacement = VOIDRIDDEN_ENDERMAN.create(level, spawnReason);
         } else if (originalType == EntityType.SPIDER) {
-            replacement = VOIDRIDDEN_SPIDER.create(level);
+            replacement = VOIDRIDDEN_SPIDER.create(level, spawnReason);
         } else if (originalType == EntityType.CREEPER) {
-            replacement = VOIDRIDDEN_CREEPER.create(level);
+            replacement = VOIDRIDDEN_CREEPER.create(level, spawnReason);
         }
 
         if (replacement == null) {
             return true;
         }
 
-        CompoundTag data = new CompoundTag();
-        entity.saveWithoutId(data);
-        replacement.load(data);
+        replacement.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
+        replacement.setDeltaMovement(entity.getDeltaMovement());
+        replacement.setCustomName(entity.getCustomName());
+        replacement.setCustomNameVisible(entity.isCustomNameVisible());
+        replacement.setSilent(entity.isSilent());
+        replacement.setInvulnerable(entity.isInvulnerable());
+        replacement.setGlowingTag(entity.isCurrentlyGlowing());
         replacement.setUUID(entity.getUUID());
 
-        // If the replacement cannot be inserted, keep the original entity instead.
+        if (replacement instanceof Mob replacementMob && entity instanceof Mob originalMob) {
+            replacementMob.setNoAi(originalMob.isNoAi());
+            if (originalMob.isPersistenceRequired()) {
+                replacementMob.setPersistenceRequired();
+            }
+        }
+
+        if (replacement instanceof LivingEntity replacementLiving && entity instanceof LivingEntity originalLiving) {
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                replacementLiving.setItemSlot(slot, originalLiving.getItemBySlot(slot).copy());
+            }
+            replacementLiving.setHealth(replacementLiving.getMaxHealth());
+        }
+
+        // If insertion fails, let the original entity load instead.
         return !level.addFreshEntity(replacement);
     }
 }
