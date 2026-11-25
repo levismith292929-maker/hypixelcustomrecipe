@@ -262,7 +262,7 @@ public final class SkyblockAbilityHandler {
 
     /** Necron's Scythe: seven close-range hit checks and a five-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
-        if (!beginAbility(player, "necrons_scythe", 35, 15)) return;
+        if (!beginAbility(player, "necrons_scythe", 35, 4)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
