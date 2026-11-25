@@ -24,7 +24,7 @@ public final class VoidriddenCreeper extends Creeper {
         double z = getZ();
 
         serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
-        serverLevel.playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE,
+        serverLevel.playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE.value(),
                 SoundSource.HOSTILE, 4.0F, 0.8F);
 
         double radiusSquared = 15.0 * 15.0;
