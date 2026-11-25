@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
 import java.util.ArrayList;
@@ -39,8 +39,7 @@ public final class DamageNumberHandler {
     public static void show(ServerLevel level, Entity target, float damage, boolean critical) {
         if (damage <= 0.0F) return;
 
-        ArmorStand display = (ArmorStand) EntityType.byString("minecraft:armor_stand")
-                .map(type -> type.create(level, EntitySpawnReason.TRIGGERED)).orElse(null);
+        ArmorStand display = EntityTypes.ARMOR_STAND.create(level, EntitySpawnReason.TRIGGERED);
         if (display == null) return;
 
         String amount = String.format(Locale.ROOT, "%,.0f", damage);
