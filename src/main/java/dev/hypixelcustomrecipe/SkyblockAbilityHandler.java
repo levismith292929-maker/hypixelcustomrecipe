@@ -365,7 +365,7 @@ public final class SkyblockAbilityHandler {
         player.sendSystemMessage(Component.literal("Click here to open Accessory Bag")
                 .withStyle(style -> style.withColor(0x55FFFF)
                         .withUnderlined(true)
-                        .withClickEvent(ClickEvent.runCommand("/accessorybag"))));
+                        .withClickEvent(new ClickEvent.RunCommand("/accessorybag"))));
     }
 
     /** Searches the current dimension for the nearest diamond ore or ancient debris. */
