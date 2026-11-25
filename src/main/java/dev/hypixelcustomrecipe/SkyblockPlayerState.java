@@ -264,7 +264,6 @@ public final class SkyblockPlayerState {
                         | ArmorStand.CLIENT_FLAG_NO_BASEPLATE
                         | ArmorStand.CLIENT_FLAG_MARKER));
         petDisplay.setInvulnerable(true);
-        petDisplay.setNoSave(true);
         petDisplay.addTag("hypixel_pet_display");
         petDisplay.setItemSlot(EquipmentSlot.HEAD, head);
         level.addFreshEntity(petDisplay);
