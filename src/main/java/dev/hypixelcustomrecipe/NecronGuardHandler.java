@@ -10,6 +10,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -17,10 +19,20 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Comparator;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Automatic Necron full-set guard summon. */
 public final class NecronGuardHandler {
+    private static final Map<UUID, UUID> GUARD_OWNERS = new ConcurrentHashMap<>();
+
     private NecronGuardHandler() {}
+
+    public static boolean isGuardOwner(Mob guard, LivingEntity target) {
+        UUID owner = GUARD_OWNERS.get(guard.getUUID());
+        return owner != null && owner.equals(target.getUUID());
+    }
 
     public static void onPlayerHit(ServerPlayer player) {
         if (!ModArmorItems.isWearingFullNecronSet(player)) return;
@@ -56,8 +68,7 @@ public final class NecronGuardHandler {
             guard.setHealth(40.0F);
             guard.setPersistenceRequired();
             guard.setCanPickUpLoot(false);
-            guard.addTag("hypixel_necron_guard");
-            guard.addTag("hypixel_necron_guard_owner_" + owner.getUUID());
+            
             guard.setCustomName(net.minecraft.network.chat.Component.literal("Necron's Guard"));
 
             ItemStack helmet = enchantedNetherite(level, Items.NETHERITE_HELMET);
@@ -77,7 +88,9 @@ public final class NecronGuardHandler {
             }
             // Start by targeting the nearest player except QWDad.
             if (target != null) guard.setTarget(target);
-            level.addFreshEntity(guard);
+            if (level.addFreshEntity(guard)) {
+                GUARD_OWNERS.put(guard.getUUID(), owner.getUUID());
+            }
         }
     }
 
