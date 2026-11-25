@@ -3,7 +3,7 @@ package dev.hypixelcustomrecipe.entity.voidridden;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.level.Level;
 
 public final class VoidriddenSpider extends Spider {
