@@ -58,6 +58,7 @@ public final class AccessoryBag {
 
     public static void open(ServerPlayer player) {
         NonNullList<ItemStack> saved = contents(player);
+        boolean[] loading = {true};
         SimpleContainer container = new SimpleContainer(SIZE) {
             @Override
             public boolean canPlaceItem(int slot, ItemStack stack) {
@@ -71,11 +72,14 @@ public final class AccessoryBag {
             @Override
             public void setChanged() {
                 super.setChanged();
-                NonNullList<ItemStack> current = contents(player);
-                for (int i = 0; i < SIZE; i++) current.set(i, getItem(i).copy());
+                if (!loading[0]) {
+                    NonNullList<ItemStack> current = contents(player);
+                    for (int i = 0; i < SIZE; i++) current.set(i, getItem(i).copy());
+                }
             }
         };
         for (int i = 0; i < SIZE; i++) container.setItem(i, saved.get(i).copy());
+        loading[0] = false;
         player.openMenu(new net.minecraft.world.SimpleMenuProvider(
                 (id, inventory, owner) ->
                         new ChestMenu(MenuType.GENERIC_9x4, id, inventory, container, 4),
