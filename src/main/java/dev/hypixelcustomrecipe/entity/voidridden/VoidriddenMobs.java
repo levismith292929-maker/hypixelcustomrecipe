@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe.entity.voidridden;
 
 import dev.hypixelcustomrecipe.HypixelCustomRecipe;
+import dev.hypixelcustomrecipe.ModItems;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.core.Registry;
