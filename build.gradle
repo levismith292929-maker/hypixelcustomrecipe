@@ -14,9 +14,12 @@ repositories {
 }
 
 loom {
+    splitEnvironmentSourceSets()
+
     mods {
         "hypixelcustomrecipe" {
             sourceSet sourceSets.main
+            sourceSet sourceSets.client
         }
     }
 }
