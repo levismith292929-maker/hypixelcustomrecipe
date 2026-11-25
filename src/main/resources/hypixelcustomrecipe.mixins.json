@@ -6,6 +6,7 @@
     "DisplayAccessor",
     "LivingEntityMixin",
     "PlayerExperienceMixin",
+    "StatViewerMenuMixin",
     "ServerPlayerMixin",
     "TextDisplayAccessor",
     "VoidriddenEndermanTeleportMixin",
