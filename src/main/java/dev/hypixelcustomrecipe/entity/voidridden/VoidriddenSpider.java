@@ -1,14 +1,23 @@
 package dev.hypixelcustomrecipe.entity.voidridden;
 
+import eu.pb4.polymer.core.api.entity.PolymerEntity;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
+import net.minecraft.world.entity.EntityTypes;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.level.Level;
 
-public final class VoidriddenSpider extends Spider {
+public final class VoidriddenSpider extends Spider implements PolymerEntity {
     public VoidriddenSpider(EntityType<? extends Spider> type, Level level) {
         super(type, level);
+
+    @Override
+    public EntityType<?> getPolymerEntityType(PacketContext context) {
+        return EntityTypes.SPIDER;
+    }
         setHealth(getMaxHealth());
     }
 
