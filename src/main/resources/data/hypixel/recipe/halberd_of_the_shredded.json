@@ -1,25 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "show_notification": true,
-  "category": "combat",
-  "pattern": [
-    "sas",
-    "aha",
-    "sas"
-  ],
+  "category": "equipment",
+  "pattern": ["sas", "aha", "sas"],
   "key": {
-    "s": [
-      "minecraft:netherite_scrap"
-    ],
-    "a": [
-      "minecraft:netherite_axe"
-    ],
-    "h": [
-      "hypixel:blade_handle"
-    ]
+    "s": ["minecraft:netherite_scrap"],
+    "a": ["minecraft:netherite_axe"],
+    "h": ["hypixel:blade_handle"]
   },
-  "result": {
-    "id": "hypixel:halberd_of_the_shredded",
-    "count": 1
-  }
+  "result": {"id": "hypixel:halberd_of_the_shredded", "count": 1}
 }

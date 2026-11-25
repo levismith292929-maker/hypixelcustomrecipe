@@ -1,25 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "show_notification": true,
-  "category": "combat",
-  "pattern": [
-    "sas",
-    "aha",
-    "sas"
-  ],
+  "category": "equipment",
+  "pattern": ["sas", "aha", "sas"],
   "key": {
-    "s": [
-      "hypixel:iron_alloy"
-    ],
-    "a": [
-      "minecraft:netherite_sword"
-    ],
-    "h": [
-      "hypixel:blade_handle"
-    ]
+    "s": ["hypixel:iron_alloy"],
+    "a": ["minecraft:netherite_sword"],
+    "h": ["hypixel:blade_handle"]
   },
-  "result": {
-    "id": "hypixel:livid_dagger",
-    "count": 1
-  }
+  "result": {"id": "hypixel:livid_dagger", "count": 1}
 }
