@@ -18,7 +18,8 @@ public abstract class ResultSlotMixin {
 
     @Inject(method = "onTake", at = @At("HEAD"), cancellable = true)
     private void hypixelcustomrecipe$consumeBulkDiamondIngredients(Player player, ItemStack stack, CallbackInfo ci) {
-        if (BulkDiamondCrafting.consume(this.craftSlots, stack.getItem())) {
+        if (BulkDiamondCrafting.isBulkOutput(stack.getItem())) {
+            BulkDiamondCrafting.consume(this.craftSlots, stack.getItem());
             ci.cancel();
         }
     }
