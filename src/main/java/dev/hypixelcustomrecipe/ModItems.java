@@ -211,7 +211,11 @@ public final class ModItems {
                     .<Component>map(ItemFormatting::lore).toList());
             properties.component(DataComponents.LORE, lore);
         }
-        Item item = new SimplePolymerItem(properties, vanillaFallback);
+        Item item = new TexturedPolymerItem(
+                properties,
+                vanillaFallback,
+                Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path)
+        );
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
