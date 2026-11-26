@@ -98,9 +98,9 @@ public final class SkyblockPlayerState {
             // player permanently blinded/damaged, while the depleted SkyBlock
             // Health pool prevents further interaction or deaths.
             newPlayer.removeAllEffects();
-            newPlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+            newPlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000000000.0);
             newPlayer.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
-            newPlayer.setHealth(1024.0F);
+            newPlayer.setHealth(1000000000.0F);
             SkyblockPlayerState state = PLAYERS.get(oldPlayer.getUUID());
             if (state != null) {
                 state.resetAfterRespawn(newPlayer);
@@ -142,7 +142,7 @@ public final class SkyblockPlayerState {
         healthInitialized = true;
         combatTicksRemaining = 0;
         healthRegenerationProgress = 0.0;
-        player.setHealth(1024.0F);
+        player.setHealth(1000000000.0F);
     }
 
     public static SkyblockPlayerState get(Player player) {
@@ -219,9 +219,9 @@ public final class SkyblockPlayerState {
     }
 
     public void loadPersistentData(ServerPlayer player, ValueInput input) {
-        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000000000.0);
         player.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
-        if (player.isAlive()) player.setHealth(1024.0F);
+        if (player.isAlive()) player.setHealth(1000000000.0F);
 
         int savedMaximum = input.getIntOr("hypixel_max_health", 0);
         int savedHealth = input.getIntOr("hypixel_health", -1);
@@ -473,11 +473,11 @@ public final class SkyblockPlayerState {
         }
 
         // The custom Health pool is authoritative. Keep vanilla health as a
-        // large reserve so normal damage can be measured after vanilla
+        // very large reserve so even large custom hits cannot trigger vanilla death before
         // resistance, shields, and other mitigation have run.
-        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1024.0);
+        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000000000.0);
         player.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
-        if (player.isAlive() && player.getHealth() < 1024.0F) player.setHealth(1024.0F);
+        if (player.isAlive() && player.getHealth() < 1000000000.0F) player.setHealth(1000000000.0F);
 
         if (activePet == Pet.IRON_GOLEM && !player.hasEffect(MobEffects.RESISTANCE)) {
             player.addEffect(new MobEffectInstance(
