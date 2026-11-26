@@ -2,7 +2,7 @@ package dev.hypixelcustomrecipe;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Identifier;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -65,6 +65,6 @@ public final class PlayerPlacedBlockData extends SavedData {
     }
 
     private static String key(ServerLevel level, BlockPos pos) {
-        return level.dimension().location() + "|" + pos.asLong();
+        return level.dimension().identifier() + "|" + pos.asLong();
     }
 }
