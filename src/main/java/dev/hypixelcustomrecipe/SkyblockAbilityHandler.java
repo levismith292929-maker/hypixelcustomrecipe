@@ -44,11 +44,29 @@ public final class SkyblockAbilityHandler {
     }
 
     public static void initialize() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-                dispatcher.register(Commands.literal("accessorybag").executes(context -> {
-                    AccessoryBag.open(context.getSource().getPlayerOrException());
-                    return 1;
-                })));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            dispatcher.register(Commands.literal("accessorybag").executes(context -> {
+                AccessoryBag.open(context.getSource().getPlayerOrException());
+                return 1;
+            }));
+            dispatcher.register(Commands.literal("statviewer")
+                    .then(Commands.literal("menu").executes(context -> {
+                        showStatViewerMenu(context.getSource().getPlayerOrException());
+                        return 1;
+                    }))
+                    .then(Commands.literal("stats").executes(context -> {
+                        showStats(context.getSource().getPlayerOrException());
+                        return 1;
+                    }))
+                    .then(Commands.literal("accessories").executes(context -> {
+                        AccessoryBag.open(context.getSource().getPlayerOrException());
+                        return 1;
+                    }))
+                    .then(Commands.literal("levels").executes(context -> {
+                        showLevels(context.getSource().getPlayerOrException());
+                        return 1;
+                    })));
+        });
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 BreathState breath = ACTIVE_BREATHS.get(player.getUUID());
@@ -89,7 +107,7 @@ public final class SkyblockAbilityHandler {
             } else if (stack.is(DatapackItems.ORE_TRACKER)) {
                 useOreTracker(serverPlayer);
             } else if (stack.is(DatapackItems.STAT_VIEWER)) {
-                showStats(serverPlayer);
+                showStatViewerMenu(serverPlayer);
             } else if (stack.is(DatapackItems.PET_ENDERMAN)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.ENDERMAN);
                 if (!serverPlayer.getAbilities().instabuild) stack.shrink(1);
@@ -339,6 +357,24 @@ public final class SkyblockAbilityHandler {
     }
 
 
+
+    public static void showStatViewerMenu(ServerPlayer player) {
+        player.sendSystemMessage(Component.literal("Stat Viewer").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+        player.sendSystemMessage(Component.literal("[Stats]").withStyle(style -> style.withColor(0x55FFFF).withUnderlined(true)
+                .withClickEvent(new ClickEvent.RunCommand("/statviewer stats"))));
+        player.sendSystemMessage(Component.literal("[Accessory Bag]").withStyle(style -> style.withColor(0x55FFFF).withUnderlined(true)
+                .withClickEvent(new ClickEvent.RunCommand("/statviewer accessories"))));
+        player.sendSystemMessage(Component.literal("[Levels]").withStyle(style -> style.withColor(0x55FFFF).withUnderlined(true)
+                .withClickEvent(new ClickEvent.RunCommand("/statviewer levels"))));
+    }
+
+    public static void showLevels(ServerPlayer player) {
+        SkyblockPlayerState state = SkyblockPlayerState.get(player);
+        player.sendSystemMessage(Component.literal("Your Levels").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+        player.sendSystemMessage(Component.literal(state.combatExperience() + "/" + state.combatExperienceRequired() + " Combat xp (Level " + state.combatLevel() + ")"));
+        player.sendSystemMessage(Component.literal(state.miningExperience() + "/" + state.miningExperienceRequired() + " Mining xp (Level " + state.miningLevel() + ")"));
+        player.sendSystemMessage(Component.literal(state.levelExperience() + "/50 Player xp (Level " + state.level() + ")"));
+    }
 
     /** Displays the same core stat categories exposed by the datapack viewer. */
     public static void showStats(ServerPlayer player) {
