@@ -28,7 +28,7 @@ public record SkyblockStats(
     public SkyblockStats {
         health = Math.max(1, health);
         defense = Math.max(0, defense);
-        critChance = Math.max(0, critChance);
+        // Negative Crit Chance is valid for weapons such as Vengence.
         critDamage = Math.max(0, critDamage);
         manaMaximum = Math.max(1, manaMaximum);
         manaRegeneration = Math.max(0, manaRegeneration);
@@ -110,7 +110,7 @@ public record SkyblockStats(
                                          int weaponIntelligence, int weaponDefense) {
         return new SkyblockStats(
                 health, defense + Math.max(0, weaponDefense), this.strength, armorStrength, Math.max(0, strength),
-                critChance + Math.max(0, weaponCritChance),
+                critChance + weaponCritChance,
                 critDamage + Math.max(0, weaponCritDamage),
                 intelligence + Math.max(0, weaponIntelligence),
                 manaMaximum, manaRegeneration, Math.max(0.0, damage)
