@@ -238,11 +238,11 @@ public abstract class LivingEntityMixin {
         LivingEntity defeated = (LivingEntity) (Object) this;
         if (hypixelcustomrecipe$combatXpAwarded || defeated.level().isClientSide()
                 || defeated instanceof Player || !(source.getEntity() instanceof ServerPlayer killer)) return;
+        hypixelcustomrecipe$combatXpAwarded = true;
         AccessoryBag.onMobKill(killer);
         int xp = hypixelcustomrecipe$combatExperienceFor(defeated)
                 + AccessoryBag.combatXpBonus(killer);
         if (xp > 0) {
-            hypixelcustomrecipe$combatXpAwarded = true;
             SkyblockPlayerState.get(killer).addCombatExperience(killer, xp);
         }
     }
