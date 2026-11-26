@@ -114,7 +114,7 @@ public final class AccessoryBag {
 
     /** Records Slayer accessory kill effects and grants Devour Ring healing. */
     public static void onMobKill(ServerPlayer player) {
-        long now = player.serverLevel().getGameTime();
+        long now = player.level().getGameTime();
         List<Long> kills = RECENT_KILLS.computeIfAbsent(player.getUUID(),
                 ignored -> java.util.Collections.synchronizedList(new java.util.ArrayList<>()));
         synchronized (kills) {
@@ -129,7 +129,7 @@ public final class AccessoryBag {
     private static int recentKillCount(ServerPlayer player) {
         List<Long> kills = RECENT_KILLS.get(player.getUUID());
         if (kills == null) return 0;
-        long now = player.serverLevel().getGameTime();
+        long now = player.level().getGameTime();
         synchronized (kills) {
             kills.removeIf(tick -> now - tick > 100);
             return kills.size();
@@ -158,12 +158,18 @@ public final class AccessoryBag {
 
     /** Reduces incoming damage from Undead or Arthropod mobs while the matching accessory is worn. */
     public static float incomingDamageMultiplier(ServerPlayer player, net.minecraft.world.entity.LivingEntity attacker) {
-        net.minecraft.world.entity.MobType type = attacker.getMobType();
+        String type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+                .getKey(attacker.getType()).getPath();
+        boolean undead = java.util.Set.of("zombie", "husk", "drowned", "skeleton", "stray",
+                "wither_skeleton", "zombie_villager", "zombified_piglin", "zoglin", "phantom",
+                "wither", "skeleton_horse", "zombie_horse").contains(type);
+        boolean arthropod = java.util.Set.of("spider", "cave_spider", "bee", "silverfish",
+                "endermite").contains(type);
         double reduction = 0.0;
-        if (type == net.minecraft.world.entity.MobType.UNDEAD) {
+        if (undead) {
             if (has(player, DatapackItems.ZOMBIE_ARTIFACT)) reduction = 0.15;
             else if (has(player, DatapackItems.ZOMBIE_RING)) reduction = 0.10;
-        } else if (type == net.minecraft.world.entity.MobType.ARTHROPOD) {
+        } else if (arthropod) {
             if (has(player, DatapackItems.SPIDER_ARTIFACT)) reduction = 0.15;
             else if (has(player, DatapackItems.SPIDER_RING)) reduction = 0.10;
         }
