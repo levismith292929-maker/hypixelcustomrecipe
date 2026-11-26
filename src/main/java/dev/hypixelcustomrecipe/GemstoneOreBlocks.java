@@ -28,7 +28,7 @@ public final class GemstoneOreBlocks {
     private GemstoneOreBlocks() {}
 
     private static Block vanillaBlock(String path) {
-        return BuiltInRegistries.BLOCK.get(Identifier.fromNamespaceAndPath("minecraft", path));
+        return BuiltInRegistries.BLOCK.get(Identifier.fromNamespaceAndPath("minecraft", path))\n                .orElseThrow(() -> new IllegalStateException("Missing vanilla block: " + path)).value();
     }
 
     private static Block register(String path, Block clientAppearance) {
