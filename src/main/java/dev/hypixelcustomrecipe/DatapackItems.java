@@ -170,6 +170,9 @@ public final class DatapackItems {
                 .component(DataComponents.CUSTOM_NAME, displayName)
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, fallbackAttributeModifiers(fallback));
+        if (isGemstoneDrill(path)) {
+            properties.enchantable(15);
+        }
         // Explicitly point the client at this mod's item definition so Polymer
         // sends the custom weapon model instead of only the vanilla fallback.
         if (isTexturedWeapon(path)) {
@@ -189,6 +192,14 @@ public final class DatapackItems {
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
+
+    private static boolean isGemstoneDrill(String path) {
+        return switch (path) {
+            case "ruby_drill", "amethyst_drill", "amber_drill", "topaz_drill",
+                    "sapphire_drill", "jade_drill", "opal_drill", "jasper_drill" -> true;
+            default -> false;
+        };
+    }
 
     private static boolean isTexturedWeapon(String path) {
         return switch (path) {

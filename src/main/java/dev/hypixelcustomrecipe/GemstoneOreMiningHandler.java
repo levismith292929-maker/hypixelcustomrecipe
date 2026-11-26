@@ -4,14 +4,13 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -32,10 +31,11 @@ public final class GemstoneOreMiningHandler {
                 return true;
             }
 
-            player.displayClientMessage(
-                    Component.literal("You need a stronger mining tool to mine this gemstone."),
-                    true
-            );
+            if (player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.sendOverlayMessage(
+                        Component.literal("You need a stronger mining tool to mine this gemstone.")
+                );
+            }
             return false;
         });
 
