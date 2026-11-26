@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "hypixel:ruby_drill",
+    "hypixel:amethyst_drill",
+    "hypixel:amber_drill",
+    "hypixel:topaz_drill",
+    "hypixel:sapphire_drill",
+    "hypixel:jade_drill",
+    "hypixel:opal_drill",
+    "hypixel:jasper_drill"
+  ]
+}

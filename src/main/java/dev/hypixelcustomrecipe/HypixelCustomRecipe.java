@@ -19,6 +19,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         GemstoneItems.initialize();
         GemstoneCoreItems.initialize();
         GemstoneOreBlocks.initialize();
+        GemstoneOreMiningHandler.initialize();
         IronAlloyDropHandler.initialize();
         ModArmorItems.initialize();
         RecipeUnlocker.initialize();

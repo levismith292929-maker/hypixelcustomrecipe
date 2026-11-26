@@ -23,7 +23,7 @@ public final class GemstoneOreBlocks {
     public static final Block SAPPHIRE_ORE = register("sapphire_gemstone_ore", vanillaBlock("blue_stained_glass"));
     public static final Block JADE_ORE = register("jade_gemstone_ore", vanillaBlock("lime_stained_glass"));
     public static final Block OPAL_ORE = register("opal_gemstone_ore", vanillaBlock("light_gray_stained_glass"));
-    public static final Block JASPER_ORE = register("jasper_gemstone_ore", vanillaBlock("brown_stained_glass"));
+    public static final Block JASPER_ORE = register("jasper_gemstone_ore", vanillaBlock("pink_stained_glass"));
 
     private GemstoneOreBlocks() {}
 
