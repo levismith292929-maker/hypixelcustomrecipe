@@ -204,8 +204,7 @@ public final class SkyblockPlayerState {
                 categoryLevelUp(player, "Mining", miningLevel);
             }
         }
-        player.sendSystemMessage(Component.literal("+" + gained + (combat ? " Combat XP" : " Mining XP"))
-                .withStyle(style -> style.withColor(0x55FF55)));
+        // Routine XP gains stay silent so mining and combat do not flood chat.
     }
 
     private void categoryLevelUp(ServerPlayer player, String category, int level) {
