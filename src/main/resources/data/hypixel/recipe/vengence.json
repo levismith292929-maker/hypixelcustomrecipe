@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "aaa",
+    "AnA",
+    "aaa"
+  ],
+  "key": {
+    "n": [
+      "minecraft:netherite_axe"
+    ],
+    "a": [
+      "hypixel:flawed_amber_gemstone"
+    ],
+    "A": [
+      "hypixel:fine_amber_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:vengence",
+    "count": 1
+  }
+}
