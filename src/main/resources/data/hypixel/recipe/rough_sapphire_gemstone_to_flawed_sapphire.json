@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "xxx",
+    "xxx",
+    "xxx"
+  ],
+  "key": {
+    "x": [
+      "hypixel:rough_sapphire_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:flawed_sapphire_gemstone",
+    "count": 1
+  }
+}
