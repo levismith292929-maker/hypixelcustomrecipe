@@ -99,6 +99,11 @@ public abstract class LivingEntityMixin {
         // health in a RETURN injection is too late when a hit is lethal.
         if (target instanceof ServerPlayer defender) {
             if (adjusted <= 0.0F || defender.isInvulnerableTo(level, source)) {
+                // This player hit is handled here; do not let the RETURN hook
+                // treat the unchanged vanilla health as damage a second time.
+                hypixelcustomrecipe$trackingPlayerDamage = false;
+                hypixelcustomrecipe$trackingDamageNumber = false;
+                hypixelcustomrecipe$damageNumberAmount = 0.0F;
                 cir.setReturnValue(false);
                 return;
             }
@@ -106,7 +111,24 @@ public abstract class LivingEntityMixin {
             SkyblockPlayerState state = SkyblockPlayerState.get(defender);
             dev.hypixelcustomrecipe.NecronGuardHandler.onPlayerHit(defender);
             if (source.getEntity() != null) state.markCombat();
+
+            // Player health is custom and is not subtracted from vanilla health.
+            // Calculate the same rounded post-Defense value used by the custom
+            // Health pool, then display it above the player who was hit.
+            float displayedDamage = (float) (Math.round(
+                    state.stats().applyDefense(adjusted) * 10.0) / 10.0);
             boolean defeated = state.applyIncomingDamage(adjusted);
+            if (displayedDamage > 0.0F) {
+                DamageNumberHandler.show(level, defender, displayedDamage,
+                        hypixelcustomrecipe$criticalHit);
+            }
+
+            // The RETURN hook below is for vanilla-managed mob health. Clear its
+            // player tracking flag so it cannot mistake die() setting vanilla
+            // health to zero for a second, enormous hit and revive the player.
+            hypixelcustomrecipe$trackingPlayerDamage = false;
+            hypixelcustomrecipe$trackingDamageNumber = false;
+            hypixelcustomrecipe$damageNumberAmount = 0.0F;
             if (defeated) defender.die(source);
             cir.setReturnValue(true);
             return;
