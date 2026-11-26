@@ -203,7 +203,9 @@ public final class DatapackItems {
 
     private static boolean isTexturedWeapon(String path) {
         return switch (path) {
-            case "aotv", "aotd", "astraea", "hyperion", "voidsplit_katana",
+            case "drill_bit", "ruby_drill", "amethyst_drill", "amber_drill", "topaz_drill",
+                    "sapphire_drill", "jade_drill", "opal_drill", "jasper_drill", "gemstone_gauntlet",
+                    "aotv", "aotd", "astraea", "hyperion", "voidsplit_katana",
                     "livid_dagger", "dark_claymore", "halberd_of_the_shredded" -> true;
             default -> false;
         };
