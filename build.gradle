@@ -29,6 +29,10 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     implementation "eu.pb4:polymer-core:0.17.5+26.2"
+    // Compile against Polymer's textured-block and resource-pack APIs.
+    // The server still supplies these modules through polymer-bundled.
+    modCompileOnly "eu.pb4:polymer-blocks:0.17.5+26.2"
+    modCompileOnly "eu.pb4:polymer-resource-pack:0.17.5+26.2"
 }
 
 def modVersion = project.version
