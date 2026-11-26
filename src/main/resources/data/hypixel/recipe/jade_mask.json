@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": true,
+  "pattern": [
+    "GGG",
+    "G G"
+  ],
+  "key": {
+    "G": [
+      "hypixel:fine_jade_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:jade_mask",
+    "count": 1
+  }
+}
