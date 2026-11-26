@@ -31,8 +31,8 @@ dependencies {
     implementation "eu.pb4:polymer-core:0.17.5+26.2"
     // Compile against Polymer's textured-block and resource-pack APIs.
     // The server still supplies these modules through polymer-bundled.
-    modImplementation "eu.pb4:polymer-blocks:0.17.5+26.2"
-    modImplementation "eu.pb4:polymer-resource-pack:0.17.5+26.2"
+    implementation "eu.pb4:polymer-blocks:0.17.5+26.2"
+    implementation "eu.pb4:polymer-resource-pack:0.17.5+26.2"
 }
 
 def modVersion = project.version
