@@ -83,6 +83,10 @@ public final class SkyblockPlayerState {
     private int necronGuardCooldownTicks;
     private int skyblockLevel;
     private int levelExperience;
+    private int combatLevel;
+    private int combatExperience;
+    private int miningLevel;
+    private int miningExperience;
 
     private ArmorStand petDisplay;
 
@@ -156,14 +160,67 @@ public final class SkyblockPlayerState {
     public int maximumHealth() { return maximumHealth; }
     public int level() { return skyblockLevel; }
     public int levelExperience() { return levelExperience; }
-    public int levelExperienceRequired() { return requiredExperienceForLevel(skyblockLevel); }
+    public int levelExperienceRequired() { return 50; }
+    public int combatLevel() { return combatLevel; }
+    public int combatExperience() { return combatExperience; }
+    public int combatExperienceRequired() { return categoryExperienceRequired(100, combatLevel); }
+    public int miningLevel() { return miningLevel; }
+    public int miningExperience() { return miningExperience; }
+    public int miningExperienceRequired() { return categoryExperienceRequired(250, miningLevel); }
+    public double categoryExperienceMultiplier() { return 1.0D + 0.02D * skyblockLevel; }
+
+    private static int categoryExperienceRequired(int base, int level) {
+        double cost = base;
+        for (int i = 0; i < level; i++) {
+            cost = Math.ceil(cost * 1.20D);
+            if (cost >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        }
+        return (int) cost;
+    }
+
+    public void addCombatExperience(ServerPlayer player, int baseAmount) {
+        addCategoryExperience(player, baseAmount, true);
+    }
+
+    public void addMiningExperience(ServerPlayer player, int baseAmount) {
+        addCategoryExperience(player, baseAmount, false);
+    }
+
+    private void addCategoryExperience(ServerPlayer player, int baseAmount, boolean combat) {
+        if (baseAmount <= 0) return;
+        int gained = Math.max(1, (int) Math.floor(baseAmount * categoryExperienceMultiplier()));
+        if (combat) {
+            combatExperience = Math.addExact(combatExperience, gained);
+            while (combatExperience >= combatExperienceRequired()) {
+                combatExperience -= combatExperienceRequired();
+                combatLevel++;
+                categoryLevelUp(player, "Combat", combatLevel);
+            }
+        } else {
+            miningExperience = Math.addExact(miningExperience, gained);
+            while (miningExperience >= miningExperienceRequired()) {
+                miningExperience -= miningExperienceRequired();
+                miningLevel++;
+                categoryLevelUp(player, "Mining", miningLevel);
+            }
+        }
+        player.sendSystemMessage(Component.literal("+" + gained + (combat ? " Combat XP" : " Mining XP"))
+                .withStyle(style -> style.withColor(0x55FF55)));
+    }
+
+    private void categoryLevelUp(ServerPlayer player, String category, int level) {
+        addLevelExperience(player, 5);
+        player.sendSystemMessage(Component.literal(category + " Level Up! Level " + level
+                + " (+5 Player XP, +5 Base HP, +1 Base Defense)")
+                .withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+    }
 
     /** Adds gained Minecraft XP levels to the separate SkyBlock level progression. */
     public void addLevelExperience(ServerPlayer player, int amount) {
         if (amount <= 0) return;
         levelExperience = Math.addExact(levelExperience, amount);
-        while (levelExperience >= levelExperienceRequired()) {
-            levelExperience -= levelExperienceRequired();
+        while (levelExperience >= 50) {
+            levelExperience -= 50;
             skyblockLevel++;
             player.sendSystemMessage(Component.literal(
                     "SkyBlock Level Up! You are now Level " + skyblockLevel + "!")
@@ -214,6 +271,10 @@ public final class SkyblockPlayerState {
         output.putInt("hypixel_necron_guard_cooldown", necronGuardCooldownTicks);
         output.putInt("hypixel_skyblock_level", skyblockLevel);
         output.putInt("hypixel_skyblock_level_xp", levelExperience);
+        output.putInt("hypixel_combat_level", combatLevel);
+        output.putInt("hypixel_combat_xp", combatExperience);
+        output.putInt("hypixel_mining_level", miningLevel);
+        output.putInt("hypixel_mining_xp", miningExperience);
         mana.savePersistentData(output);
         AccessoryBag.save(player, output);
     }
@@ -236,7 +297,13 @@ public final class SkyblockPlayerState {
         necronGuardCooldownTicks = Math.max(0, input.getIntOr("hypixel_necron_guard_cooldown", 0));
         skyblockLevel = Math.max(0, input.getIntOr("hypixel_skyblock_level", 0));
         levelExperience = Math.max(0, input.getIntOr("hypixel_skyblock_level_xp", 0));
-        levelExperience = Math.min(levelExperience, levelExperienceRequired() - 1);
+        levelExperience = Math.min(levelExperience, 49);
+        combatLevel = Math.max(0, input.getIntOr("hypixel_combat_level", 0));
+        combatExperience = Math.max(0, input.getIntOr("hypixel_combat_xp", 0));
+        combatExperience = Math.min(combatExperience, combatExperienceRequired() - 1);
+        miningLevel = Math.max(0, input.getIntOr("hypixel_mining_level", 0));
+        miningExperience = Math.max(0, input.getIntOr("hypixel_mining_xp", 0));
+        miningExperience = Math.min(miningExperience, miningExperienceRequired() - 1);
         int petIndex = input.getIntOr("hypixel_pet", 0);
         Pet[] pets = Pet.values();
         if (petIndex >= 0 && petIndex < pets.length) {
@@ -439,6 +506,11 @@ public final class SkyblockPlayerState {
         }
     }
 
+    private SkyblockStats applyCategoryBonuses(SkyblockStats base) {
+        int totalCategoryLevels = combatLevel + miningLevel;
+        return base.add(totalCategoryLevels * 50, totalCategoryLevels, 0, 0, 0, 0, 0, 0, 0);
+    }
+
     private void tick(ServerPlayer player) {
         if (necronGuardCooldownTicks > 0) necronGuardCooldownTicks--;
         // Keep one permanent Stat Viewer in hotbar slot 9, matching the datapack.
@@ -454,9 +526,9 @@ public final class SkyblockPlayerState {
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
-        stats = AccessoryBag.applyAdminRing(player, SkyblockLevelBonuses.apply(
+        stats = AccessoryBag.applyAdminRing(player, applyCategoryBonuses(SkyblockLevelBonuses.apply(
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
-                skyblockLevel));
+                skyblockLevel)));
 
         int recalculatedMaximum = Math.max(1, stats.health());
         if (!healthInitialized) {
