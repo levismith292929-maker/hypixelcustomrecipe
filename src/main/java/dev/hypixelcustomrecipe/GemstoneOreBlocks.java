@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
@@ -17,16 +16,20 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * vanilla stained-glass color for players without the mod.
  */
 public final class GemstoneOreBlocks {
-    public static final Block RUBY_ORE = register("ruby_gemstone_ore", Blocks.RED_STAINED_GLASS);
-    public static final Block AMETHYST_ORE = register("amethyst_gemstone_ore", Blocks.PURPLE_STAINED_GLASS);
-    public static final Block AMBER_ORE = register("amber_gemstone_ore", Blocks.ORANGE_STAINED_GLASS);
-    public static final Block TOPAZ_ORE = register("topaz_gemstone_ore", Blocks.YELLOW_STAINED_GLASS);
-    public static final Block SAPPHIRE_ORE = register("sapphire_gemstone_ore", Blocks.BLUE_STAINED_GLASS);
-    public static final Block JADE_ORE = register("jade_gemstone_ore", Blocks.LIME_STAINED_GLASS);
-    public static final Block OPAL_ORE = register("opal_gemstone_ore", Blocks.LIGHT_GRAY_STAINED_GLASS);
-    public static final Block JASPER_ORE = register("jasper_gemstone_ore", Blocks.BROWN_STAINED_GLASS);
+    public static final Block RUBY_ORE = register("ruby_gemstone_ore", vanillaBlock("red_stained_glass"));
+    public static final Block AMETHYST_ORE = register("amethyst_gemstone_ore", vanillaBlock("purple_stained_glass"));
+    public static final Block AMBER_ORE = register("amber_gemstone_ore", vanillaBlock("orange_stained_glass"));
+    public static final Block TOPAZ_ORE = register("topaz_gemstone_ore", vanillaBlock("yellow_stained_glass"));
+    public static final Block SAPPHIRE_ORE = register("sapphire_gemstone_ore", vanillaBlock("blue_stained_glass"));
+    public static final Block JADE_ORE = register("jade_gemstone_ore", vanillaBlock("lime_stained_glass"));
+    public static final Block OPAL_ORE = register("opal_gemstone_ore", vanillaBlock("light_gray_stained_glass"));
+    public static final Block JASPER_ORE = register("jasper_gemstone_ore", vanillaBlock("brown_stained_glass"));
 
     private GemstoneOreBlocks() {}
+
+    private static Block vanillaBlock(String path) {
+        return BuiltInRegistries.BLOCK.get(Identifier.fromNamespaceAndPath("minecraft", path));
+    }
 
     private static Block register(String path, Block clientAppearance) {
         Identifier id = Identifier.fromNamespaceAndPath("hypixel", path);
