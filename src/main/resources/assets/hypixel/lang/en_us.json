@@ -78,5 +78,15 @@
   "block.hypixel.sapphire_gemstone_ore": "Sapphire Gemstone Ore",
   "block.hypixel.jade_gemstone_ore": "Jade Gemstone Ore",
   "block.hypixel.opal_gemstone_ore": "Opal Gemstone Ore",
-  "block.hypixel.jasper_gemstone_ore": "Jasper Gemstone Ore"
+  "block.hypixel.jasper_gemstone_ore": "Jasper Gemstone Ore",
+  "item.hypixel.ruby_mask": "Ruby Mask",
+  "item.hypixel.amethyst_mask": "Amethyst Mask",
+  "item.hypixel.amber_mask": "Amber Mask",
+  "item.hypixel.topaz_mask": "Topaz Mask",
+  "item.hypixel.sapphire_mask": "Sapphire Mask",
+  "item.hypixel.jade_mask": "Jade Mask",
+  "item.hypixel.opal_mask": "Opal Mask",
+  "item.hypixel.jasper_mask": "Jasper Mask",
+  "item.hypixel.gem_tank": "Gem Tank",
+  "item.hypixel.nature_gem": "Nature Gem"
 }
