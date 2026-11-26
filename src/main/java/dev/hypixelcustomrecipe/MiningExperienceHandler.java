@@ -2,16 +2,25 @@ package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Awards Mining XP for successfully broken blocks. Player-placement filtering is intentionally deferred. */
+/** Awards Mining XP only for blocks that were not placed by a player. */
 public final class MiningExperienceHandler {
     private MiningExperienceHandler() {}
 
     public static void initialize() {
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (!(player instanceof ServerPlayer serverPlayer) || player.getAbilities().instabuild) return;
+            if (!(world instanceof ServerLevel serverLevel)) return;
+
+            PlayerPlacedBlockData placedBlocks = PlayerPlacedBlockData.get(serverLevel);
+            if (placedBlocks.contains(serverLevel, pos)) {
+                placedBlocks.remove(serverLevel, pos);
+                return;
+            }
+
             int xp = experienceFor(state);
             if (xp > 0) SkyblockPlayerState.get(serverPlayer).addMiningExperience(serverPlayer, xp);
         });
