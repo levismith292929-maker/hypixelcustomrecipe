@@ -83,15 +83,15 @@ public final class DatapackItems {
     public static final Item BLADE_HANDLE = register("blade_handle", "Blade Handle", Items.STICK);
     public static final Item IRON_ALLOY = registerStackableGlint("iron_alloy", "Iron Alloy", Items.IRON_BLOCK);
     public static final Item DRILL_BIT = registerStackableGlint("drill_bit", "Drill Bit", Items.PRISMARINE_SHARD);
-    public static final Item RUBY_DRILL = register("ruby_drill", "Ruby Drill", Items.PRISMARINE_SHARD);
-    public static final Item AMETHYST_DRILL = register("amethyst_drill", "Amethyst Drill", Items.PRISMARINE_SHARD);
-    public static final Item AMBER_DRILL = register("amber_drill", "Amber Drill", Items.PRISMARINE_SHARD);
-    public static final Item TOPAZ_DRILL = register("topaz_drill", "Topaz Drill", Items.PRISMARINE_SHARD);
-    public static final Item SAPPHIRE_DRILL = register("sapphire_drill", "Sapphire Drill", Items.PRISMARINE_SHARD);
-    public static final Item JADE_DRILL = register("jade_drill", "Jade Drill", Items.PRISMARINE_SHARD);
-    public static final Item OPAL_DRILL = register("opal_drill", "Opal Drill", Items.PRISMARINE_SHARD);
-    public static final Item JASPER_DRILL = register("jasper_drill", "Jasper Drill", Items.PRISMARINE_SHARD);
-    public static final Item GEMSTONE_GAUNTLET = register("gemstone_gauntlet", "Gemstone Gauntlet", Items.PRISMARINE_SHARD);
+    public static final Item RUBY_DRILL = registerMiningTool("ruby_drill", "Ruby Drill", "Ruby");
+    public static final Item AMETHYST_DRILL = registerMiningTool("amethyst_drill", "Amethyst Drill", "Amethyst");
+    public static final Item AMBER_DRILL = registerMiningTool("amber_drill", "Amber Drill", "Amber");
+    public static final Item TOPAZ_DRILL = registerMiningTool("topaz_drill", "Topaz Drill", "Topaz");
+    public static final Item SAPPHIRE_DRILL = registerMiningTool("sapphire_drill", "Sapphire Drill", "Sapphire");
+    public static final Item JADE_DRILL = registerMiningTool("jade_drill", "Jade Drill", "Jade");
+    public static final Item OPAL_DRILL = registerMiningTool("opal_drill", "Opal Drill", "Opal");
+    public static final Item JASPER_DRILL = registerMiningTool("jasper_drill", "Jasper Drill", "Jasper");
+    public static final Item GEMSTONE_GAUNTLET = registerMiningTool("gemstone_gauntlet", "Gemstone Gauntlet", "All Gemstones");
     public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND, "Needs 160 diamonds to craft");
     public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK, "Needs 80 enchanted diamonds to craft");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
@@ -146,6 +146,16 @@ public final class DatapackItems {
                         Identifier.fromNamespaceAndPath(NAMESPACE, path))
                 : new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, fallback);
         return Registry.register(BuiltInRegistries.ITEM, key, item);
+    }
+
+    private static Item registerMiningTool(String path, String name, String gemstoneRange) {
+        return register(path, name, Items.PRISMARINE_SHARD,
+                "Mining Tool",
+                "",
+                "Gemstone Mining",
+                "Can mine: " + gemstoneRange,
+                "",
+                "A specialized tool forged for gemstone mining.");
     }
 
     private static Item register(String path, String name, Item fallback, String... loreLines) {
