@@ -1,22 +1,31 @@
 package dev.hypixelcustomrecipe;
 
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class GemstoneOreMiningHandler {
+    private static final double[] MINIMUM_TOOL_SECONDS =
+            {2.0, 3.0, 5.0, 6.0, 8.0, 9.0, 10.0, 12.0};
+    private static final double[] NEXT_TOOL_SECONDS =
+            {1.5, 2.5, 4.5, 5.5, 7.5, 8.5, 9.5, 11.0};
+    private static final double[] TWO_TIERS_ABOVE_SECONDS =
+            {1.0, 2.0, 4.0, 5.0, 7.0, 8.0, 9.0, 10.0};
+    private static final double[] EXTRA_TIER_REDUCTION =
+            {0.25, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1.0};
+
+    private static final int GEMSTONE_GAUNTLET_TIER = 9;
+    private static final float GEMSTONE_ORE_HARDNESS = 3.0F;
+
     private GemstoneOreMiningHandler() {}
 
     public static void initialize() {
@@ -88,11 +97,47 @@ public final class GemstoneOreMiningHandler {
     }
 
     /**
-     * Mining tiers: netherite pickaxe = 0, then Ruby through Jasper drills = 1-8.
-     * Ore tiers use the same numbering, so Ruby requires a netherite pickaxe,
-     * Amethyst requires Ruby Drill, and each later ore requires the previous drill.
+     * Returns the custom destroy speed for a gemstone ore, or -1 when this
+     * item is not allowed to mine that ore. The times are calibrated against
+     * the ore's 3.0 hardness and Minecraft's normal 20 ticks-per-second rate.
      */
-    private static int getToolTier(ItemStack stack) {
+    public static float getGemstoneMiningSpeed(BlockState state, ItemStack tool) {
+        int oreTier = getOreTier(state);
+        int toolTier = getToolTier(tool);
+        if (oreTier < 0 || toolTier < oreTier) {
+            return -1.0F;
+        }
+
+        // The gauntlet is the final tier; higher tiers never reduce time further.
+        toolTier = Math.min(toolTier, GEMSTONE_GAUNTLET_TIER);
+
+        double seconds;
+        if (toolTier == oreTier) {
+            seconds = MINIMUM_TOOL_SECONDS[oreTier];
+        } else if (toolTier == oreTier + 1) {
+            seconds = NEXT_TOOL_SECONDS[oreTier];
+        } else {
+            int extraTiers = Math.max(0, toolTier - (oreTier + 2));
+            seconds = TWO_TIERS_ABOVE_SECONDS[oreTier]
+                    - EXTRA_TIER_REDUCTION[oreTier] * extraTiers;
+        }
+
+        // A zero-second target means the ore should break on the first mining tick.
+        if (seconds <= 0.0) {
+            return 1_000_000.0F;
+        }
+
+        // Vanilla block progress per tick is destroySpeed / hardness / 30.
+        // Convert the requested wall-clock time into the corresponding speed.
+        return (GEMSTONE_ORE_HARDNESS * 1.5F) / (float) seconds;
+    }
+
+    /**
+     * Mining tiers: Netherite Pickaxe = 0, Ruby through Jasper Drills = 1-8,
+     * and Gemstone Gauntlet = 9. Ruby ore requires a Netherite Pickaxe;
+     * each later ore requires the previous drill or better.
+     */
+    public static int getToolTier(ItemStack stack) {
         Item item = stack.getItem();
         if (item == Items.NETHERITE_PICKAXE) return 0;
         if (item == DatapackItems.RUBY_DRILL) return 1;
@@ -103,6 +148,7 @@ public final class GemstoneOreMiningHandler {
         if (item == DatapackItems.JADE_DRILL) return 6;
         if (item == DatapackItems.OPAL_DRILL) return 7;
         if (item == DatapackItems.JASPER_DRILL) return 8;
+        if (item == DatapackItems.GEMSTONE_GAUNTLET) return GEMSTONE_GAUNTLET_TIER;
         return -1;
     }
 
