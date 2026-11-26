@@ -18,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ResolvableProfile;
 
 import java.nio.charset.StandardCharsets;
@@ -126,7 +127,9 @@ public final class GemstoneItems {
                 .stacksTo(64)
                 .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
-                .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
+                .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile))
+                .component(DataComponents.LORE, new ItemLore(java.util.List.of(
+                        ItemFormatting.lore(auraName(path)))));
         Item item = new SimplePolymerItem(itemProperties, Items.PLAYER_HEAD) {
             @Override
             public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack,
@@ -136,6 +139,17 @@ public final class GemstoneItems {
             }
         };
         return Registry.register(BuiltInRegistries.ITEM, key, item);
+    }
+
+    private static String auraName(String path) {
+        if (path.contains("ruby")) return "Health";
+        if (path.contains("amethyst")) return "Gemstone Fortune";
+        if (path.contains("amber")) return "Strength";
+        if (path.contains("topaz")) return "Crit Chance";
+        if (path.contains("sapphire")) return "Intelligence";
+        if (path.contains("jade")) return "Defense";
+        if (path.contains("opal")) return "Crit Damage";
+        return "Everything";
     }
 
     public static void initialize() {
