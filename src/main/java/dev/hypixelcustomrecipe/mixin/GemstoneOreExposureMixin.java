@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
+ * Gemstone generation placement rule: at least three of six faces must be supported.
  * Requires each generated gemstone ore block to have at least three of its
  * six face-adjacent blocks be End Stone or another gemstone ore block.
  */
