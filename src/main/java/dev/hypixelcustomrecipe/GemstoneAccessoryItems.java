@@ -21,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
 
@@ -32,34 +33,64 @@ public final class GemstoneAccessoryItems {
     private static final String NS = "hypixel";
 
     public static final Item RUBY_MASK = head("ruby_mask", "Ruby Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMwNzdiNTM2OTcwNGU3NmE4ODU5NWRiNzU0Y2QzOWYxMzQ0YTg2MzhiOTZhYzRlYWEyNmM1ZGNjMjA4MWVkMiJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMwNzdiNTM2OTcwNGU3NmE4ODU5NWRiNzU0Y2QzOWYxMzQ0YTg2MzhiOTZhYzRlYWEyNmM1ZGNjMjA4MWVkMiJ9fX0=",
+            "Health: +10%",
+            "Accessory: Increases your maximum Health.");
     public static final Item AMETHYST_MASK = head("amethyst_mask", "Amethyst Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTc1YjVhMjRlNTNjZjU2YmFhYTFjODkxNDRjMjdkMjg3NjVlNWQwODExNjNiZmNiMmJlYzJjNWY4ZWEzNmY1NiJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTc1YjVhMjRlNTNjZjU2YmFhYTFjODkxNDRjMjdkMjg3NjVlNWQwODExNjNiZmNiMmJlYzJjNWY4ZWEzNmY1NiJ9fX0=",
+            "Gemstone Fortune: +10%",
+            "Accessory: Increases your chance to find extra gemstones.");
     public static final Item AMBER_MASK = head("amber_mask", "Amber Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjE5MTcwOWU3ZDVkOTdkZTQyZjBmNzNjMjgxM2JhM2JlNWJlMWI0NTE0ZjUzYTFlMDIyMzI5NzdlMDUyNmY0YSJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjE5MTcwOWU3ZDVkOTdkZTQyZjBmNzNjMjgxM2JhM2JlNWJlMWI0NTE0ZjUzYTFlMDIyMzI5NzdlMDUyNmY0YSJ9fX0=",
+            "Strength: +10%",
+            "Accessory: Increases your Strength.");
     public static final Item TOPAZ_MASK = head("topaz_mask", "Topaz Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTZkYmE4ZmQ2ZDFkNTc4NDU1MTVjYWI4NGIzMDM3YTliZDJiYjFkYjNhYzAxMjg4Nzg2ODI4NzY1ZGRlMTY3ZiJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTZkYmE4ZmQ2ZDFkNTc4NDU1MTVjYWI4NGIzMDM3YTliZDJiYjFkYjNhYzAxMjg4Nzg2ODI4NzY1ZGRlMTY3ZiJ9fX0=",
+            "Crit Chance: +5%",
+            "Accessory: Increases your Critical Chance.");
     public static final Item SAPPHIRE_MASK = head("sapphire_mask", "Sapphire Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODEzNGI4OTdhMDRiNTRiZjAwNzgxZjk3YzI1OWQxY2YyOWFkNDZjZDk5YzMxYjA1OGFlMDZkZDQ1ZGNhNWExYSJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODEzNGI4OTdhMDRiNTRiZjAwNzgxZjk3YzI1OWQxY2YyOWFkNDZjZDk5YzMxYjA1OGFlMDZkZDQ1ZGNhNWExYSJ9fX0=",
+            "Intelligence: +15%",
+            "Accessory: Increases your Intelligence.");
     public static final Item JADE_MASK = head("jade_mask", "Jade Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTA0YWMwM2Q1MWExOTU3N2UwN2Q3NTg4OTM3NjI3ZWQ0MjUzZTcwZTY1Y2MzMGNjOGNhODkyY2M4NjBmYzBlZiJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTA0YWMwM2Q1MWExOTU3N2UwN2Q3NTg4OTM3NjI3ZWQ0MjUzZTcwZTY1Y2MzMGNjOGNhODkyY2M4NjBmYzBlZiJ9fX0=",
+            "Defense: +20%",
+            "Accessory: Increases your Defense.");
     public static final Item OPAL_MASK = head("opal_mask", "Opal Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M4NjRjMDhkODU3NmNjMWQ3MzQ0MmU4MGFiODNkMTM3NWI2OTI4ZmIwYzQ4MmNmZDM0NzVhM2JiZGZhZDhmNCJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M4NjRjMDhkODU3NmNjMWQ3MzQ0MmU4MGFiODNkMTM3NWI2OTI4ZmIwYzQ4MmNmZDM0NzVhM2JiZGZhZDhmNCJ9fX0=",
+            "Crit Damage: +25%",
+            "Accessory: Increases your Critical Damage.");
     public static final Item JASPER_MASK = head("jasper_mask", "Jasper Mask",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmY5NTg1NWFhNWRhZjYyMTBhZjFiZGI2MWJjNzM5YjIyZDYwOThjMmI3ZTAwZTVmZTEwNmU4M2NmNmQwNzQzNSJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmY5NTg1NWFhNWRhZjYyMTBhZjFiZGI2MWJjNzM5YjIyZDYwOThjMmI3ZTAwZTVmZTEwNmU4M2NmNmQwNzQzNSJ9fX0=",
+            "All Stats: +4%",
+            "Accessory: Increases Health, Defense, Strength, Crit Chance, Crit Damage, Intelligence, Mana, Mana Regeneration, and Weapon Damage.");
 
     public static final Item GEM_TANK = register("gem_tank", "Gem Tank",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjA5ZmY4OTEzOGJhMWRiNDBlYjcyMzU5Y2Q5YmVjYWVjNTgxYzM3NGRkZGJlYTc0ZjE0M2Y2ZTg3NWVhNGU5NiJ9fX0=", true);
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjA5ZmY4OTEzOGJhMWRiNDBlYjcyMzU5Y2Q5YmVjYWVjNTgxYzM3NGRkZGJlYTc0ZjE0M2Y2ZTg3NWVhNGU5NiJ9fX0=", true,
+            "Ability: Gemstone Storage",
+            "Stores up to 8 gemstones, one of each type.",
+            "Insert any gemstone quality into its matching slot.",
+            "Rough: +1% stat",
+            "Flawed: +3% stat",
+            "Fine: +5% stat",
+            "Flawless: +8% stat",
+            "Perfect: +12% stat",
+            "Core: +25% stat",
+            "RIGHT CLICK in your offhand to open.");
     public static final Item NATURE_GEM = head("nature_gem", "Nature Gem",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjAzN2VmNzE4NDY5OTRjZDk0MGFkOWIxNzcyZWE0ZWJmZjA2NjAwYWI4OWFhMzg2YTkxM2FlYjQ3NTQ4N2JlYiJ9fX0=");
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjAzN2VmNzE4NDY5OTRjZDk0MGFkOWIxNzcyZWE0ZWJmZjA2NjAwYWI4OWFhMzg2YTkxM2FlYjQ3NTQ4N2JlYiJ9fX0=",
+            "Health: +2%",
+            "Defense: +2%",
+            "Gemstone Fortune: +2%",
+            "Accessory: A small boost to your core stats.");
 
     private GemstoneAccessoryItems() {}
 
-    private static Item head(String path, String name, String texture) {
-        return register(path, name, texture, false);
+    private static Item head(String path, String name, String texture, String... lore) {
+        return register(path, name, texture, false, lore);
     }
 
-    private static Item register(String path, String name, String texture, boolean tank) {
+    private static Item register(String path, String name, String texture, boolean tank, String... lore) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(NS, path));
         Property property = new Property("textures", texture);
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", property));
@@ -71,6 +102,10 @@ public final class GemstoneAccessoryItems {
                 .component(DataComponents.CUSTOM_NAME, Component.literal(name))
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
                 .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
+        if (lore.length > 0) {
+            itemProperties.component(DataComponents.LORE, new ItemLore(
+                    java.util.Arrays.stream(lore).map(ItemFormatting::lore).toList()));
+        }
         Item item = new SimplePolymerItem(itemProperties, Items.PLAYER_HEAD) {
             @Override
             public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack,
