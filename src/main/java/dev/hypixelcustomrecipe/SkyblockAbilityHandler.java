@@ -298,13 +298,12 @@ public final class SkyblockAbilityHandler {
 
     /** Necron's Scythe: seven close-range hit checks and a five-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
-        if (!beginAbility(player, "necrons_scythe", 50, 4)) return;
+        if (!beginAbility(player, "necrons_scythe", 1, 1)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
-        double baseDamage = 250.0;
         double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
         for (double distance : scanDistances) {
@@ -314,7 +313,13 @@ public final class SkyblockAbilityHandler {
                     entity -> isValidScytheTarget(entity, player)
                             && entity.distanceToSqr(center) <= 2.25)) {
                 if (hitTargets.add(target.getUUID())) {
-                    target.hurtServer(level, source, (float) scytheAbilityDamage(player, target, baseDamage));
+                    // Deal 2.5% of the target's maximum Health. Players use
+                    // the mod's custom Health pool rather than vanilla's reserve.
+                    double maximumHealth = target instanceof ServerPlayer targetPlayer
+                            ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
+                            : target.getMaxHealth();
+                    float damage = (float) (maximumHealth * 0.025D);
+                    target.hurtServer(level, source, damage);
                 }
             }
         }
@@ -448,17 +453,6 @@ public final class SkyblockAbilityHandler {
         String type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
         return entity != caster && !type.equals("enderman")
                 && !type.equals("armor_stand") && entity.isAlive();
-    }
-
-    /** Necron's Scythe loses 3% damage for each digit in the target's maximum health. */
-    private static double scytheAbilityDamage(ServerPlayer player, LivingEntity target, double baseDamage) {
-        double damage = abilityDamage(player, target, baseDamage);
-        double maxHealth = target.getMaxHealth();
-        int digits = maxHealth >= 1.0
-                ? (int) Math.floor(Math.log10(maxHealth)) + 1
-                : 1;
-        double reduction = Math.min(1.0, digits * 0.03);
-        return damage * (1.0 - reduction);
     }
 
     private static double abilityDamage(ServerPlayer player, LivingEntity target, double baseDamage) {
