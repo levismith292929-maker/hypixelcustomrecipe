@@ -146,7 +146,15 @@ public abstract class LivingEntityMixin {
             hypixelcustomrecipe$trackingPlayerDamage = false;
             hypixelcustomrecipe$trackingDamageNumber = false;
             hypixelcustomrecipe$damageNumberAmount = 0.0F;
-            if (defeated) defender.die(source);
+            if (defeated) {
+                // Commit the vanilla entity to its normal death state before
+                // invoking the ServerPlayer death flow. Custom Health is
+                // separate from vanilla Health, which otherwise remains at
+                // its large reserve value and can leave the player alive but
+                // unable to play after reaching zero custom Health.
+                defender.setHealth(0.0F);
+                defender.die(source);
+            }
             cir.setReturnValue(true);
             return;
         }
