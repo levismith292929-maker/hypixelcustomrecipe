@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "iii",
+    "ini",
+    "iii"
+  ],
+  "key": {
+    "i": [
+      "hypixel:compact_iron_ingot"
+    ],
+    "n": [
+      "minecraft:netherite_sword"
+    ]
+  },
+  "result": {
+    "id": "hypixel:hunter_knife",
+    "count": 1
+  }
+}
