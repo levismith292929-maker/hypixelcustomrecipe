@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "NNI",
+    "BIN",
+    "ABN"
+  ],
+  "key": {
+    "N": [
+      "minecraft:iron_nugget"
+    ],
+    "I": [
+      "minecraft:iron_ingot"
+    ],
+    "B": [
+      "minecraft:iron_block"
+    ],
+    "A": [
+      "hypixel:iron_alloy"
+    ]
+  },
+  "result": {
+    "id": "hypixel:drill_bit",
+    "count": 4
+  }
+}
