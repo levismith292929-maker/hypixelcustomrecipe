@@ -18,27 +18,27 @@ public final class VanillaWeaponStats {
     private static final Map<String, WeaponStats> STATS = Map.ofEntries(
             Map.entry("wooden_sword", new WeaponStats(7, 1)),
             Map.entry("stone_sword", new WeaponStats(8, 2)),
-            Map.entry("copper_sword", new WeaponStats(10, 4)),
-            Map.entry("iron_sword", new WeaponStats(11, 6)),
-            Map.entry("golden_sword", new WeaponStats(10, 8)),
-            Map.entry("diamond_sword", new WeaponStats(14, 8)),
-            Map.entry("netherite_sword", new WeaponStats(17, 11)),
-            Map.entry("aote", new WeaponStats(100, 100)),
-            Map.entry("aotv", new WeaponStats(120, 100)),
-            Map.entry("aotd", new WeaponStats(225, 100)),
-            Map.entry("astraea", new WeaponStats(270, 150, 0, 0, 50, 250)),
-            Map.entry("hyperion", new WeaponStats(260, 150, 0, 0, 350)),
-            Map.entry("zombie_sword", new WeaponStats(100, 50, 0, 0, 50)),
-            Map.entry("atomsplit_katana", new WeaponStats(305, 100, 0, 50, 300)),
-            Map.entry("livid_dagger", new WeaponStats(210, 60, 100, 50, 0)),
-            Map.entry("dark_claymore", new WeaponStats(500, 100, 0, 100, 0)),
-            Map.entry("halberd_of_the_shredded", new WeaponStats(140, 115, 0, 0, 0)),
-            // Hunter Knife: listed Damage 20 after the global 5x weapon rule.
-            Map.entry("hunter_knife", new WeaponStats(4, 7)),
-            // Raider Axe: listed Damage 35 after the global 5x weapon rule.
-            Map.entry("raider_axe", new WeaponStats(7, 8)),
-            // Vengence: listed Damage 10 is multiplied by the global 5x weapon rule.
-            Map.entry("vengence", new WeaponStats(10, 25, -100, 0, 0)),
+            Map.entry("copper_sword", new WeaponStats(50, 4)),
+            Map.entry("iron_sword", new WeaponStats(55, 6)),
+            Map.entry("golden_sword", new WeaponStats(50, 8)),
+            Map.entry("diamond_sword", new WeaponStats(70, 8)),
+            Map.entry("netherite_sword", new WeaponStats(85, 11)),
+            Map.entry("aote", new WeaponStats(500, 100)),
+            Map.entry("aotv", new WeaponStats(600, 100)),
+            Map.entry("aotd", new WeaponStats(1125, 100)),
+            Map.entry("astraea", new WeaponStats(1350, 150, 0, 0, 50, 250)),
+            Map.entry("hyperion", new WeaponStats(1300, 150, 0, 0, 350)),
+            Map.entry("zombie_sword", new WeaponStats(500, 50, 0, 0, 50)),
+            Map.entry("atomsplit_katana", new WeaponStats(1525, 100, 0, 50, 300)),
+            Map.entry("livid_dagger", new WeaponStats(1050, 60, 100, 50, 0)),
+            Map.entry("dark_claymore", new WeaponStats(2500, 100, 0, 100, 0)),
+            Map.entry("halberd_of_the_shredded", new WeaponStats(700, 115, 0, 0, 0)),
+            // Hunter Knife: final Damage is stored directly.
+            Map.entry("hunter_knife", new WeaponStats(20, 7)),
+            // Raider Axe: final Damage is stored directly.
+            Map.entry("raider_axe", new WeaponStats(35, 8)),
+            // Vengence: final Damage is stored directly.
+            Map.entry("vengence", new WeaponStats(50, 25, -100, 0, 0)),
 
             Map.entry("wooden_axe", new WeaponStats(8, 0)),
             Map.entry("stone_axe", new WeaponStats(10, 1)),
@@ -73,13 +73,7 @@ public final class VanillaWeaponStats {
         }
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         WeaponStats weapon = STATS.getOrDefault(id.getPath(), WeaponStats.NONE);
-        // All custom Hypixel weapons deal five times their listed base weapon
-        // Damage. Keep Strength, Crit stats, Intelligence, and Defense unchanged.
-        if (id.getNamespace().equals("hypixel") && weapon.damage() > 0) {
-            return new WeaponStats(weapon.damage() * 5, weapon.strength(),
-                    weapon.critChance(), weapon.critDamage(), weapon.intelligence(),
-                    weapon.defense());
-        }
+        // Damage values are stored directly as their final intended values.
         return weapon;
     }
 
