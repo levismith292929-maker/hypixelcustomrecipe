@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.BossEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.component.DataComponents;
@@ -196,7 +197,7 @@ public final class SkyblockPlayerState {
     private void addCategoryExperience(ServerPlayer player, int baseAmount, boolean combat) {
         if (baseAmount <= 0) return;
         int gained = Math.max(1, (int) Math.floor(baseAmount * categoryExperienceMultiplier()));
-        player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.25F, 1.5F);
+        hypixelcustomrecipe$playExperienceSound(player);
         if (combat) {
             combatExperience = Math.addExact(combatExperience, gained);
             while (combatExperience >= combatExperienceRequired()) {
@@ -225,10 +226,19 @@ public final class SkyblockPlayerState {
         }
     }
 
+    private static void hypixelcustomrecipe$playExperienceSound(ServerPlayer player) {
+        player.connection.send(new ClientboundSoundPacket(
+                BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.EXPERIENCE_ORB_PICKUP),
+                SoundSource.PLAYERS,
+                player.getX(), player.getY(), player.getZ(),
+                0.25F, 1.5F, player.getRandom().nextLong()
+        ));
+    }
+
     /** Adds gained Minecraft XP levels to the separate SkyBlock level progression. */
     public void addLevelExperience(ServerPlayer player, int amount) {
         if (amount <= 0) return;
-        player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.25F, 1.5F);
+        hypixelcustomrecipe$playExperienceSound(player);
         levelExperience = Math.addExact(levelExperience, amount);
         while (levelExperience >= 50) {
             levelExperience -= 50;
