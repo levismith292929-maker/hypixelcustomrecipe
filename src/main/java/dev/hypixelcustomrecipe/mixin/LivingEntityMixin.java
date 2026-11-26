@@ -11,20 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.monster.Vex;
-import net.minecraft.world.entity.monster.MagmaCube;
-import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.monster.Evoker;
-import net.minecraft.world.entity.monster.Blaze;
-import net.minecraft.world.entity.monster.Ghast;
-import net.minecraft.world.entity.monster.WitherSkeleton;
-import net.minecraft.world.entity.monster.Shulker;
-import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.warden.Warden;
@@ -258,16 +245,19 @@ public abstract class LivingEntityMixin {
         if (entity instanceof EnderDragon) return 5000;
         if (entity instanceof WitherBoss) return 1000;
         if (entity instanceof Warden) return 7500;
-        if (entity instanceof Shulker || entity instanceof Ravager) return 75;
-        if (entity instanceof Slime || entity instanceof Evoker || entity instanceof Blaze
-                || entity instanceof Ghast || entity instanceof WitherSkeleton) return 30;
-        EntityType<?> type = entity.getType();
-        if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.SPIDER
-                || type == EntityType.PILLAGER || type == EntityType.CREEPER
-                || type == EntityType.WITCH || type == EntityType.SILVERFISH) return 5;
-        if (entity instanceof AbstractIllager || entity instanceof Vex
-                || entity instanceof MagmaCube || entity instanceof EnderMan) return 12;
-        if (entity instanceof Animal) return 2;
+        String id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+                .getKey(entity.getType()).getPath();
+        if (id.equals("shulker") || id.equals("ravager")) return 75;
+        if (id.equals("slime") || id.equals("evoker") || id.equals("blaze")
+                || id.equals("ghast") || id.equals("wither_skeleton")) return 30;
+        if (id.equals("vindicator") || id.equals("illusioner") || id.equals("vex")
+                || id.equals("magma_cube") || id.equals("enderman")) return 12;
+        if (id.equals("zombie") || id.equals("skeleton") || id.equals("spider")
+                || id.equals("pillager") || id.equals("creeper") || id.equals("witch")
+                || id.equals("silverfish")) return 5;
+        if (id.equals("cow") || id.equals("pig") || id.equals("sheep")
+                || id.equals("chicken") || id.equals("rabbit") || id.equals("mooshroom")
+                || id.equals("goat")) return 2;
         return 0;
     }
 
