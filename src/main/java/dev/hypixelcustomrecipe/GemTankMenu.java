@@ -123,7 +123,7 @@ public final class GemTankMenu {
             }
         };
         for (int i = 0; i < SIZE; i++) container.setItem(i, saved.get(i).copy());
-        container.setItem(8, new ItemStack(Items.GRAY_STAINED_GLASS_PANE));
+        container.setItem(8, new ItemStack(Items.BARRIER));
         loading[0] = false;
         player.openMenu(new net.minecraft.world.SimpleMenuProvider(
                 (id, inventory, owner) ->
