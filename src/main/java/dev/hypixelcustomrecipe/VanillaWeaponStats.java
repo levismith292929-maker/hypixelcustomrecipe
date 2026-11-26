@@ -33,6 +33,9 @@ public final class VanillaWeaponStats {
             Map.entry("livid_dagger", new WeaponStats(210, 60, 100, 50, 0)),
             Map.entry("dark_claymore", new WeaponStats(500, 100, 0, 100, 0)),
             Map.entry("halberd_of_the_shredded", new WeaponStats(140, 115, 0, 0, 0)),
+            // Vengence: listed Damage 10 is multiplied by the global 5x weapon rule.
+            Map.entry("vengence", new WeaponStats(10, 25, -100, 0, 0)),
+
             Map.entry("wooden_axe", new WeaponStats(8, 0)),
             Map.entry("stone_axe", new WeaponStats(10, 1)),
             Map.entry("copper_axe", new WeaponStats(11, 2)),
