@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe.mixin;
 
 import dev.hypixelcustomrecipe.GemstoneOreMiningHandler;
+import dev.hypixelcustomrecipe.DatapackItems;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,6 +18,10 @@ public abstract class PlayerGemstoneMiningSpeedMixin {
             BlockState state, CallbackInfoReturnable<Float> cir) {
         Player player = (Player) (Object) this;
         ItemStack tool = player.getMainHandItem();
+        if (tool.getItem() == DatapackItems.ADMIN_DRILL) {
+            cir.setReturnValue(1_000_000.0F);
+            return;
+        }
         float gemstoneSpeed = GemstoneOreMiningHandler.getGemstoneMiningSpeed(state, tool);
         if (gemstoneSpeed >= 0.0F) {
             cir.setReturnValue(gemstoneSpeed);
