@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "xxx",
+    "xxx",
+    "xxx"
+  ],
+  "key": {
+    "x": [
+      "hypixel:flawless_topaz_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:perfect_topaz_gemstone",
+    "count": 1
+  }
+}
