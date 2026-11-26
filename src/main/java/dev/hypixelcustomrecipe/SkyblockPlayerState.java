@@ -87,6 +87,7 @@ public final class SkyblockPlayerState {
     private int combatExperience;
     private int miningLevel;
     private int miningExperience;
+    private boolean levelMessagesEnabled = true;
     private String recentExperienceActionBar = "";
     private int recentExperienceActionBarTicks;
 
@@ -170,6 +171,8 @@ public final class SkyblockPlayerState {
     public int miningExperience() { return miningExperience; }
     public int miningExperienceRequired() { return categoryExperienceRequired(250, miningLevel); }
     public double categoryExperienceMultiplier() { return 1.0D + 0.05D * skyblockLevel; }
+    public boolean levelMessagesEnabled() { return levelMessagesEnabled; }
+    public void toggleLevelMessages() { levelMessagesEnabled = !levelMessagesEnabled; }
 
     private static int categoryExperienceRequired(int base, int level) {
         double cost = base;
@@ -212,9 +215,11 @@ public final class SkyblockPlayerState {
 
     private void categoryLevelUp(ServerPlayer player, String category, int level) {
         addLevelExperience(player, 5);
-        player.sendSystemMessage(Component.literal(category + " Level Up! Level " + level
-                + " (+5 Player XP, +5 Base HP, +1 Base Defense)")
-                .withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+        if (levelMessagesEnabled) {
+            player.sendSystemMessage(Component.literal(category + " Level Up! Level " + level
+                    + " (+5 Player XP, +5 Base HP, +1 Base Defense)")
+                    .withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
+        }
     }
 
     /** Adds gained Minecraft XP levels to the separate SkyBlock level progression. */
@@ -224,9 +229,11 @@ public final class SkyblockPlayerState {
         while (levelExperience >= 50) {
             levelExperience -= 50;
             skyblockLevel++;
-            player.sendSystemMessage(Component.literal(
-                    "SkyBlock Level Up! You are now Level " + skyblockLevel + "!")
-                    .withStyle(style -> style.withColor(0x55FFFF).withBold(true)));
+            if (levelMessagesEnabled) {
+                player.sendSystemMessage(Component.literal(
+                        "SkyBlock Level Up! You are now Level " + skyblockLevel + "!")
+                        .withStyle(style -> style.withColor(0x55FFFF).withBold(true)));
+            }
         }
     }
 
@@ -277,6 +284,7 @@ public final class SkyblockPlayerState {
         output.putInt("hypixel_combat_xp", combatExperience);
         output.putInt("hypixel_mining_level", miningLevel);
         output.putInt("hypixel_mining_xp", miningExperience);
+        output.putBoolean("hypixel_level_messages_enabled", levelMessagesEnabled);
         mana.savePersistentData(output);
         AccessoryBag.save(player, output);
         GemTankMenu.save(player, output);
@@ -308,6 +316,7 @@ public final class SkyblockPlayerState {
         miningLevel = Math.max(0, input.getIntOr("hypixel_mining_level", 0));
         miningExperience = Math.max(0, input.getIntOr("hypixel_mining_xp", 0));
         miningExperience = Math.min(miningExperience, miningExperienceRequired() - 1);
+        levelMessagesEnabled = input.getBooleanOr("hypixel_level_messages_enabled", true);
         int petIndex = input.getIntOr("hypixel_pet", 0);
         Pet[] pets = Pet.values();
         if (petIndex >= 0 && petIndex < pets.length) {
