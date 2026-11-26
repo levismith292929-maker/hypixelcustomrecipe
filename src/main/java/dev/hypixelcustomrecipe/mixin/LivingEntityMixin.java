@@ -90,6 +90,7 @@ public abstract class LivingEntityMixin {
                                     VanillaWeaponStats.applyHeldWeapon(
                                             ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem())))),
                     attackerState.level());
+            attackStats = VengenceHandler.applyActiveBuff(attacker, attackStats);
             VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
             if (attackStats.weaponDamage() > 0.0) {
                 float attackScale = attacker.getAttackStrengthScale(0.5F);
@@ -244,6 +245,7 @@ public abstract class LivingEntityMixin {
                 || defeated instanceof Player || !(source.getEntity() instanceof ServerPlayer killer)) return;
         hypixelcustomrecipe$combatXpAwarded = true;
         AccessoryBag.onMobKill(killer);
+        VengenceHandler.onMobKill(killer);
         int xp = hypixelcustomrecipe$combatExperienceFor(defeated)
                 + AccessoryBag.combatXpBonus(killer);
         if (xp > 0) {
