@@ -35,9 +35,13 @@ public record SkyblockStats(
         weaponDamage = Math.max(0.0, weaponDamage);
     }
 
-    /** Strength and armor Strength jointly scale the held weapon's damage. */
+    /**
+     * Hypixel-style melee scaling: all Strength sources contribute at 1% per
+     * point. Weapon Strength is kept separate in the stat display, but it
+     * contributes to the same melee multiplier.
+     */
     public double strengthMultiplier() {
-        return 1.0 + (strength + armorStrength) / 200.0 + weaponStrength / 100.0;
+        return 1.0 + (strength + armorStrength + weaponStrength) / 100.0;
     }
 
     /** Expected critical multiplier, before checking the random crit roll. */
@@ -59,7 +63,9 @@ public record SkyblockStats(
     }
 
     public double calculateWeaponDamage(boolean critical) {
-        double damage = weaponDamage * strengthMultiplier();
+        // The standard melee formula includes 5 base damage before weapon
+        // damage and Strength scaling.
+        double damage = (5.0 + weaponDamage) * strengthMultiplier();
         return critical ? damage * criticalMultiplier() : damage;
     }
 
