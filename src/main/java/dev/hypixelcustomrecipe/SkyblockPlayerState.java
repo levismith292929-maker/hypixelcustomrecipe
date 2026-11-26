@@ -169,7 +169,7 @@ public final class SkyblockPlayerState {
     public int miningLevel() { return miningLevel; }
     public int miningExperience() { return miningExperience; }
     public int miningExperienceRequired() { return categoryExperienceRequired(250, miningLevel); }
-    public double categoryExperienceMultiplier() { return 1.0D + 0.02D * skyblockLevel; }
+    public double categoryExperienceMultiplier() { return 1.0D + 0.05D * skyblockLevel; }
 
     private static int categoryExperienceRequired(int base, int level) {
         double cost = base;
@@ -325,10 +325,8 @@ public final class SkyblockPlayerState {
     }
 
     private int manaRegenerationFor(Pet pet) {
-        int levelScaledBase = SkyblockLevelBonuses.scaleGeneral(SkyblockStats.BASE.manaRegeneration(), skyblockLevel);
-        int petRegeneration = SkyblockLevelBonuses.scaleGeneral(pet.manaRegeneration(), skyblockLevel);
-        int intelligenceBonus = stats.manaRegeneration() - levelScaledBase;
-        return Math.max(0, petRegeneration + intelligenceBonus);
+        int intelligenceBonus = stats.manaRegeneration() - SkyblockStats.BASE.manaRegeneration();
+        return Math.max(0, pet.manaRegeneration() + intelligenceBonus);
     }
 
     public void activatePet(ServerPlayer player, Pet pet) {
@@ -500,7 +498,7 @@ public final class SkyblockPlayerState {
         if (isArmorPiece(player, EquipmentSlot.FEET, "necron_boots")) armorBonusPerFourSeconds += 25.0;
 
         double healthPerFourSeconds = 25.0 + armorBonusPerFourSeconds;
-        healthPerFourSeconds = Math.ceil(healthPerFourSeconds * SkyblockLevelBonuses.vitalityMultiplier(skyblockLevel));
+        
         healthRegenerationProgress += healthPerFourSeconds / 80.0;
 
         int wholeHealth = (int) healthRegenerationProgress;
@@ -530,9 +528,8 @@ public final class SkyblockPlayerState {
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
-        stats = AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(SkyblockLevelBonuses.apply(
-                VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
-                skyblockLevel))));
+        stats = SkyblockLevelBonuses.apply(AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(
+                VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel);
 
         int recalculatedMaximum = Math.max(1, stats.health());
         if (!healthInitialized) {
