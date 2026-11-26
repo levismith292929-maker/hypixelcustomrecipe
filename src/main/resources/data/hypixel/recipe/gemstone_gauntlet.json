@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "123",
+    "4 5",
+    "678"
+  ],
+  "key": {
+    "1": [
+      "hypixel:ruby_drill"
+    ],
+    "2": [
+      "hypixel:amethyst_drill"
+    ],
+    "3": [
+      "hypixel:amber_drill"
+    ],
+    "4": [
+      "hypixel:topaz_drill"
+    ],
+    "5": [
+      "hypixel:sapphire_drill"
+    ],
+    "6": [
+      "hypixel:jade_drill"
+    ],
+    "7": [
+      "hypixel:opal_drill"
+    ],
+    "8": [
+      "hypixel:jasper_drill"
+    ]
+  },
+  "result": {
+    "id": "hypixel:gemstone_gauntlet",
+    "count": 1
+  }
+}
