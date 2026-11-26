@@ -187,7 +187,7 @@ public final class SkyblockAbilityHandler {
 
     /** Hyperion: 60 ability damage to living non-player targets within five blocks. */
     private static void useHyperion(ServerPlayer player) {
-        if (!beginAbility(player, "hyperion", 150, 100)) return;
+        if (!beginAbility(player, "hyperion", 150, 20)) return;
         ServerLevel level = (ServerLevel) player.level();
         double baseDamage = 200.0;
         DamageSource source = level.damageSources().explosion(null, player);
@@ -270,7 +270,7 @@ public final class SkyblockAbilityHandler {
 
     /** Necron's Scythe: seven close-range hit checks and a five-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
-        if (!beginAbility(player, "necrons_scythe", 150, 4)) return;
+        if (!beginAbility(player, "necrons_scythe", 50, 4)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
