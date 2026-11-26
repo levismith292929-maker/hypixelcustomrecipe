@@ -6,7 +6,6 @@ import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.core.api.block.SimplePolymerBlock;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -20,11 +19,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
-
 /**
  * Placeable gemstone ores using Polymer Blocks' textured full-block models.
- * The custom assets are copied into Polymer's generated server resource pack,
- * so vanilla clients see the supplied gemstone textures instead of fallbacks.
+ * Registering this mod as a Polymer asset source makes its block models and
+ * textures available in the generated server resource pack.
  */
 public final class GemstoneOreBlocks {
     public static final Block RUBY_ORE = register("ruby_gemstone_ore");
@@ -76,17 +74,10 @@ public final class GemstoneOreBlocks {
     }
 
     public static void initialize() {
-        // Copy the existing "hypixel" asset namespace into Polymer's pack. The
-        // registered item/block IDs intentionally keep their historical namespace.
-        PolymerResourcePackUtils.RESOURCE_PACK_CREATION_EVENT.register(builder -> {
-            var container = FabricLoader.getInstance()
-                    .getModContainer(HypixelCustomRecipe.MOD_ID)
-                    .orElseThrow(() -> new IllegalStateException("Could not find this mod's resources"));
-            var assets = container.findPath("assets/hypixel")
-                    .orElseThrow(() -> new IllegalStateException("Missing assets/hypixel resource folder"));
-            if (!builder.copyFromPath(assets, "assets/hypixel", true)) {
-                HypixelCustomRecipe.LOGGER.error("Failed to copy gemstone assets into Polymer's resource pack");
-            }
-        });
+        // Polymer Blocks requires the model and texture assets to be registered
+        // as a resource-pack source; without this clients only see the note-block fallback.
+        if (!PolymerResourcePackUtils.addModAssets(HypixelCustomRecipe.MOD_ID)) {
+            throw new IllegalStateException("Could not register gemstone assets with Polymer");
+        }
     }
 }
