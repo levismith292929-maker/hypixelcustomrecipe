@@ -7,6 +7,7 @@ import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
 import dev.hypixelcustomrecipe.SkyblockLevelBonuses;
 import dev.hypixelcustomrecipe.VanillaWeaponStats;
+import dev.hypixelcustomrecipe.VengenceHandler;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
