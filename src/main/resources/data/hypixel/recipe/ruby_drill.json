@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "GGD",
+    "APG",
+    "CAG"
+  ],
+  "key": {
+    "G": [
+      "hypixel:rough_ruby_gemstone"
+    ],
+    "D": [
+      "hypixel:drill_bit"
+    ],
+    "A": [
+      "hypixel:iron_alloy"
+    ],
+    "P": [
+      "minecraft:netherite_pickaxe"
+    ],
+    "C": [
+      "hypixel:ruby_gemstone_core"
+    ]
+  },
+  "result": {
+    "id": "hypixel:ruby_drill",
+    "count": 1
+  }
+}
