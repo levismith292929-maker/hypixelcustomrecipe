@@ -4,29 +4,22 @@ import dev.hypixelcustomrecipe.PlayerPlacedBlockData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Clears placement markers for blocks actually included in an explosion's destruction list. */
-@Mixin(Explosion.class)
+/** Clears a placement marker whenever an explosion destroys a block. */
+@Mixin(Block.class)
 public abstract class ExplosionMixin {
-    @Shadow @Final private Level level;
-
-    @Inject(method = "finalizeExplosion", at = @At("HEAD"))
-    private void hypixelcustomrecipe$clearDestroyedPlacementMarkers(
-            boolean particles,
+    @Inject(method = "wasExploded", at = @At("HEAD"))
+    private void hypixelcustomrecipe$clearDestroyedPlacementMarker(
+            ServerLevel level,
+            BlockPos pos,
+            Explosion explosion,
             CallbackInfo ci
     ) {
-        if (!(level instanceof ServerLevel serverLevel)) return;
-
-        PlayerPlacedBlockData data = PlayerPlacedBlockData.get(serverLevel);
-        for (BlockPos pos : ((Explosion) (Object) this).getToBlow()) {
-            data.remove(serverLevel, pos);
-        }
+        PlayerPlacedBlockData.get(level).remove(level, pos);
     }
 }
