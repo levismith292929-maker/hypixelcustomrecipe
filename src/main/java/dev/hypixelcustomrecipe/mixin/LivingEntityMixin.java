@@ -93,6 +93,7 @@ public abstract class LivingEntityMixin {
                 adjusted = (float) (attackStats.calculateWeaponDamage(false) * attackScale
                         * AccessoryBag.damageBonusMultiplier(attacker));
             }
+            adjusted = AccessoryBag.applyTarantulaTalisman(attacker, target, adjusted);
 
             int chance = Math.min(100, attackStats.critChance());
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
@@ -105,6 +106,9 @@ public abstract class LivingEntityMixin {
         // before vanilla subtracts health or runs its death logic; restoring vanilla
         // health in a RETURN injection is too late when a hit is lethal.
         if (target instanceof ServerPlayer defender) {
+            if (source.getEntity() instanceof LivingEntity attacker && attacker != defender) {
+                adjusted *= AccessoryBag.incomingDamageMultiplier(defender, attacker);
+            }
             if (adjusted <= 0.0F || defender.isInvulnerableTo(level, source)) {
                 // This player hit is handled here; do not let the RETURN hook
                 // treat the unchanged vanilla health as damage a second time.
@@ -234,7 +238,9 @@ public abstract class LivingEntityMixin {
         LivingEntity defeated = (LivingEntity) (Object) this;
         if (hypixelcustomrecipe$combatXpAwarded || defeated.level().isClientSide()
                 || defeated instanceof Player || !(source.getEntity() instanceof ServerPlayer killer)) return;
-        int xp = hypixelcustomrecipe$combatExperienceFor(defeated);
+        AccessoryBag.onMobKill(killer);
+        int xp = hypixelcustomrecipe$combatExperienceFor(defeated)
+                + AccessoryBag.combatXpBonus(killer);
         if (xp > 0) {
             hypixelcustomrecipe$combatXpAwarded = true;
             SkyblockPlayerState.get(killer).addCombatExperience(killer, xp);
