@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": true,
+  "pattern": [
+    "GGG",
+    "G G"
+  ],
+  "key": {
+    "G": [
+      "hypixel:fine_amber_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:amber_mask",
+    "count": 1
+  }
+}
