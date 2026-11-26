@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "GGD",
+    "APG",
+    "CAG"
+  ],
+  "key": {
+    "G": [
+      "hypixel:rough_jade_gemstone"
+    ],
+    "D": [
+      "hypixel:drill_bit"
+    ],
+    "A": [
+      "hypixel:iron_alloy"
+    ],
+    "P": [
+      "sapphire_drill"
+    ],
+    "C": [
+      "hypixel:jade_gemstone_core"
+    ]
+  },
+  "result": {
+    "id": "hypixel:jade_drill",
+    "count": 1
+  }
+}
