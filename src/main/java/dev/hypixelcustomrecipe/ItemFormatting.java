@@ -11,12 +11,15 @@ public final class ItemFormatting {
     public static ChatFormatting rarityColor(String path) {
         return switch (path) {
             case "necron_core", "aotv", "aotd", "astraea", "hyperion", "necrons_scythe",
-                    "pet_ender_dragon", "pet_golden_dragon" -> ChatFormatting.GOLD;
+                    "pet_ender_dragon", "pet_golden_dragon", "amber_drill", "topaz_drill",
+                    "jade_drill" -> ChatFormatting.GOLD;
             case "zombie_sword", "aote", "old_dragon_fragment", "protector_dragon_fragment",
                     "wise_dragon_fragment", "young_dragon_fragment", "strong_dragon_fragment",
                     "unstable_dragon_fragment", "superior_dragon_fragment", "pet_iron_golem",
-                    "pet_enderman" -> ChatFormatting.DARK_PURPLE;
-            case "ore_tracker" -> ChatFormatting.BLUE;
+                    "pet_enderman", "amethyst_drill", "sapphire_drill" -> ChatFormatting.DARK_PURPLE;
+            case "opal_drill", "jasper_drill" -> ChatFormatting.LIGHT_PURPLE;
+            case "gemstone_gauntlet" -> ChatFormatting.AQUA;
+            case "ore_tracker", "ruby_drill" -> ChatFormatting.BLUE;
             default -> ChatFormatting.WHITE;
         };
     }
