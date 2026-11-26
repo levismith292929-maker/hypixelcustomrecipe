@@ -1,34 +1,28 @@
 package dev.hypixelcustomrecipe;
 
-/** Applies permanent SkyBlock level bonuses to the combined equipment stats.
- * All stat multipliers round upward to the next whole stat point. */
+/** Applies permanent SkyBlock level bonuses to the player's complete stat total. */
 public final class SkyblockLevelBonuses {
     private SkyblockLevelBonuses() {}
 
-    public static double generalMultiplier(int level) { return 1.0D + Math.max(0, level) * 0.10D; }
-    public static double vitalityMultiplier(int level) { return 1.0D + Math.max(0, level) * 0.15D; }
-
-    public static int scaleGeneral(int value, int level) {
-        return (int) Math.ceil(Math.max(0, value) * generalMultiplier(level));
-    }
-
+    // Player Level bonuses affect the final combined stats, including armor,
+    // accessories, and held equipment.
     public static SkyblockStats apply(SkyblockStats base, int level) {
         int safeLevel = Math.max(0, level);
-        double survival = 1.0D + safeLevel * 0.20D;
-        double general = generalMultiplier(safeLevel);
-        double damage = vitalityMultiplier(safeLevel);
+        double healthDefense = 1.0D + safeLevel * 0.05D;
+        double intelligence = 1.0D + safeLevel * 0.06D;
+        double strength = 1.0D + safeLevel * 0.04D;
         return new SkyblockStats(
-                (int) Math.ceil(base.health() * survival),
-                (int) Math.ceil(base.defense() * survival),
-                (int) Math.ceil(base.strength() * general),
-                (int) Math.ceil(base.armorStrength() * general),
-                (int) Math.ceil(base.weaponStrength() * general),
+                (int) Math.round(base.health() * healthDefense),
+                (int) Math.round(base.defense() * healthDefense),
+                (int) Math.round(base.strength() * strength),
+                (int) Math.round(base.armorStrength() * strength),
+                (int) Math.round(base.weaponStrength() * strength),
                 base.critChance() + safeLevel,
-                base.critDamage() + safeLevel * 10,
-                (int) Math.ceil(base.intelligence() * general),
+                (int) Math.round(base.critDamage() * strength),
+                (int) Math.round(base.intelligence() * intelligence),
                 base.manaMaximum(),
-                (int) Math.ceil(base.manaRegeneration() * general),
-                Math.ceil(base.weaponDamage() * damage)
+                base.manaRegeneration(),
+                base.weaponDamage()
         );
     }
 }
