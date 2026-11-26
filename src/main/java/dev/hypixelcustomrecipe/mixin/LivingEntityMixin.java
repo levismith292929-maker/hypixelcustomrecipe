@@ -98,7 +98,7 @@ public abstract class LivingEntityMixin {
         // before vanilla subtracts health or runs its death logic; restoring vanilla
         // health in a RETURN injection is too late when a hit is lethal.
         if (target instanceof ServerPlayer defender) {
-            if (adjusted <= 0.0F || defender.isInvulnerableTo(source)) {
+            if (adjusted <= 0.0F || defender.isInvulnerableTo(level, source)) {
                 cir.setReturnValue(false);
                 return;
             }
