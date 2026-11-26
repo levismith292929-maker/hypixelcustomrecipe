@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "GGD",
+    "APG",
+    "CAG"
+  ],
+  "key": {
+    "G": [
+      "hypixel:rough_sapphire_gemstone"
+    ],
+    "D": [
+      "hypixel:drill_bit"
+    ],
+    "A": [
+      "hypixel:iron_alloy"
+    ],
+    "P": [
+      "topaz_drill"
+    ],
+    "C": [
+      "hypixel:sapphire_gemstone_core"
+    ]
+  },
+  "result": {
+    "id": "hypixel:sapphire_drill",
+    "count": 1
+  }
+}
