@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "iii",
+    "iii",
+    "iii"
+  ],
+  "key": {
+    "i": [
+      "hypixel:compact_gold_ingot"
+    ]
+  },
+  "result": {
+    "id": "hypixel:compact_gold_block",
+    "count": 1
+  }
+}
