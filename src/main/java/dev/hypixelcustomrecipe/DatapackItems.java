@@ -133,7 +133,7 @@ public final class DatapackItems {
                 .setId(key)
                 .stacksTo(64)
                 .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(name, ItemFormatting.rarityColor(path)))
-                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, !isMiningTool(path))
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         if (loreLines.length > 0) {
             List<Component> lore = Arrays.stream(loreLines)
@@ -168,7 +168,7 @@ public final class DatapackItems {
                 .setId(key)
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, displayName)
-                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, !isMiningTool(path))
                 .component(DataComponents.ATTRIBUTE_MODIFIERS, fallbackAttributeModifiers(fallback));
         if (isGemstoneDrill(path)) {
             properties.enchantable(15);
@@ -192,6 +192,14 @@ public final class DatapackItems {
         return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
+
+    private static boolean isMiningTool(String path) {
+        return switch (path) {
+            case "drill_bit", "ruby_drill", "amethyst_drill", "amber_drill", "topaz_drill",
+                    "sapphire_drill", "jade_drill", "opal_drill", "jasper_drill", "gemstone_gauntlet" -> true;
+            default -> false;
+        };
+    }
 
     private static boolean isGemstoneDrill(String path) {
         return switch (path) {
