@@ -87,30 +87,34 @@ public final class VoidTrailManager {
 
     private static void damageNearbyPlayers(ServerLevel level, Trail trail) {
         Vec3 line = trail.end.subtract(trail.start);
-        Vec3 horizontal = new Vec3(line.x, 0.0, line.z);
-        double lengthSquared = horizontal.lengthSqr();
-        if (lengthSquared < 1.0E-6) {
+        double length = line.length();
+        if (length < 1.0E-6) {
             return;
         }
 
-        Vec3 side = new Vec3(-horizontal.z, 0.0, horizontal.x).normalize();
-        AABB bounds = new AABB(trail.start, trail.end)
-                .inflate(TRAIL_HALF_WIDTH, TRAIL_HEIGHT, TRAIL_HALF_WIDTH)
-                .expandTowards(0.0, TRAIL_HEIGHT, 0.0);
+        // Sample the entire 3D trail at short intervals. Each sample checks a
+        // full 2-block-wide, 4-block-tall section, avoiding gaps on diagonal trails.
+        AABB bounds = new AABB(trail.start, trail.end).inflate(TRAIL_HALF_WIDTH, TRAIL_HEIGHT, TRAIL_HALF_WIDTH);
+        int samples = Math.max(1, (int) Math.ceil(length * 4.0));
         for (Player player : level.getEntitiesOfClass(Player.class, bounds)) {
             if (!player.isAlive()) {
                 continue;
             }
 
-            Vec3 fromStart = player.position().subtract(trail.start);
-            double along = Math.max(0.0, Math.min(1.0,
-                    (fromStart.x * horizontal.x + fromStart.z * horizontal.z) / lengthSquared));
-            Vec3 closestPoint = trail.start.add(line.scale(along));
-            Vec3 horizontalOffset = player.position().subtract(closestPoint);
-            double sideDistance = Math.abs(horizontalOffset.dot(side));
-            boolean overlapsHeight = player.getBoundingBox().maxY >= closestPoint.y
-                    && player.getBoundingBox().minY <= closestPoint.y + TRAIL_HEIGHT;
-            if (sideDistance <= TRAIL_HALF_WIDTH && overlapsHeight) {
+            AABB playerBounds = player.getBoundingBox();
+            boolean intersectsTrail = false;
+            for (int i = 0; i <= samples; i++) {
+                Vec3 point = trail.start.add(line.scale(i / (double) samples));
+                AABB section = new AABB(
+                        point.x - TRAIL_HALF_WIDTH, point.y, point.z - TRAIL_HALF_WIDTH,
+                        point.x + TRAIL_HALF_WIDTH, point.y + TRAIL_HEIGHT, point.z + TRAIL_HALF_WIDTH
+                );
+                if (playerBounds.intersects(section)) {
+                    intersectsTrail = true;
+                    break;
+                }
+            }
+            if (intersectsTrail) {
                 player.hurtServer(level, level.damageSources().generic(), 50.0F);
             }
         }
