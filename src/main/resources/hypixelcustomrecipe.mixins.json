@@ -16,7 +16,10 @@
     "TextDisplayAccessor",
     "VoidriddenEndermanTeleportMixin",
     "VoidriddenCreeperMixin",
-    "NecronGuardTargetMixin"
+    "NecronGuardTargetMixin",
+    "BlockItemPlacementMixin",
+    "PistonMovingBlockEntityMixin",
+    "ExplosionMixin"
   ],
   "injectors": {
     "defaultRequire": 1
