@@ -261,13 +261,13 @@ public abstract class LivingEntityMixin {
         if (entity instanceof Shulker || entity instanceof Ravager) return 75;
         if (entity instanceof Slime || entity instanceof Evoker || entity instanceof Blaze
                 || entity instanceof Ghast || entity instanceof WitherSkeleton) return 30;
-        if (entity instanceof AbstractIllager || entity instanceof Vex
-                || entity instanceof MagmaCube || entity instanceof EnderMan) return 12;
-        if (entity instanceof Animal) return 2;
         EntityType<?> type = entity.getType();
         if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.SPIDER
                 || type == EntityType.PILLAGER || type == EntityType.CREEPER
                 || type == EntityType.WITCH || type == EntityType.SILVERFISH) return 5;
+        if (entity instanceof AbstractIllager || entity instanceof Vex
+                || entity instanceof MagmaCube || entity instanceof EnderMan) return 12;
+        if (entity instanceof Animal) return 2;
         return 0;
     }
 
