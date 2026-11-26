@@ -506,7 +506,7 @@ public final class SkyblockPlayerState {
         }
     }
 
-    private SkyblockStats applyCategoryBonuses(SkyblockStats base) {
+    public SkyblockStats applyCategoryBonuses(SkyblockStats base) {
         int totalCategoryLevels = combatLevel + miningLevel;
         return base.add(totalCategoryLevels * 50, totalCategoryLevels, 0, 0, 0, 0, 0, 0, 0);
     }
