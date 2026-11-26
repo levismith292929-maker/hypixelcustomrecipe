@@ -65,7 +65,15 @@ public final class VanillaWeaponStats {
             return WeaponStats.NONE;
         }
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return STATS.getOrDefault(id.getPath(), WeaponStats.NONE);
+        WeaponStats weapon = STATS.getOrDefault(id.getPath(), WeaponStats.NONE);
+        // All custom Hypixel weapons deal five times their listed base weapon
+        // Damage. Keep Strength, Crit stats, Intelligence, and Defense unchanged.
+        if (id.getNamespace().equals("hypixel") && weapon.damage() > 0) {
+            return new WeaponStats(weapon.damage() * 5, weapon.strength(),
+                    weapon.critChance(), weapon.critDamage(), weapon.intelligence(),
+                    weapon.defense());
+        }
+        return weapon;
     }
 
     public static SkyblockStats applyHeldWeapon(SkyblockStats armorStats, ItemStack stack) {
