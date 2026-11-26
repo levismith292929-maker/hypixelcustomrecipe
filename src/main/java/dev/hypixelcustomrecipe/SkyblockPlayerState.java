@@ -593,7 +593,7 @@ public final class SkyblockPlayerState {
 
         if (++hudUpdateTicks >= 1) {
             hudUpdateTicks = 0;
-            Component hud = Component.literal("Health: ")
+            var hud = Component.literal("Health: ")
                     .withStyle(ChatFormatting.RED)
                     .append(Component.literal(String.format(java.util.Locale.ROOT, "%d/%d",
                             (int) Math.round(currentHealth / 10.0),
