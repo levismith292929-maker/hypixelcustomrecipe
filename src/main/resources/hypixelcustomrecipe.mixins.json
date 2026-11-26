@@ -10,6 +10,7 @@
     "DisplayAccessor",
     "LivingEntityMixin",
     "PlayerExperienceMixin",
+    "PlayerGemstoneMiningSpeedMixin",
     "StatViewerMenuMixin",
     "ServerPlayerMixin",
     "TextDisplayAccessor",
