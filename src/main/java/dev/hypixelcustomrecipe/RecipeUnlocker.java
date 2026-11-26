@@ -58,12 +58,12 @@ public final class RecipeUnlocker {
         RecipeSynchronization.synchronizeRecipeSerializer(
                 BuiltInRegistries.RECIPE_SERIALIZER.get(
                         Identifier.fromNamespaceAndPath("minecraft", "crafting_shaped")
-                )
+                ).orElseThrow().value()
         );
         RecipeSynchronization.synchronizeRecipeSerializer(
                 BuiltInRegistries.RECIPE_SERIALIZER.get(
                         Identifier.fromNamespaceAndPath("minecraft", "smithing_transform")
-                )
+                ).orElseThrow().value()
         );
 
         // Give every mod recipe to players when they join, making it available in the
