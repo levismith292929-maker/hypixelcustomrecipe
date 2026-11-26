@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": true,
+  "pattern": [
+    "PPP",
+    "PRP",
+    "PPP"
+  ],
+  "key": {
+    "P": [
+      "minecraft:glass_pane"
+    ],
+    "R": [
+      "hypixel:rough_ruby_gemstone",
+      "hypixel:rough_amethyst_gemstone",
+      "hypixel:rough_amber_gemstone",
+      "hypixel:rough_topaz_gemstone",
+      "hypixel:rough_sapphire_gemstone",
+      "hypixel:rough_jade_gemstone",
+      "hypixel:rough_opal_gemstone",
+      "hypixel:rough_jasper_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:gem_tank",
+    "count": 1
+  }
+}
