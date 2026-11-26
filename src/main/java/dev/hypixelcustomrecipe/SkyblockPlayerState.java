@@ -33,6 +33,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -171,14 +172,14 @@ public final class SkyblockPlayerState {
     public int miningLevel() { return miningLevel; }
     public int miningExperience() { return miningExperience; }
     public int miningExperienceRequired() { return categoryExperienceRequired(250, miningLevel); }
-    public double categoryExperienceMultiplier() { return 1.0D + 0.05D * skyblockLevel; }
+    public double categoryExperienceMultiplier() { return 1.0D + 0.10D * skyblockLevel; }
     public boolean levelMessagesEnabled() { return levelMessagesEnabled; }
     public void toggleLevelMessages() { levelMessagesEnabled = !levelMessagesEnabled; }
 
     private static int categoryExperienceRequired(int base, int level) {
         double cost = base;
         for (int i = 0; i < level; i++) {
-            cost = Math.ceil(cost * 1.20D);
+            cost = Math.ceil(cost * 1.08D);
             if (cost >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
         }
         return (int) cost;
@@ -195,7 +196,7 @@ public final class SkyblockPlayerState {
     private void addCategoryExperience(ServerPlayer player, int baseAmount, boolean combat) {
         if (baseAmount <= 0) return;
         int gained = Math.max(1, (int) Math.floor(baseAmount * categoryExperienceMultiplier()));
-        player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.25F, 1.5F);
+        player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.25F, 1.5F);
         if (combat) {
             combatExperience = Math.addExact(combatExperience, gained);
             while (combatExperience >= combatExperienceRequired()) {
