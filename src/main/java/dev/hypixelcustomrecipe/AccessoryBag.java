@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class AccessoryBag {
     private static final int SIZE = 36;
     private static final Map<UUID, NonNullList<ItemStack>> CONTENTS = new ConcurrentHashMap<>();
+    private static final Map<UUID, List<Long>> RECENT_KILLS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Map<UUID, Integer>> TARANTULA_HITS = new ConcurrentHashMap<>();
     private static final Codec<List<ItemStack>> STACK_LIST = ItemStack.CODEC.listOf();
 
     private AccessoryBag() {}
@@ -37,7 +39,19 @@ public final class AccessoryBag {
                 || stack.is(GemstoneAccessoryItems.JADE_MASK)
                 || stack.is(GemstoneAccessoryItems.OPAL_MASK)
                 || stack.is(GemstoneAccessoryItems.JASPER_MASK)
-                || stack.is(GemstoneAccessoryItems.NATURE_GEM));
+                || stack.is(GemstoneAccessoryItems.NATURE_GEM)
+                || stack.is(DatapackItems.ZOMBIE_RING)
+                || stack.is(DatapackItems.DEVOUR_RING)
+                || stack.is(DatapackItems.ZOMBIE_ARTIFACT)
+                || stack.is(DatapackItems.REAPER_ORB)
+                || stack.is(DatapackItems.SPIDER_RING)
+                || stack.is(DatapackItems.TARANTULA_TALISMAN)
+                || stack.is(DatapackItems.SPIDER_ARTIFACT)
+                || stack.is(DatapackItems.RED_CLAW_TALISMAN)
+                || stack.is(DatapackItems.RED_CLAW_RING)
+                || stack.is(DatapackItems.RED_CLAW_ARTIFACT)
+                || stack.is(DatapackItems.HUNTER_TALISMAN)
+                || stack.is(DatapackItems.HUNTER_RING));
     }
 
     public static SkyblockStats applyAdminRing(ServerPlayer player, SkyblockStats stats) {
@@ -83,14 +97,77 @@ public final class AccessoryBag {
             mana += all; manaRegen += all; weaponDamage += all;
         }
 
+        int reaperStrength = has(player, DatapackItems.REAPER_ORB) ? recentKillCount(player) * 2 : 0;
+        int redClawCritDamage = (has(player, DatapackItems.RED_CLAW_ARTIFACT) ? 5 : 0)
+                + (has(player, DatapackItems.RED_CLAW_RING) ? 3 : 0)
+                + (has(player, DatapackItems.RED_CLAW_TALISMAN) ? 1 : 0);
+
         return new SkyblockStats(
                 scale(original.health(), health), scale(original.defense(), defense),
-                scale(original.strength(), strength), scale(original.armorStrength(), strength),
+                scale(original.strength(), strength) + reaperStrength, scale(original.armorStrength(), strength),
                 scale(original.weaponStrength(), strength), scale(original.critChance(), critChance),
-                scale(original.critDamage(), critDamage), scale(original.intelligence(), intelligence),
+                scale(original.critDamage(), critDamage) + redClawCritDamage, scale(original.intelligence(), intelligence),
                 scale(original.manaMaximum(), mana), scale(original.manaRegeneration(), manaRegen),
                 original.weaponDamage() * weaponDamage
         );
+    }
+
+    /** Records Slayer accessory kill effects and grants Devour Ring healing. */
+    public static void onMobKill(ServerPlayer player) {
+        long now = player.serverLevel().getGameTime();
+        List<Long> kills = RECENT_KILLS.computeIfAbsent(player.getUUID(),
+                ignored -> java.util.Collections.synchronizedList(new java.util.ArrayList<>()));
+        synchronized (kills) {
+            kills.add(now);
+            kills.removeIf(tick -> now - tick > 100);
+        }
+        if (has(player, DatapackItems.DEVOUR_RING)) {
+            SkyblockPlayerState.get(player).heal(50);
+        }
+    }
+
+    private static int recentKillCount(ServerPlayer player) {
+        List<Long> kills = RECENT_KILLS.get(player.getUUID());
+        if (kills == null) return 0;
+        long now = player.serverLevel().getGameTime();
+        synchronized (kills) {
+            kills.removeIf(tick -> now - tick > 100);
+            return kills.size();
+        }
+    }
+
+    /** Additional flat Combat XP awarded for each mob kill. */
+    public static int combatXpBonus(ServerPlayer player) {
+        return (has(player, DatapackItems.HUNTER_TALISMAN) ? 2 : 0)
+                + (has(player, DatapackItems.HUNTER_RING) ? 5 : 0);
+    }
+
+    /** Applies the Tarantula Talisman's every-tenth-hit bonus per target. */
+    public static float applyTarantulaTalisman(ServerPlayer player, net.minecraft.world.entity.LivingEntity target,
+                                               float damage) {
+        if (!has(player, DatapackItems.TARANTULA_TALISMAN)) return damage;
+        Map<UUID, Integer> hits = TARANTULA_HITS.computeIfAbsent(player.getUUID(),
+                ignored -> new ConcurrentHashMap<>());
+        int count = hits.merge(target.getUUID(), 1, Integer::sum);
+        if (count >= 10) {
+            hits.put(target.getUUID(), 0);
+            return damage * 1.10F;
+        }
+        return damage;
+    }
+
+    /** Reduces incoming damage from Undead or Arthropod mobs while the matching accessory is worn. */
+    public static float incomingDamageMultiplier(ServerPlayer player, net.minecraft.world.entity.LivingEntity attacker) {
+        net.minecraft.world.entity.MobType type = attacker.getMobType();
+        double reduction = 0.0;
+        if (type == net.minecraft.world.entity.MobType.UNDEAD) {
+            if (has(player, DatapackItems.ZOMBIE_ARTIFACT)) reduction = 0.15;
+            else if (has(player, DatapackItems.ZOMBIE_RING)) reduction = 0.10;
+        } else if (type == net.minecraft.world.entity.MobType.ARTHROPOD) {
+            if (has(player, DatapackItems.SPIDER_ARTIFACT)) reduction = 0.15;
+            else if (has(player, DatapackItems.SPIDER_RING)) reduction = 0.10;
+        }
+        return (float) (1.0 - reduction);
     }
 
     /** Total additive Gemstone Fortune percentage from accessories and the Gem Tank. */
