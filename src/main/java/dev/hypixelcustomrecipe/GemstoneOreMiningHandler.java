@@ -84,6 +84,13 @@ public final class GemstoneOreMiningHandler {
                 amount++;
             }
 
+            // Gemstone Fortune is an additional chance to roll one step higher.
+            // It never exceeds the Fortune III maximum of eight gemstones.
+            double gemstoneFortune = AccessoryBag.gemstoneFortuneBonusPercent(serverPlayer);
+            if (amount < 8 && level.getRandom().nextDouble() * 100.0 < gemstoneFortune) {
+                amount++;
+            }
+
             ItemEntity gemstone = new ItemEntity(
                     serverLevel,
                     pos.getX() + 0.5,
