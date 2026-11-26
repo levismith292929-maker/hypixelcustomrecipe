@@ -42,7 +42,7 @@ public final class VanillaWeaponStats {
 
             Map.entry("wooden_axe", new WeaponStats(8, 0)),
             Map.entry("stone_axe", new WeaponStats(10, 1)),
-            Map.entry("copper_axe", new WeaponStats(11, 2)),
+            Map.entry("copper_axe", new WeaponStats(55, 2)),
             Map.entry("iron_axe", new WeaponStats(14, 2)),
             Map.entry("golden_axe", new WeaponStats(12, 6)),
             Map.entry("diamond_axe", new WeaponStats(17, 4)),
