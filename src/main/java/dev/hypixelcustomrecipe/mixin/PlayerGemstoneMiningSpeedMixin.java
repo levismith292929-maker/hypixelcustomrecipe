@@ -18,7 +18,7 @@ public abstract class PlayerGemstoneMiningSpeedMixin {
             BlockState state, CallbackInfoReturnable<Float> cir) {
         Player player = (Player) (Object) this;
         ItemStack tool = player.getMainHandItem();
-        if (tool.getItem() == DatapackItems.ADMIN_DRILL) {
+        if (tool.is(DatapackItems.ADMIN_DRILL) || tool.getItem() == DatapackItems.ADMIN_DRILL) {
             cir.setReturnValue(1_000_000.0F);
             return;
         }
