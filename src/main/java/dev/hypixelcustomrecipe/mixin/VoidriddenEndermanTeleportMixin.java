@@ -13,12 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class VoidriddenEndermanTeleportMixin {
-    @Unique
-    private double hypixelcustomrecipe$oldX;
-    @Unique
-    private double hypixelcustomrecipe$oldY;
-    @Unique
-    private double hypixelcustomrecipe$oldZ;
+    @Unique private double hypixelcustomrecipe$oldX;
+    @Unique private double hypixelcustomrecipe$oldY;
+    @Unique private double hypixelcustomrecipe$oldZ;
 
     @Inject(method = "randomTeleport(DDDZ)Z", at = @At("HEAD"))
     private void hypixelcustomrecipe$captureTeleportStart(
@@ -37,10 +34,8 @@ public abstract class VoidriddenEndermanTeleportMixin {
     ) {
         if (!Boolean.TRUE.equals(cir.getReturnValue())
                 || !((Object) this instanceof VoidriddenEnderman enderman)
-                || !enderman.hasBeenHitByPlayer()\n                || !(enderman.level() instanceof ServerLevel serverLevel)) {
-            return;
-        }
-
+                || !enderman.hasBeenHitByPlayer()
+                || !(enderman.level() instanceof ServerLevel serverLevel)) return;
         Vec3 start = new Vec3(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY + 1.0, hypixelcustomrecipe$oldZ);
         Vec3 end = new Vec3(enderman.getX(), enderman.getY() + 1.0, enderman.getZ());
         VoidTrailManager.add(serverLevel, enderman.getUUID(), start, end);

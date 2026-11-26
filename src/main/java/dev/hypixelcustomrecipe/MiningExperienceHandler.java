@@ -14,19 +14,18 @@ public final class MiningExperienceHandler {
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (!(player instanceof ServerPlayer serverPlayer) || player.getAbilities().instabuild) return;
             if (!(world instanceof ServerLevel serverLevel)) return;
-
             PlayerPlacedBlockData placedBlocks = PlayerPlacedBlockData.get(serverLevel);
             if (placedBlocks.contains(serverLevel, pos)) {
                 placedBlocks.remove(serverLevel, pos);
                 return;
             }
-
             int xp = experienceFor(state);
             if (xp > 0) SkyblockPlayerState.get(serverPlayer).addMiningExperience(serverPlayer, xp);
         });
     }
 
     private static int experienceFor(BlockState state) {
+        if (state.is(GemstoneOreBlocks.RAINBOW_ORE)) return 250_000;
         if (state.is(GemstoneOreBlocks.RUBY_ORE)) return 100;
         if (state.is(GemstoneOreBlocks.AMETHYST_ORE)) return 175;
         if (state.is(GemstoneOreBlocks.AMBER_ORE)) return 307;
@@ -35,7 +34,6 @@ public final class MiningExperienceHandler {
         if (state.is(GemstoneOreBlocks.JADE_ORE)) return 1649;
         if (state.is(GemstoneOreBlocks.OPAL_ORE)) return 2886;
         if (state.is(GemstoneOreBlocks.JASPER_ORE)) return 5051;
-
         String id = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         boolean deepslate = id.startsWith("deepslate_");
         String ore = deepslate ? id.substring("deepslate_".length()) : id;

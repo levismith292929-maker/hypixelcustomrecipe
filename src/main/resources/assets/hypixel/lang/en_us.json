@@ -88,5 +88,7 @@
   "item.hypixel.opal_mask": "Opal Mask",
   "item.hypixel.jasper_mask": "Jasper Mask",
   "item.hypixel.gem_tank": "Gem Tank",
-  "item.hypixel.nature_gem": "Nature Gem"
+  "item.hypixel.nature_gem": "Nature Gem",
+  "item.hypixel.rainbow_gemstone_ore": "Rainbow Gemstone Ore",
+  "block.hypixel.rainbow_gemstone_ore": "Rainbow Gemstone Ore"
 }

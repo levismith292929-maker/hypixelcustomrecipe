@@ -10,13 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-/**
- * Native, client-registered gemstone ore blocks.
- *
- * Every player installs this mod, so these are real Minecraft blocks rather
- * than Polymer stand-ins. Their normal blockstates, models, and textures are
- * loaded directly from the mod's assets/hypixel resource namespace.
- */
+/** Native gemstone ore blocks registered for the Hypixel content namespace. */
 public final class GemstoneOreBlocks {
     public static final Block RUBY_ORE = register("ruby_gemstone_ore");
     public static final Block AMETHYST_ORE = register("amethyst_gemstone_ore");
@@ -26,6 +20,7 @@ public final class GemstoneOreBlocks {
     public static final Block JADE_ORE = register("jade_gemstone_ore");
     public static final Block OPAL_ORE = register("opal_gemstone_ore");
     public static final Block JASPER_ORE = register("jasper_gemstone_ore");
+    public static final Block RAINBOW_ORE = register("rainbow_gemstone_ore");
 
     private GemstoneOreBlocks() {}
 
@@ -33,18 +28,12 @@ public final class GemstoneOreBlocks {
         Identifier id = Identifier.fromNamespaceAndPath("hypixel", path);
         ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, id);
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, id);
-
-        Block block = new Block(BlockBehaviour.Properties.of()
-                .setId(blockKey)
-                .strength(3.0F, 6.0F));
+        Block block = new Block(BlockBehaviour.Properties.of().setId(blockKey).strength(3.0F, 6.0F));
         Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
-
         BlockItem blockItem = new BlockItem(block, new Item.Properties().setId(itemKey));
         Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem);
         return block;
     }
 
-    public static void initialize() {
-        // Calling this method ensures all eight native blocks are initialized.
-    }
+    public static void initialize() {}
 }
