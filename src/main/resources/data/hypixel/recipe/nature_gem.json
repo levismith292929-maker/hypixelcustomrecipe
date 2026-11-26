@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": true,
+  "pattern": [
+    "RRR",
+    "RLR",
+    "RRR"
+  ],
+  "key": {
+    "R": [
+      "hypixel:fine_ruby_gemstone"
+    ],
+    "L": [
+      "#minecraft:leaves"
+    ]
+  },
+  "result": {
+    "id": "hypixel:nature_gem",
+    "count": 1
+  }
+}
