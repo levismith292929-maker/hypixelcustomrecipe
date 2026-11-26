@@ -8,9 +8,9 @@ public final class SkyblockLevelBonuses {
     // accessories, and held equipment.
     public static SkyblockStats apply(SkyblockStats base, int level) {
         int safeLevel = Math.max(0, level);
-        double healthDefense = 1.0D + safeLevel * 0.05D;
-        double intelligence = 1.0D + safeLevel * 0.06D;
-        double strength = 1.0D + safeLevel * 0.04D;
+        double healthDefense = 1.0D + safeLevel * 0.10D;
+        double intelligence = 1.0D + safeLevel * 0.11D;
+        double strength = 1.0D + safeLevel * 0.09D;
         return new SkyblockStats(
                 (int) Math.round(base.health() * healthDefense),
                 (int) Math.round(base.defense() * healthDefense),
