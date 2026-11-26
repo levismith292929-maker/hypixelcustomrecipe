@@ -126,8 +126,22 @@ public final class GemTankMenu {
         container.setItem(8, new ItemStack(Items.BARRIER));
         loading[0] = false;
         player.openMenu(new net.minecraft.world.SimpleMenuProvider(
-                (id, inventory, owner) ->
-                        new ChestMenu(MenuType.GENERIC_9x1, id, inventory, container, 1),
+                (id, inventory, owner) -> {
+                    ChestMenu menu = new ChestMenu(MenuType.GENERIC_9x1, id, inventory, container, 1);
+                    // The ninth slot is a decorative barrier, never a player-accessible slot.
+                    menu.slots.set(8, new net.minecraft.world.inventory.Slot(container, 8, 8 + 8 * 18, 18) {
+                        @Override
+                        public boolean mayPickup(net.minecraft.world.entity.player.Player player) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean mayPlace(ItemStack stack) {
+                            return false;
+                        }
+                    });
+                    return menu;
+                },
                 Component.literal("Gem Tank")));
     }
 
