@@ -37,6 +37,9 @@ public abstract class LivingEntityMixin {
     private boolean hypixelcustomrecipe$trackingDamageNumber;
 
     @Unique
+    private boolean hypixelcustomrecipe$combatXpAwarded;
+
+    @Unique
     private boolean hypixelcustomrecipe$criticalHit;
 
     @Unique
@@ -229,10 +232,13 @@ public abstract class LivingEntityMixin {
     private void hypixelcustomrecipe$awardCombatExperience(DamageSource source,
             org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         LivingEntity defeated = (LivingEntity) (Object) this;
-        if (defeated.level().isClientSide() || defeated instanceof Player
-                || !(source.getEntity() instanceof ServerPlayer killer)) return;
+        if (hypixelcustomrecipe$combatXpAwarded || defeated.level().isClientSide()
+                || defeated instanceof Player || !(source.getEntity() instanceof ServerPlayer killer)) return;
         int xp = hypixelcustomrecipe$combatExperienceFor(defeated);
-        if (xp > 0) SkyblockPlayerState.get(killer).addCombatExperience(killer, xp);
+        if (xp > 0) {
+            hypixelcustomrecipe$combatXpAwarded = true;
+            SkyblockPlayerState.get(killer).addCombatExperience(killer, xp);
+        }
     }
 
     @Unique
