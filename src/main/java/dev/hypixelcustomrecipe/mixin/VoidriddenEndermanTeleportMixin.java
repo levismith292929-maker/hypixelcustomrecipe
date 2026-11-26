@@ -37,7 +37,7 @@ public abstract class VoidriddenEndermanTeleportMixin {
     ) {
         if (!Boolean.TRUE.equals(cir.getReturnValue())
                 || !((Object) this instanceof VoidriddenEnderman enderman)
-                || !(enderman.level() instanceof ServerLevel serverLevel)) {
+                || !enderman.hasBeenHitByPlayer()\n                || !(enderman.level() instanceof ServerLevel serverLevel)) {
             return;
         }
 
