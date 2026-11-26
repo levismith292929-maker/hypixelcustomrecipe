@@ -1,11 +1,5 @@
 package dev.hypixelcustomrecipe;
 
-import eu.pb4.polymer.blocks.api.BlockModelType;
-import eu.pb4.polymer.blocks.api.PolymerBlockModel;
-import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
-import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
-import eu.pb4.polymer.core.api.block.SimplePolymerBlock;
-import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -14,15 +8,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 /**
- * Placeable gemstone ores using Polymer Blocks' textured full-block models.
- * Registering this mod as a Polymer asset source makes its block models and
- * textures available in the generated server resource pack.
+ * Native, client-registered gemstone ore blocks.
+ *
+ * Every player installs this mod, so these are real Minecraft blocks rather
+ * than Polymer stand-ins. Their normal blockstates, models, and textures are
+ * loaded directly from the mod's assets/hypixel resource namespace.
  */
 public final class GemstoneOreBlocks {
     public static final Block RUBY_ORE = register("ruby_gemstone_ore");
@@ -40,44 +33,18 @@ public final class GemstoneOreBlocks {
         Identifier id = Identifier.fromNamespaceAndPath("hypixel", path);
         ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, id);
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, id);
-        Identifier modelId = Identifier.fromNamespaceAndPath("hypixel", "block/" + path);
 
-        Block block = new TexturedGemstoneOreBlock(
-                BlockBehaviour.Properties.of().setId(blockKey).strength(3.0F, 6.0F),
-                modelId
-        );
+        Block block = new Block(BlockBehaviour.Properties.of()
+                .setId(blockKey)
+                .strength(3.0F, 6.0F));
         Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
+
         BlockItem blockItem = new BlockItem(block, new Item.Properties().setId(itemKey));
         Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem);
         return block;
     }
 
-    private static final class TexturedGemstoneOreBlock extends SimplePolymerBlock implements PolymerTexturedBlock {
-        private final BlockState texturedState;
-
-        private TexturedGemstoneOreBlock(BlockBehaviour.Properties properties, Identifier modelId) {
-            super(properties, Blocks.NOTE_BLOCK);
-            BlockState requested = PolymerBlockResourceUtils.requestBlock(
-                    BlockModelType.FULL_BLOCK,
-                    PolymerBlockModel.of(modelId)
-            );
-            if (requested == null) {
-                throw new IllegalStateException("Polymer ran out of FULL_BLOCK models for " + modelId);
-            }
-            this.texturedState = requested;
-        }
-
-        @Override
-        public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
-            return this.texturedState;
-        }
-    }
-
     public static void initialize() {
-        // Polymer Blocks requires the model and texture assets to be registered
-        // as a resource-pack source; without this clients only see the note-block fallback.
-        if (!PolymerResourcePackUtils.addModAssets(HypixelCustomRecipe.MOD_ID)) {
-            throw new IllegalStateException("Could not register gemstone assets with Polymer");
-        }
+        // Calling this method ensures all eight native blocks are initialized.
     }
 }
