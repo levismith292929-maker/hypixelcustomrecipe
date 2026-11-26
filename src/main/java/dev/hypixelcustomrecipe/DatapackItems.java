@@ -91,6 +91,8 @@ public final class DatapackItems {
     public static final Item JADE_DRILL = registerMiningTool("jade_drill", "Jade Drill", "Ruby–Opal");
     public static final Item OPAL_DRILL = registerMiningTool("opal_drill", "Opal Drill", "Ruby–Jasper");
     public static final Item JASPER_DRILL = registerMiningTool("jasper_drill", "Jasper Drill", "All Gemstones");
+    public static final Item ADMIN_DRILL = register("admin_drill", "Admin Drill", Items.PRISMARINE_SHARD,
+            "Admin Item", "Instantly mines any block.");
     public static final Item GEMSTONE_GAUNTLET = registerMiningTool("gemstone_gauntlet", "Gemstone Gauntlet", "All Gemstones");
     public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND, "Needs 160 diamonds to craft");
     public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK, "Needs 80 enchanted diamonds to craft");
