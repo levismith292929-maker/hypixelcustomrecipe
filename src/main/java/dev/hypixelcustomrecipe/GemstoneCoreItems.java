@@ -6,7 +6,6 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -54,9 +53,8 @@ public final class GemstoneCoreItems {
         PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", texture));
         GameProfile profile = new GameProfile(
                 UUID.nameUUIDFromBytes(("hypixel:" + path).getBytes(StandardCharsets.UTF_8)),
-                "HypixelGemstoneCore", properties);
-        Component name = Component.literal(displayName).withStyle(style -> style
-                .withColor(ChatFormatting.GOLD).withBold(true).withUnderlined(true).withItalic(false));
+                "HypixelGemstone", properties);
+        Component name = Component.literal(displayName);
         Item.Properties itemProperties = new Item.Properties()
                 .setId(key)
                 .stacksTo(64)
