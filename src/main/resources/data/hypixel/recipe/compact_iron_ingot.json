@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "iii",
+    "iIi",
+    "iii"
+  ],
+  "key": {
+    "i": [
+      "minecraft:iron_ingot"
+    ],
+    "I": [
+      "minecraft:iron_block"
+    ]
+  },
+  "result": {
+    "id": "hypixel:compact_iron_ingot",
+    "count": 1
+  }
+}
