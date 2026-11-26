@@ -70,7 +70,7 @@ public final class DatapackItems {
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
             "Ability: Wither Impact  RIGHT CLICK",
             "Slash forward with a sweeping strike, damaging nearby enemies.",
-            "Mana Cost: 150",
+            "Mana Cost: 50",
             "Cooldown: 4 ticks");
     public static final Item ATOMSPLIT_KATANA = register("atomsplit_katana", "Atomsplit Katana", Items.NETHERITE_SWORD,
             "Damage: 305", "Strength: 100", "Crit Damage: 50%", "Intelligence: 300");
