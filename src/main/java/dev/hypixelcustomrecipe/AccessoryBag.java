@@ -50,11 +50,10 @@ public final class AccessoryBag {
     /** Applies the unique gemstone accessories once; duplicates are rejected by the bag. */
     public static SkyblockStats applyGemstoneAccessories(ServerPlayer player, SkyblockStats original) {
         double health = 1.0, defense = 1.0, strength = 1.0, critChance = 1.0;
-        double critDamage = 1.0, intelligence = 1.0;
-        double fortune = gemstoneFortuneBonusPercent(player);
+        double critDamage = 1.0, intelligence = 1.0, mana = 1.0, manaRegen = 1.0, weaponDamage = 1.0;
 
         if (has(player, GemstoneAccessoryItems.RUBY_MASK)) health += 0.10;
-        if (has(player, GemstoneAccessoryItems.AMETHYST_MASK)) fortune += 10.0;
+
         if (has(player, GemstoneAccessoryItems.AMBER_MASK)) strength += 0.10;
         if (has(player, GemstoneAccessoryItems.TOPAZ_MASK)) critChance += 0.05;
         if (has(player, GemstoneAccessoryItems.SAPPHIRE_MASK)) intelligence += 0.15;
@@ -63,13 +62,13 @@ public final class AccessoryBag {
         if (has(player, GemstoneAccessoryItems.JASPER_MASK)) {
             health += 0.04; defense += 0.04; strength += 0.04;
             critChance += 0.04; critDamage += 0.04; intelligence += 0.04;
+            mana += 0.04; manaRegen += 0.04; weaponDamage += 0.04;
         }
         if (has(player, GemstoneAccessoryItems.NATURE_GEM)) {
-            health += 0.02; defense += 0.02; fortune += 2.0;
+            health += 0.02; defense += 0.02;
         }
 
         health += GemTankMenu.qualityPercentFor(player, 0) / 100.0;
-        fortune += GemTankMenu.qualityPercentFor(player, 1);
         strength += GemTankMenu.qualityPercentFor(player, 2) / 100.0;
         critChance += GemTankMenu.qualityPercentFor(player, 3) / 100.0;
         intelligence += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
@@ -78,13 +77,17 @@ public final class AccessoryBag {
         double all = GemTankMenu.qualityPercentFor(player, 7) / 100.0;
         health += all; defense += all; strength += all;
         critChance += all; critDamage += all; intelligence += all;
+        mana += all; manaRegen += all; weaponDamage += all;
+        mana += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
+        manaRegen += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
 
         return new SkyblockStats(
                 scale(original.health(), health), scale(original.defense(), defense),
                 scale(original.strength(), strength), scale(original.armorStrength(), strength),
                 scale(original.weaponStrength(), strength), scale(original.critChance(), critChance),
                 scale(original.critDamage(), critDamage), scale(original.intelligence(), intelligence),
-                original.manaMaximum(), original.manaRegeneration(), original.weaponDamage()
+                scale(original.manaMaximum(), mana), scale(original.manaRegeneration(), manaRegen),
+                original.weaponDamage() * weaponDamage
         );
     }
 
@@ -94,7 +97,6 @@ public final class AccessoryBag {
         if (has(player, GemstoneAccessoryItems.AMETHYST_MASK)) bonus += 10.0;
         if (has(player, GemstoneAccessoryItems.NATURE_GEM)) bonus += 2.0;
         bonus += GemTankMenu.qualityPercentFor(player, 1);
-        bonus += GemTankMenu.qualityPercentFor(player, 7);
         return bonus;
     }
 
@@ -173,8 +175,12 @@ public final class AccessoryBag {
                 List<ItemStack> decoded = STACK_LIST.parse(
                         player.registryAccess().createSerializationContext(JsonOps.INSTANCE),
                         JsonParser.parseString(json)).getOrThrow();
+                java.util.Set<net.minecraft.world.item.Item> seen = new java.util.HashSet<>();
                 for (int i = 0; i < Math.min(SIZE, decoded.size()); i++) {
-                    if (isAccessory(decoded.get(i))) items.set(i, decoded.get(i));
+                    ItemStack stack = decoded.get(i);
+                    if (isAccessory(stack) && seen.add(stack.getItem())) {
+                        items.set(i, stack.copyWithCount(1));
+                    }
                 }
             } catch (Exception exception) {
                 HypixelCustomRecipe.LOGGER.error("Could not load accessory bag for {}", player.getGameProfile().name(), exception);
