@@ -276,7 +276,12 @@ public final class SkyblockPlayerState {
 
     /** Restores custom Health points; one vanilla heart is 20 custom points. */
     public void heal(int amount) {
-        if (amount > 0) currentHealth = Math.min(maximumHealth, currentHealth + amount);
+        // Zero custom Health is a committed death state. Only the respawn
+        // callbacks may restore Health; regeneration and healing cannot revive
+        // a player while the server is processing death.
+        if (amount > 0 && currentHealth > 0) {
+            currentHealth = Math.min(maximumHealth, currentHealth + amount);
+        }
     }
 
     /** Starts the Necron guard set-bonus cooldown without charging mana. */
@@ -490,6 +495,10 @@ public final class SkyblockPlayerState {
     }
 
     private void tickHealthRegeneration(ServerPlayer player) {
+        if (currentHealth <= 0 || !player.isAlive()) {
+            healthRegenerationProgress = 0.0;
+            return;
+        }
         if (combatTicksRemaining > 0) {
             combatTicksRemaining--;
             healthRegenerationProgress = 0.0;
@@ -560,8 +569,10 @@ public final class SkyblockPlayerState {
             currentHealth = maximumHealth;
             healthInitialized = true;
         } else if (currentHealth <= 0) {
+            // Do not refill the external Health pool here. A player at zero
+            // must remain dead until ServerPlayerEvents.AFTER_RESPAWN calls
+            // resetAfterRespawn().
             maximumHealth = recalculatedMaximum;
-            if (player.isAlive()) currentHealth = maximumHealth;
         } else {
             int healthDifference = recalculatedMaximum - maximumHealth;
             maximumHealth = recalculatedMaximum;
