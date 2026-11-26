@@ -80,6 +80,19 @@ public final class DatapackItems {
             "Damage: 500", "Strength: 100", "Crit Damage: 100%");
     public static final Item HALBERD_OF_THE_SHREDDED = register("halberd_of_the_shredded", "Halberd of the Shredded", Items.NETHERITE_AXE,
             "Damage: 140", "Strength: 115");
+    public static final Item COMPACT_IRON_INGOT = registerStackableGlint("compact_iron_ingot", "Compact Iron Ingot", Items.IRON_INGOT);
+    public static final Item COMPACT_IRON_BLOCK = registerStackableGlint("compact_iron_block", "Compact Iron Block", Items.IRON_BLOCK);
+    public static final Item COMPACT_GOLD_INGOT = registerStackableGlint("compact_gold_ingot", "Compact Gold Ingot", Items.GOLD_INGOT);
+    public static final Item COMPACT_GOLD_BLOCK = registerStackableGlint("compact_gold_block", "Compact Gold Block", Items.GOLD_BLOCK);
+    public static final Item HUNTER_KNIFE = register("hunter_knife", "Hunter Knife", Items.IRON_SWORD,
+            "A compact, deadly hunting blade.");
+    public static final Item RAIDER_AXE = register("raider_axe", "Raider Axe", Items.IRON_AXE,
+            "A sturdy axe favored by raiders.");
+    public static final Item VENGENCE = register("vengence", "Vengence", Items.NETHERITE_AXE,
+            "Damage: 50", "Strength: 25", "Crit Chance: -100%",
+            "Ability: Bloodlust",
+            "Each kill multiplies Damage and Strength by 1.05x for 3 seconds.",
+            "Kills refresh the duration. No stack limit.");
     public static final Item BLADE_HANDLE = register("blade_handle", "Blade Handle", Items.STICK);
     public static final Item IRON_ALLOY = registerStackableGlint("iron_alloy", "Iron Alloy", Items.IRON_BLOCK);
     public static final Item DRILL_BIT = registerStackableGlint("drill_bit", "Drill Bit", Items.PRISMARINE_SHARD);
