@@ -58,7 +58,7 @@ public final class GemstoneOreBlocks {
     private static final class TexturedGemstoneOreBlock extends SimplePolymerBlock implements PolymerTexturedBlock {
         private final BlockState texturedState;
 
-        private TexturedGemstoneOreBlock(Properties properties, Identifier modelId) {
+        private TexturedGemstoneOreBlock(BlockBehaviour.Properties properties, Identifier modelId) {
             super(properties, Blocks.NOTE_BLOCK);
             BlockState requested = PolymerBlockResourceUtils.requestBlock(
                     BlockModelType.FULL_BLOCK,
