@@ -279,6 +279,7 @@ public final class SkyblockPlayerState {
         output.putInt("hypixel_mining_xp", miningExperience);
         mana.savePersistentData(output);
         AccessoryBag.save(player, output);
+        GemTankMenu.save(player, output);
     }
 
     public void loadPersistentData(ServerPlayer player, ValueInput input) {
@@ -296,6 +297,7 @@ public final class SkyblockPlayerState {
 
         mana.loadPersistentData(input);
         AccessoryBag.load(player, input);
+        GemTankMenu.load(player, input);
         necronGuardCooldownTicks = Math.max(0, input.getIntOr("hypixel_necron_guard_cooldown", 0));
         skyblockLevel = Math.max(0, input.getIntOr("hypixel_skyblock_level", 0));
         levelExperience = Math.max(0, input.getIntOr("hypixel_skyblock_level_xp", 0));
@@ -528,9 +530,9 @@ public final class SkyblockPlayerState {
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
-        stats = AccessoryBag.applyAdminRing(player, applyCategoryBonuses(SkyblockLevelBonuses.apply(
+        stats = AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(SkyblockLevelBonuses.apply(
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem()),
-                skyblockLevel)));
+                skyblockLevel))));
 
         int recalculatedMaximum = Math.max(1, stats.health());
         if (!healthInitialized) {
