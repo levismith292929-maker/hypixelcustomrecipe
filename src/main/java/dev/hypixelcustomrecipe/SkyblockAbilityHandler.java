@@ -403,7 +403,8 @@ public final class SkyblockAbilityHandler {
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
         player.sendSystemMessage(Component.literal("SkyBlock Level: " + state.level()
                 + " (" + state.levelExperience() + "/" + state.levelExperienceRequired() + " XP)"));
-        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.0f", stats.calculateWeaponDamage(false) * AccessoryBag.damageBonusMultiplier(player))));
+        player.sendSystemMessage(Component.literal("Damage: " + String.format(java.util.Locale.ROOT, "%.0f", stats.calculateWeaponDamage(false) * state.activePet().damageMultiplier()
+                * AccessoryBag.damageBonusMultiplier(player))));
         player.sendSystemMessage(Component.literal("Strength: " + stats.strength()));
         player.sendSystemMessage(Component.literal("Armor Strength: " + stats.armorStrength()));
         player.sendSystemMessage(Component.literal("Crit Chance: " + stats.critChance() + "%"));
