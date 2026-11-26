@@ -94,6 +94,24 @@ public abstract class LivingEntityMixin {
             }
         }
 
+        // Players use the custom Health/Defense pool directly. Intercept the hit
+        // before vanilla subtracts health or runs its death logic; restoring vanilla
+        // health in a RETURN injection is too late when a hit is lethal.
+        if (target instanceof ServerPlayer defender) {
+            if (adjusted <= 0.0F || defender.isInvulnerableTo(source)) {
+                cir.setReturnValue(false);
+                return;
+            }
+
+            SkyblockPlayerState state = SkyblockPlayerState.get(defender);
+            dev.hypixelcustomrecipe.NecronGuardHandler.onPlayerHit(defender);
+            if (source.getEntity() != null) state.markCombat();
+            boolean defeated = state.applyIncomingDamage(adjusted);
+            if (defeated) defender.die(source);
+            cir.setReturnValue(true);
+            return;
+        }
+
         // Keep the full attack value for the floating number. The target's health
         // loss can be much smaller simply because the mob has little health left.
         hypixelcustomrecipe$damageNumberAmount = adjusted;
