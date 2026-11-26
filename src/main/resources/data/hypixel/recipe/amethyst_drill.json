@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "GGD",
+    "APG",
+    "CAG"
+  ],
+  "key": {
+    "G": [
+      "hypixel:rough_amethyst_gemstone"
+    ],
+    "D": [
+      "hypixel:drill_bit"
+    ],
+    "A": [
+      "hypixel:iron_alloy"
+    ],
+    "P": [
+      "ruby_drill"
+    ],
+    "C": [
+      "hypixel:amethyst_gemstone_core"
+    ]
+  },
+  "result": {
+    "id": "hypixel:amethyst_drill",
+    "count": 1
+  }
+}
