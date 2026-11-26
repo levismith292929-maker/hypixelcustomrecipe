@@ -32,6 +32,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -194,6 +195,7 @@ public final class SkyblockPlayerState {
     private void addCategoryExperience(ServerPlayer player, int baseAmount, boolean combat) {
         if (baseAmount <= 0) return;
         int gained = Math.max(1, (int) Math.floor(baseAmount * categoryExperienceMultiplier()));
+        player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.25F, 1.5F);
         if (combat) {
             combatExperience = Math.addExact(combatExperience, gained);
             while (combatExperience >= combatExperienceRequired()) {
@@ -225,6 +227,7 @@ public final class SkyblockPlayerState {
     /** Adds gained Minecraft XP levels to the separate SkyBlock level progression. */
     public void addLevelExperience(ServerPlayer player, int amount) {
         if (amount <= 0) return;
+        player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.25F, 1.5F);
         levelExperience = Math.addExact(levelExperience, amount);
         while (levelExperience >= 50) {
             levelExperience -= 50;
