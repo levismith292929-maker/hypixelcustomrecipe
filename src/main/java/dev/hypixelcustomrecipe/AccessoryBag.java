@@ -78,8 +78,6 @@ public final class AccessoryBag {
         health += all; defense += all; strength += all;
         critChance += all; critDamage += all; intelligence += all;
         mana += all; manaRegen += all; weaponDamage += all;
-        mana += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
-        manaRegen += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
 
         return new SkyblockStats(
                 scale(original.health(), health), scale(original.defense(), defense),
@@ -96,7 +94,9 @@ public final class AccessoryBag {
         double bonus = 0.0;
         if (has(player, GemstoneAccessoryItems.AMETHYST_MASK)) bonus += 10.0;
         if (has(player, GemstoneAccessoryItems.NATURE_GEM)) bonus += 2.0;
+        if (has(player, GemstoneAccessoryItems.JASPER_MASK)) bonus += 4.0;
         bonus += GemTankMenu.qualityPercentFor(player, 1);
+        bonus += GemTankMenu.qualityPercentFor(player, 7);
         return bonus;
     }
 
