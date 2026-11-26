@@ -32,7 +32,7 @@ public abstract class GemstoneOreExposureMixin {
             BlockPos.MutableBlockPos mutablePos,
             CallbackInfoReturnable<Boolean> cir
     ) {
-        if (!hypixelcustomrecipe$isGemstoneOre(targetState.state())) {
+        if (!hypixelcustomrecipe$isGemstoneOre(targetState.state)) {
             return;
         }
 
