@@ -122,7 +122,7 @@ public final class DatapackItems {
             "Accessory", "Every 10th melee hit against the same enemy deals 10% extra damage.");
     public static final Item SPIDER_ARTIFACT = register("spider_artifact", "Spider Artifact", Items.COBWEB,
             "Accessory", "Take 15% less damage from Arthropods.");
-    public static final Item RED_CLAW_TALISMAN = register("red_claw_talisman", "Red Claw Talisman", Items.RED_WOOL,
+    public static final Item RED_CLAW_TALISMAN = register("red_claw_talisman", "Red Claw Talisman", Items.REDSTONE,
             "Accessory", "+1% Crit Damage.");
     public static final Item RED_CLAW_RING = register("red_claw_ring", "Red Claw Ring", Items.REDSTONE,
             "Accessory", "+3% Crit Damage.");
