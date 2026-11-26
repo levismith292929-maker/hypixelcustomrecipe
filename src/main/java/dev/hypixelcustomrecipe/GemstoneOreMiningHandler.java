@@ -147,6 +147,7 @@ public final class GemstoneOreMiningHandler {
      */
     public static int getToolTier(ItemStack stack) {
         Item item = stack.getItem();
+        if (item == DatapackItems.ADMIN_DRILL || stack.is(DatapackItems.ADMIN_DRILL)) return GEMSTONE_GAUNTLET_TIER;
 
         // Polymer presents custom drills using a vanilla fallback item to clients.
         // Their ITEM_MODEL component keeps the real drill identity, so use it
