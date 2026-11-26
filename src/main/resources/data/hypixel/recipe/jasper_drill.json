@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "equipment",
+  "pattern": [
+    "GGD",
+    "APG",
+    "CAG"
+  ],
+  "key": {
+    "G": [
+      "hypixel:rough_jasper_gemstone"
+    ],
+    "D": [
+      "hypixel:drill_bit"
+    ],
+    "A": [
+      "hypixel:iron_alloy"
+    ],
+    "P": [
+      "opal_drill"
+    ],
+    "C": [
+      "hypixel:jasper_gemstone_core"
+    ]
+  },
+  "result": {
+    "id": "hypixel:jasper_drill",
+    "count": 1
+  }
+}
