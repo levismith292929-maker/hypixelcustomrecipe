@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "xxx",
+    "xxx",
+    "xxx"
+  ],
+  "key": {
+    "x": [
+      "hypixel:perfect_jasper_gemstone"
+    ]
+  },
+  "result": {
+    "id": "hypixel:jasper_gemstone_core",
+    "count": 1
+  }
+}
