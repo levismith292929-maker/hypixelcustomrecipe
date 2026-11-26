@@ -69,16 +69,19 @@ public final class AccessoryBag {
             health += 0.02; defense += 0.02;
         }
 
-        health += GemTankMenu.qualityPercentFor(player, 0) / 100.0;
-        strength += GemTankMenu.qualityPercentFor(player, 2) / 100.0;
-        critChance += GemTankMenu.qualityPercentFor(player, 3) / 100.0;
-        intelligence += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
-        defense += GemTankMenu.qualityPercentFor(player, 5) / 100.0;
-        critDamage += GemTankMenu.qualityPercentFor(player, 6) / 100.0;
-        double all = GemTankMenu.qualityPercentFor(player, 7) / 100.0;
-        health += all; defense += all; strength += all;
-        critChance += all; critDamage += all; intelligence += all;
-        mana += all; manaRegen += all; weaponDamage += all;
+        // Gem Tank contents only grant their auras while the Gem Tank itself is in the Accessory Bag.
+        if (has(player, GemstoneAccessoryItems.GEM_TANK)) {
+            health += GemTankMenu.qualityPercentFor(player, 0) / 100.0;
+            strength += GemTankMenu.qualityPercentFor(player, 2) / 100.0;
+            critChance += GemTankMenu.qualityPercentFor(player, 3) / 100.0;
+            intelligence += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
+            defense += GemTankMenu.qualityPercentFor(player, 5) / 100.0;
+            critDamage += GemTankMenu.qualityPercentFor(player, 6) / 100.0;
+            double all = GemTankMenu.qualityPercentFor(player, 7) / 100.0;
+            health += all; defense += all; strength += all;
+            critChance += all; critDamage += all; intelligence += all;
+            mana += all; manaRegen += all; weaponDamage += all;
+        }
 
         return new SkyblockStats(
                 scale(original.health(), health), scale(original.defense(), defense),
@@ -96,8 +99,11 @@ public final class AccessoryBag {
         if (has(player, GemstoneAccessoryItems.AMETHYST_MASK)) bonus += 10.0;
         if (has(player, GemstoneAccessoryItems.NATURE_GEM)) bonus += 2.0;
         if (has(player, GemstoneAccessoryItems.JASPER_MASK)) bonus += 4.0;
-        bonus += GemTankMenu.qualityPercentFor(player, 1);
-        bonus += GemTankMenu.qualityPercentFor(player, 7);
+        // Gem Tank Fortune is active only while the Gem Tank is in the Accessory Bag.
+        if (has(player, GemstoneAccessoryItems.GEM_TANK)) {
+            bonus += GemTankMenu.qualityPercentFor(player, 1);
+            bonus += GemTankMenu.qualityPercentFor(player, 7);
+        }
         return bonus;
     }
 
