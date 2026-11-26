@@ -51,7 +51,8 @@ public final class GemstoneOreMiningHandler {
         PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
             int oreTier = getOreTier(state);
             if (oreTier < 0 || player.getAbilities().instabuild
-                    || !(level instanceof ServerLevel serverLevel)) {
+                    || !(level instanceof ServerLevel serverLevel)
+                    || !(player instanceof ServerPlayer serverPlayer)) {
                 return;
             }
 
