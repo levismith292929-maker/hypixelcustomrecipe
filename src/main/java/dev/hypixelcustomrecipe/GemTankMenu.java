@@ -99,6 +99,11 @@ public final class GemTankMenu {
         boolean[] loading = {true};
         SimpleContainer container = new SimpleContainer(9) {
             @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+
+            @Override
             public boolean canPlaceItem(int slot, ItemStack stack) {
                 if (slot >= SIZE || !isGemstone(stack)) return false;
                 int type = gemstoneType(stack);
