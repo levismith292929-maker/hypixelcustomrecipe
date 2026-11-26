@@ -87,6 +87,8 @@ public final class SkyblockPlayerState {
     private int combatExperience;
     private int miningLevel;
     private int miningExperience;
+    private String recentExperienceActionBar = "";
+    private int recentExperienceActionBarTicks;
 
     private ArmorStand petDisplay;
 
@@ -204,7 +206,8 @@ public final class SkyblockPlayerState {
                 categoryLevelUp(player, "Mining", miningLevel);
             }
         }
-        // Routine XP gains stay silent so mining and combat do not flood chat.
+        recentExperienceActionBar = "+" + gained + (combat ? " Combat XP" : " Mining XP");
+        recentExperienceActionBarTicks = 40;
     }
 
     private void categoryLevelUp(ServerPlayer player, String category, int level) {
@@ -582,6 +585,12 @@ public final class SkyblockPlayerState {
             astraeaOrbTicks--;
         }
 
+        if (recentExperienceActionBarTicks > 0) {
+            recentExperienceActionBarTicks--;
+        } else {
+            recentExperienceActionBar = "";
+        }
+
         if (++hudUpdateTicks >= 1) {
             hudUpdateTicks = 0;
             Component hud = Component.literal("Health: ")
@@ -598,6 +607,10 @@ public final class SkyblockPlayerState {
                             " | Level: %d (%d/%d XP)", skyblockLevel, levelExperience,
                             levelExperienceRequired())).withStyle(ChatFormatting.WHITE))
                     .append(Component.literal(abilityCooldownHud(player)).withStyle(ChatFormatting.WHITE));
+            if (!recentExperienceActionBar.isEmpty()) {
+                hud = hud.append(Component.literal(" | " + recentExperienceActionBar)
+                        .withStyle(ChatFormatting.YELLOW));
+            }
             player.connection.send(new ClientboundSetActionBarTextPacket(hud));
         }
     }
