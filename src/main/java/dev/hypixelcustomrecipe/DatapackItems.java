@@ -47,7 +47,7 @@ public final class DatapackItems {
             "Damage: 225", "Strength: 100",
             "Ability: Dragon Rage  RIGHT CLICK",
             "Breathe fire 5 blocks in the direction you look.",
-            "Each mob is hit once for 350 base ability damage, increased by Strength and Intelligence.",
+            "Each mob is hit once for 100 base ability damage, increased by Strength and Intelligence.",
             "Mana Cost: 80",
             "Cooldown: 12 ticks");
     public static final Item ASTRAEA = registerColored("astraea", "Astraea", Items.NETHERITE_SWORD, 0xFF55FF,
@@ -60,7 +60,7 @@ public final class DatapackItems {
     public static final Item HYPERION = registerColored("hyperion", "Hyperion", Items.NETHERITE_SWORD, 0xFFAA00,
             "Damage: 260", "Strength: 150", "Intelligence: 350",
             "Ability: Implosion  RIGHT CLICK",
-            "Deal 800 base ability damage to every target within 5 blocks.",
+            "Deal 200 base ability damage to every target within 5 blocks.",
             "Damage scales with Strength and Intelligence.",
             "Mana Cost: 150",
             "Cooldown: 5 seconds");
@@ -215,6 +215,15 @@ public final class DatapackItems {
                         new AttributeModifier(
                                 Identifier.fromNamespaceAndPath("minecraft", "base_attack_speed"),
                                 attackSpeed,
+                                AttributeModifier.Operation.ADD_VALUE
+                        ),
+                        EquipmentSlotGroup.MAINHAND
+                )
+                .withModifierAdded(
+                        Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(
+                                Identifier.fromNamespaceAndPath("hypixelcustomrecipe", "melee_hit_placeholder"),
+                                0.01,
                                 AttributeModifier.Operation.ADD_VALUE
                         ),
                         EquipmentSlotGroup.MAINHAND
