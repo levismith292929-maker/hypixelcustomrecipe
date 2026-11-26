@@ -19,7 +19,8 @@
     "NecronGuardTargetMixin",
     "BlockItemPlacementMixin",
     "PistonMovingBlockEntityMixin",
-    "ExplosionMixin"
+    "ExplosionMixin",
+    "GemstoneOreExposureMixin"
   ],
   "injectors": {
     "defaultRequire": 1
