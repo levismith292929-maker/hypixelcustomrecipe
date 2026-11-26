@@ -82,6 +82,16 @@ public final class DatapackItems {
             "Damage: 140", "Strength: 115");
     public static final Item BLADE_HANDLE = register("blade_handle", "Blade Handle", Items.STICK);
     public static final Item IRON_ALLOY = registerStackableGlint("iron_alloy", "Iron Alloy", Items.IRON_BLOCK);
+    public static final Item DRILL_BIT = registerStackableGlint("drill_bit", "Drill Bit", Items.PRISMARINE_SHARD);
+    public static final Item RUBY_DRILL = register("ruby_drill", "Ruby Drill", Items.PRISMARINE_SHARD);
+    public static final Item AMETHYST_DRILL = register("amethyst_drill", "Amethyst Drill", Items.PRISMARINE_SHARD);
+    public static final Item AMBER_DRILL = register("amber_drill", "Amber Drill", Items.PRISMARINE_SHARD);
+    public static final Item TOPAZ_DRILL = register("topaz_drill", "Topaz Drill", Items.PRISMARINE_SHARD);
+    public static final Item SAPPHIRE_DRILL = register("sapphire_drill", "Sapphire Drill", Items.PRISMARINE_SHARD);
+    public static final Item JADE_DRILL = register("jade_drill", "Jade Drill", Items.PRISMARINE_SHARD);
+    public static final Item OPAL_DRILL = register("opal_drill", "Opal Drill", Items.PRISMARINE_SHARD);
+    public static final Item JASPER_DRILL = register("jasper_drill", "Jasper Drill", Items.PRISMARINE_SHARD);
+    public static final Item GEMSTONE_GAUNTLET = register("gemstone_gauntlet", "Gemstone Gauntlet", Items.PRISMARINE_SHARD);
     public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND, "Needs 160 diamonds to craft");
     public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK, "Needs 80 enchanted diamonds to craft");
     public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
