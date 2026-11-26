@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -80,12 +80,12 @@ public final class GemstoneAccessoryItems {
             }
 
             @Override
-            public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+            public InteractionResult use(Level level, Player player, InteractionHand hand) {
                 ItemStack stack = player.getItemInHand(hand);
                 if (tank && hand == InteractionHand.OFF_HAND && !level.isClientSide()
                         && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                     GemTankMenu.open(serverPlayer);
-                    return InteractionResultHolder.success(stack);
+                    return InteractionResult.SUCCESS;
                 }
                 return super.use(level, player, hand);
             }
