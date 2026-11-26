@@ -189,7 +189,7 @@ public final class SkyblockAbilityHandler {
     private static void useHyperion(ServerPlayer player) {
         if (!beginAbility(player, "hyperion", 150, 100)) return;
         ServerLevel level = (ServerLevel) player.level();
-        double baseDamage = 800.0;
+        double baseDamage = 200.0;
         DamageSource source = level.damageSources().explosion(null, player);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(5.0), entity -> isValidCombatTarget(entity, player)
@@ -217,7 +217,7 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, "aotd", 80, 12)) return;
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(direction.scale(0.3)).add(0.0, -0.1, 0.0);
-        double baseDamage = 350.0;
+        double baseDamage = 100.0;
         ACTIVE_BREATHS.put(player.getUUID(), new BreathState(origin, direction, baseDamage));
         playSound(player, net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, 1.0F, 1.0F);
     }
@@ -276,7 +276,7 @@ public final class SkyblockAbilityHandler {
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
         Set<UUID> hitTargets = new HashSet<>();
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
-        double baseDamage = 1350.0;
+        double baseDamage = 250.0;
         double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
         for (double distance : scanDistances) {
