@@ -40,6 +40,7 @@ public final class AccessoryBag {
                 || stack.is(GemstoneAccessoryItems.OPAL_MASK)
                 || stack.is(GemstoneAccessoryItems.JASPER_MASK)
                 || stack.is(GemstoneAccessoryItems.NATURE_GEM)
+                || stack.is(GemstoneAccessoryItems.GEM_TANK)
                 || stack.is(DatapackItems.ZOMBIE_RING)
                 || stack.is(DatapackItems.DEVOUR_RING)
                 || stack.is(DatapackItems.ZOMBIE_ARTIFACT)
