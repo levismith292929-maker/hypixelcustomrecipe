@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
-import java.io.IOException;
 
 /**
  * Placeable gemstone ores using Polymer Blocks' textured full-block models.
@@ -80,17 +79,13 @@ public final class GemstoneOreBlocks {
         // Copy the existing "hypixel" asset namespace into Polymer's pack. The
         // registered item/block IDs intentionally keep their historical namespace.
         PolymerResourcePackUtils.RESOURCE_PACK_CREATION_EVENT.register(builder -> {
-            try {
-                var container = FabricLoader.getInstance()
-                        .getModContainer(HypixelCustomRecipe.MOD_ID)
-                        .orElseThrow(() -> new IllegalStateException("Could not find this mod's resources"));
-                var assets = container.findPath("assets/hypixel")
-                        .orElseThrow(() -> new IllegalStateException("Missing assets/hypixel resource folder"));
-                if (!builder.copyFromPath(assets, "assets/hypixel", true)) {
-                    HypixelCustomRecipe.LOGGER.error("Failed to copy gemstone assets into Polymer's resource pack");
-                }
-            } catch (IOException exception) {
-                throw new IllegalStateException("Failed to load gemstone resource-pack assets", exception);
+            var container = FabricLoader.getInstance()
+                    .getModContainer(HypixelCustomRecipe.MOD_ID)
+                    .orElseThrow(() -> new IllegalStateException("Could not find this mod's resources"));
+            var assets = container.findPath("assets/hypixel")
+                    .orElseThrow(() -> new IllegalStateException("Missing assets/hypixel resource folder"));
+            if (!builder.copyFromPath(assets, "assets/hypixel", true)) {
+                HypixelCustomRecipe.LOGGER.error("Failed to copy gemstone assets into Polymer's resource pack");
             }
         });
     }
