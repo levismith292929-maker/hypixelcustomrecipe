@@ -139,6 +139,26 @@ public final class GemstoneOreMiningHandler {
      */
     public static int getToolTier(ItemStack stack) {
         Item item = stack.getItem();
+
+        // Polymer presents custom drills using a vanilla fallback item to clients.
+        // Their ITEM_MODEL component keeps the real drill identity, so use it
+        // before checking the server-side registered item instance.
+        net.minecraft.resources.Identifier model = stack.get(net.minecraft.core.component.DataComponents.ITEM_MODEL);
+        if (model != null && model.getNamespace().equals("hypixel")) {
+            return switch (model.getPath()) {
+                case "ruby_drill" -> 1;
+                case "amethyst_drill" -> 2;
+                case "amber_drill" -> 3;
+                case "topaz_drill" -> 4;
+                case "sapphire_drill" -> 5;
+                case "jade_drill" -> 6;
+                case "opal_drill" -> 7;
+                case "jasper_drill" -> 8;
+                case "gemstone_gauntlet" -> GEMSTONE_GAUNTLET_TIER;
+                default -> item == Items.NETHERITE_PICKAXE ? 0 : -1;
+            };
+        }
+
         if (item == Items.NETHERITE_PICKAXE) return 0;
         if (item == DatapackItems.RUBY_DRILL) return 1;
         if (item == DatapackItems.AMETHYST_DRILL) return 2;
