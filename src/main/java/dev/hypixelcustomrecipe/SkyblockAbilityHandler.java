@@ -65,6 +65,16 @@ public final class SkyblockAbilityHandler {
                     .then(Commands.literal("levels").executes(context -> {
                         showLevels(context.getSource().getPlayerOrException());
                         return 1;
+                    }))
+                    .then(Commands.literal("togglelevelmessages").executes(context -> {
+                        ServerPlayer player = context.getSource().getPlayerOrException();
+                        SkyblockPlayerState state = SkyblockPlayerState.get(player);
+                        state.toggleLevelMessages();
+                        player.sendSystemMessage(Component.literal("Level-up messages: "
+                                + (state.levelMessagesEnabled() ? "ON" : "OFF"))
+                                .withStyle(style -> style.withColor(0x55FFFF)));
+                        showStatViewerMenu(player);
+                        return 1;
                     })));
         });
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -366,6 +376,11 @@ public final class SkyblockAbilityHandler {
                 .withClickEvent(new ClickEvent.RunCommand("/statviewer accessories"))));
         player.sendSystemMessage(Component.literal("[Levels]").withStyle(style -> style.withColor(0x55FFFF).withUnderlined(true)
                 .withClickEvent(new ClickEvent.RunCommand("/statviewer levels"))));
+        boolean enabled = SkyblockPlayerState.get(player).levelMessagesEnabled();
+        player.sendSystemMessage(Component.literal("[Level-up Messages: " + (enabled ? "ON" : "OFF") + "]")
+                .withStyle(style -> style.withColor(enabled ? 0x55FF55 : 0xFF5555)
+                        .withUnderlined(true)
+                        .withClickEvent(new ClickEvent.RunCommand("/statviewer togglelevelmessages"))));
     }
 
     public static void showLevels(ServerPlayer player) {
