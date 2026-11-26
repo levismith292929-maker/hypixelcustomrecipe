@@ -94,6 +94,7 @@ public abstract class LivingEntityMixin {
             if (attackStats.weaponDamage() > 0.0) {
                 float attackScale = attacker.getAttackStrengthScale(0.5F);
                 adjusted = (float) (attackStats.calculateWeaponDamage(false) * attackScale
+                        * attackerState.activePet().damageMultiplier()
                         * AccessoryBag.damageBonusMultiplier(attacker));
             }
             adjusted = AccessoryBag.applyTarantulaTalisman(attacker, target, adjusted);
