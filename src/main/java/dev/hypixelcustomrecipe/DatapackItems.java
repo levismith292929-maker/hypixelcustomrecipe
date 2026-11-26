@@ -108,6 +108,30 @@ public final class DatapackItems {
             "Cooldown: 30 seconds");
     public static final Item STAT_VIEWER = register("stat_viewer", "View Stats", Items.NETHER_STAR,
             "Click in your inventory to view your stats, including your held weapon.");
+    public static final Item ZOMBIE_RING = register("zombie_ring", "Zombie Ring", Items.ROTTEN_FLESH,
+            "Accessory", "Take 10% less damage from Undead mobs.");
+    public static final Item DEVOUR_RING = register("devour_ring", "Devour Ring", Items.GOLDEN_APPLE,
+            "Accessory", "Heal 5 Health when you kill a mob.");
+    public static final Item ZOMBIE_ARTIFACT = register("zombie_artifact", "Zombie Artifact", Items.ZOMBIE_HEAD,
+            "Accessory", "Take 15% less damage from Undead mobs.");
+    public static final Item REAPER_ORB = register("reaper_orb", "Reaper Orb", Items.WITHER_SKELETON_SKULL,
+            "Accessory", "Gain +2 Strength for each mob killed in the last 5 seconds.");
+    public static final Item SPIDER_RING = register("spider_ring", "Spider Ring", Items.SPIDER_EYE,
+            "Accessory", "Take 10% less damage from Arthropods.");
+    public static final Item TARANTULA_TALISMAN = register("tarantula_talisman", "Tarantula Talisman", Items.FERMENTED_SPIDER_EYE,
+            "Accessory", "Every 10th melee hit against the same enemy deals 10% extra damage.");
+    public static final Item SPIDER_ARTIFACT = register("spider_artifact", "Spider Artifact", Items.COBWEB,
+            "Accessory", "Take 15% less damage from Arthropods.");
+    public static final Item RED_CLAW_TALISMAN = register("red_claw_talisman", "Red Claw Talisman", Items.RED_DYE,
+            "Accessory", "+1% Crit Damage.");
+    public static final Item RED_CLAW_RING = register("red_claw_ring", "Red Claw Ring", Items.REDSTONE,
+            "Accessory", "+3% Crit Damage.");
+    public static final Item RED_CLAW_ARTIFACT = register("red_claw_artifact", "Red Claw Artifact", Items.REDSTONE_BLOCK,
+            "Accessory", "+5% Crit Damage.");
+    public static final Item HUNTER_TALISMAN = register("hunter_talisman", "Hunter Talisman", Items.BONE,
+            "Accessory", "+2 Combat XP per mob kill.");
+    public static final Item HUNTER_RING = register("hunter_ring", "Hunter Ring", Items.BONE_BLOCK,
+            "Accessory", "+5 Combat XP per mob kill.");
     public static final Item ADMIN_RING = registerProfileHead("admin_ring", "Admin Ring", null,
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzQwZTdjMDE2YTgzYzdjNTgwNmI4ZWZmMGZhMTJmMjczYzAzNmExOGU1MDY2YmRlZDI4MGZhNmJlZGU3Y2M5ZCJ9fX0=", "Accessory", "+100% Damage", "All Stats: x5");
 
