@@ -27,7 +27,16 @@ public final class AccessoryBag {
     private AccessoryBag() {}
 
     public static boolean isAccessory(ItemStack stack) {
-        return !stack.isEmpty() && stack.is(DatapackItems.ADMIN_RING);
+        return !stack.isEmpty() && (stack.is(DatapackItems.ADMIN_RING)
+                || stack.is(GemstoneAccessoryItems.RUBY_MASK)
+                || stack.is(GemstoneAccessoryItems.AMETHYST_MASK)
+                || stack.is(GemstoneAccessoryItems.AMBER_MASK)
+                || stack.is(GemstoneAccessoryItems.TOPAZ_MASK)
+                || stack.is(GemstoneAccessoryItems.SAPPHIRE_MASK)
+                || stack.is(GemstoneAccessoryItems.JADE_MASK)
+                || stack.is(GemstoneAccessoryItems.OPAL_MASK)
+                || stack.is(GemstoneAccessoryItems.JASPER_MASK)
+                || stack.is(GemstoneAccessoryItems.NATURE_GEM));
     }
 
     public static SkyblockStats applyAdminRing(ServerPlayer player, SkyblockStats stats) {
@@ -36,6 +45,65 @@ public final class AccessoryBag {
                 timesFive(stats.strength()), timesFive(stats.armorStrength()), timesFive(stats.weaponStrength()),
                 timesFive(stats.critChance()), timesFive(stats.critDamage()), timesFive(stats.intelligence()),
                 timesFive(stats.manaMaximum()), timesFive(stats.manaRegeneration()), stats.weaponDamage() * 5.0);
+    }
+
+    /** Applies the unique gemstone accessories once; duplicates are rejected by the bag. */
+    public static SkyblockStats applyGemstoneAccessories(ServerPlayer player, SkyblockStats original) {
+        double health = 1.0, defense = 1.0, strength = 1.0, critChance = 1.0;
+        double critDamage = 1.0, intelligence = 1.0;
+        double fortune = gemstoneFortuneBonusPercent(player);
+
+        if (has(player, GemstoneAccessoryItems.RUBY_MASK)) health += 0.10;
+        if (has(player, GemstoneAccessoryItems.AMETHYST_MASK)) fortune += 10.0;
+        if (has(player, GemstoneAccessoryItems.AMBER_MASK)) strength += 0.10;
+        if (has(player, GemstoneAccessoryItems.TOPAZ_MASK)) critChance += 0.05;
+        if (has(player, GemstoneAccessoryItems.SAPPHIRE_MASK)) intelligence += 0.15;
+        if (has(player, GemstoneAccessoryItems.JADE_MASK)) defense += 0.20;
+        if (has(player, GemstoneAccessoryItems.OPAL_MASK)) critDamage += 0.25;
+        if (has(player, GemstoneAccessoryItems.JASPER_MASK)) {
+            health += 0.04; defense += 0.04; strength += 0.04;
+            critChance += 0.04; critDamage += 0.04; intelligence += 0.04;
+        }
+        if (has(player, GemstoneAccessoryItems.NATURE_GEM)) {
+            health += 0.02; defense += 0.02; fortune += 2.0;
+        }
+
+        health += GemTankMenu.qualityPercentFor(player, 0) / 100.0;
+        fortune += GemTankMenu.qualityPercentFor(player, 1);
+        strength += GemTankMenu.qualityPercentFor(player, 2) / 100.0;
+        critChance += GemTankMenu.qualityPercentFor(player, 3) / 100.0;
+        intelligence += GemTankMenu.qualityPercentFor(player, 4) / 100.0;
+        defense += GemTankMenu.qualityPercentFor(player, 5) / 100.0;
+        critDamage += GemTankMenu.qualityPercentFor(player, 6) / 100.0;
+        double all = GemTankMenu.qualityPercentFor(player, 7) / 100.0;
+        health += all; defense += all; strength += all;
+        critChance += all; critDamage += all; intelligence += all;
+
+        return new SkyblockStats(
+                scale(original.health(), health), scale(original.defense(), defense),
+                scale(original.strength(), strength), scale(original.armorStrength(), strength),
+                scale(original.weaponStrength(), strength), scale(original.critChance(), critChance),
+                scale(original.critDamage(), critDamage), scale(original.intelligence(), intelligence),
+                original.manaMaximum(), original.manaRegeneration(), original.weaponDamage()
+        );
+    }
+
+    /** Total additive Gemstone Fortune percentage from accessories and the Gem Tank. */
+    public static double gemstoneFortuneBonusPercent(ServerPlayer player) {
+        double bonus = 0.0;
+        if (has(player, GemstoneAccessoryItems.AMETHYST_MASK)) bonus += 10.0;
+        if (has(player, GemstoneAccessoryItems.NATURE_GEM)) bonus += 2.0;
+        bonus += GemTankMenu.qualityPercentFor(player, 1);
+        bonus += GemTankMenu.qualityPercentFor(player, 7);
+        return bonus;
+    }
+
+    private static int scale(int value, double multiplier) {
+        return (int) Math.min(Integer.MAX_VALUE, Math.round(value * multiplier));
+    }
+
+    private static boolean has(ServerPlayer player, Item item) {
+        return contents(player).stream().anyMatch(stack -> stack.is(item));
     }
 
     public static double damageBonusMultiplier(ServerPlayer player) {
