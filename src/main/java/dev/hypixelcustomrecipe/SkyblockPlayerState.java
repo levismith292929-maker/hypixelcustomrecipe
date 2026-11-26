@@ -318,7 +318,10 @@ public final class SkyblockPlayerState {
         int savedHealth = input.getIntOr("hypixel_health", -1);
         if (savedMaximum > 0 && savedHealth >= 0) {
             maximumHealth = savedMaximum;
-            currentHealth = Math.min(savedHealth, savedMaximum);
+            // A zero-Health value can be saved if the server stops while a
+            // player is in the death transition. A newly loaded player is
+            // alive again, so do not restore that stale dead state on login.
+            currentHealth = savedHealth == 0 ? savedMaximum : Math.min(savedHealth, savedMaximum);
             healthInitialized = true;
         }
 
