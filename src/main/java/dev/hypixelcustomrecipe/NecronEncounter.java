@@ -96,6 +96,7 @@ public final class NecronEncounter {
     public static boolean isNecron(LivingEntity entity) { return necron != null && entity == necron; }
     public static double logicalMaximumHealth() { return MAX_HP; }
     public static double toEntityDamage(double logicalDamage) { return logicalDamage / HP_PER_ENTITY_HP; }
+    public static double toLogicalDamage(double entityDamage) { return entityDamage * HP_PER_ENTITY_HP; }
     public static boolean isLaserActive() { return isActive() && laserActive; }
 
     public static boolean canPlaceBlock(ServerPlayer player, BlockPos pos) {
