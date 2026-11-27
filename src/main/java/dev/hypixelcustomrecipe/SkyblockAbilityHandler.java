@@ -314,7 +314,12 @@ public final class SkyblockAbilityHandler {
 
     private static void useScytheAbility(ServerPlayer player, boolean soulBlade) {
         String abilityId = soulBlade ? "soul_blade" : "necrons_scythe";
-        if (!beginAbility(player, abilityId, soulBlade ? 100 : 1, 1)) return;
+        if (!beginAbility(player, abilityId, soulBlade ? 100 : 1, 1)) {
+            if (soulBlade && mana(player).isOnCooldown(abilityId)) {
+                player.sendSystemMessage(Component.literal("Soul Blade is recharging!"));
+            }
+            return;
+        }
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition();
@@ -334,7 +339,7 @@ public final class SkyblockAbilityHandler {
                 AABB area = new AABB(point, point).inflate(0.55D);
                 for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
                         entity -> isValidScytheTarget(entity, player)
-                                && entity.distanceToSqr(point) <= 0.3025D)) {
+                                && entity.getBoundingBox().inflate(0.1D).contains(point))) {
                     if (hitTargets.add(target.getUUID())) {
                         double maximumHealth = target instanceof ServerPlayer targetPlayer
                                 ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
@@ -378,7 +383,9 @@ public final class SkyblockAbilityHandler {
     /** Bypasses Defense and armor, including the custom player Health pool. */
     private static void applyScytheTrueDamage(ServerLevel level, LivingEntity target,
                                                DamageSource source, float damage) {
-        if (damage <= 0.0F || target.isInvulnerableTo(level, source)) return;
+        // Soul Blade is explicitly true damage: do not reject targets because
+        // their normal damage immunity blocks the synthetic damage source.
+        if (damage <= 0.0F) return;
         if (target instanceof ServerPlayer defender) {
             SkyblockPlayerState state = SkyblockPlayerState.get(defender);
             state.markCombat();
