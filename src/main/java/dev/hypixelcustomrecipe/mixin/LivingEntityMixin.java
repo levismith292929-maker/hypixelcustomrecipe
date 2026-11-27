@@ -2,6 +2,7 @@ package dev.hypixelcustomrecipe.mixin;
 
 import dev.hypixelcustomrecipe.AccessoryBag;
 import dev.hypixelcustomrecipe.DamageNumberHandler;
+import dev.hypixelcustomrecipe.DatapackItems;
 import dev.hypixelcustomrecipe.ModArmorItems;
 import dev.hypixelcustomrecipe.SkyblockPlayerState;
 import dev.hypixelcustomrecipe.SkyblockStats;
@@ -103,9 +104,17 @@ public abstract class LivingEntityMixin {
         hypixelcustomrecipe$damageNumberAmount = amount;
 
         float adjusted = amount;
+        boolean soulBladeAttack = source.getEntity() instanceof ServerPlayer soulBladeAttacker
+                && soulBladeAttacker != target && source.getDirectEntity() == soulBladeAttacker
+                && soulBladeAttacker.getMainHandItem().is(DatapackItems.SOUL_BLADE);
 
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target
                 && source.getDirectEntity() == attacker) {
+            if (soulBladeAttack) {
+                adjusted = target instanceof ServerPlayer defenderTarget
+                        ? SkyblockPlayerState.get(defenderTarget).maximumHealth() * 0.05F
+                        : target.getMaxHealth() * 0.05F;
+            } else {
             SkyblockPlayerState attackerState = SkyblockPlayerState.get(attacker);
             SkyblockStats attackStats = SkyblockLevelBonuses.apply(
                     AccessoryBag.applyGemstoneAccessories(attacker,
@@ -128,13 +137,14 @@ public abstract class LivingEntityMixin {
                 adjusted *= (float) attackStats.criticalMultiplier();
                 hypixelcustomrecipe$criticalHit = true;
             }
+            }
         }
 
         // Players use the custom Health/Defense pool directly. Intercept the hit
         // before vanilla subtracts health or runs its death logic; restoring vanilla
         // health in a RETURN injection is too late when a hit is lethal.
         if (target instanceof ServerPlayer defender) {
-            if (source.getEntity() instanceof LivingEntity attacker && attacker != defender) {
+            if (!soulBladeAttack && source.getEntity() instanceof LivingEntity attacker && attacker != defender) {
                 adjusted *= AccessoryBag.incomingDamageMultiplier(defender, attacker);
             }
             if (adjusted <= 0.0F || defender.isInvulnerableTo(level, source)) {
@@ -155,8 +165,9 @@ public abstract class LivingEntityMixin {
             // Calculate the same rounded post-Defense value used by the custom
             // Health pool, then display it above the player who was hit.
             float displayedDamage = (float) (Math.round(
-                    state.stats().applyDefense(adjusted) * 10.0) / 10.0);
-            boolean defeated = state.applyIncomingDamage(adjusted);
+                    (soulBladeAttack ? adjusted : state.stats().applyDefense(adjusted)) * 10.0) / 10.0);
+            boolean defeated = soulBladeAttack
+                    ? state.applyTrueDamage(adjusted) : state.applyIncomingDamage(adjusted);
             if (displayedDamage > 0.0F) {
                 DamageNumberHandler.show(level, defender, displayedDamage,
                         hypixelcustomrecipe$criticalHit);
@@ -177,6 +188,26 @@ public abstract class LivingEntityMixin {
                 defender.setHealth(0.0F);
                 defender.die(source);
             }
+            cir.setReturnValue(true);
+            return;
+        }
+
+        // Soul Blade damage is true damage: remove exactly 5% of maximum health,
+        // bypassing armor, Defense, Strength, critical hits, and accessory modifiers.
+        if (soulBladeAttack) {
+            if (target.isInvulnerableTo(level, source)) {
+                hypixelcustomrecipe$trackingPlayerDamage = false;
+                hypixelcustomrecipe$trackingDamageNumber = false;
+                hypixelcustomrecipe$damageNumberAmount = 0.0F;
+                cir.setReturnValue(false);
+                return;
+            }
+            target.setHealth(Math.max(0.0F, target.getHealth() - adjusted));
+            DamageNumberHandler.show(level, target, adjusted, false);
+            if (target.getHealth() <= 0.0F) target.die(source);
+            hypixelcustomrecipe$trackingPlayerDamage = false;
+            hypixelcustomrecipe$trackingDamageNumber = false;
+            hypixelcustomrecipe$damageNumberAmount = 0.0F;
             cir.setReturnValue(true);
             return;
         }
