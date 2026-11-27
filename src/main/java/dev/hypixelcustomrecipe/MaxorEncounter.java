@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.WitherSkull;
@@ -311,7 +312,7 @@ public final class MaxorEncounter {
         for (UUID uuid : LASER_AFFECTED) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);
             if (player != null) {
-                SkyblockPlayerState.get(player).clearMaxorLaserStacks();
+                SkyblockPlayerState.clearMaxorLaserStacksFor(uuid);
             }
         }
         LASER_AFFECTED.clear();
