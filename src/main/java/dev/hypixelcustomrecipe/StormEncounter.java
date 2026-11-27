@@ -3,6 +3,7 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -65,7 +66,8 @@ public final class StormEncounter {
 
     public static void initialize() {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-                storm == null || entity != storm);
+                storm == null || entity != storm
+                        || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (storm != null && entity == storm) {
