@@ -316,8 +316,12 @@ public final class MaxorEncounter {
         encounterLevel.playSound(null, maxor.blockPosition(), SoundEvents.WITHER_DEATH,
                 SoundSource.HOSTILE, 2.0F, 0.8F);
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("Maxor has been defeated! " + rewarded + " player(s) earned the reward."),
+                Component.literal("Maxor has been defeated! " + rewarded + " player(s) earned the reward. Storm begins in 5 minutes!"),
                 false);
+        // Preserve the encounter location, owner, and participants for Storm's
+        // five-minute intermission before clearing Maxor's phase state.
+        StormEncounter.beginBreak(encounterLevel, maxor.blockPosition(), altarOwner,
+                Set.copyOf(PARTICIPANTS));
         clearEncounter();
     }
 
@@ -364,8 +368,12 @@ public final class MaxorEncounter {
 
     /** Also called by direct-damage abilities that bypass hurtServer. */
     public static void recordDirectDamage(LivingEntity target, ServerPlayer attacker, double entityDamage) {
-        if (maxor == null || target != maxor || entityDamage <= 0.0D) return;
-        recordDamage(attacker, entityDamage);
+        if (entityDamage <= 0.0D) return;
+        if (maxor != null && target == maxor) {
+            recordDamage(attacker, entityDamage);
+            return;
+        }
+        StormEncounter.recordDirectDamage(target, attacker, entityDamage);
     }
 
     private static void recordDamage(ServerPlayer player, double entityDamage) {
