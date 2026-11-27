@@ -34,6 +34,9 @@ import java.util.UUID;
  */
 public final class MaxorEncounter {
     private static final double MAXOR_HEALTH = 2_000_000.0D;
+    // Vanilla's max-health attribute is capped, so map 1,024 entity HP to 2,000,000 boss HP.
+    private static final double ENTITY_HEALTH = 1_024.0D;
+    private static final double BOSS_HP_PER_ENTITY_HP = MAXOR_HEALTH / ENTITY_HEALTH;
     private static final double REWARD_THRESHOLD = MAXOR_HEALTH * 0.20D;
     private static final int MINION_INTERVAL_TICKS = 80;
     private static final int MINION_BATCH_SIZE = 8;
@@ -87,7 +90,7 @@ public final class MaxorEncounter {
             }
             Entity attacker = source.getEntity();
             if (attacker instanceof ServerPlayer player) {
-                PLAYER_DAMAGE.merge(player.getUUID(), (double) amount, Double::sum);
+                PLAYER_DAMAGE.merge(player.getUUID(), (double) amount * BOSS_HP_PER_ENTITY_HP, Double::sum);
                 PARTICIPANTS.add(player.getUUID());
             }
             return true;
@@ -122,9 +125,9 @@ public final class MaxorEncounter {
         boss.setPersistenceRequired();
         var maxHealth = boss.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealth != null) {
-            maxHealth.setBaseValue(MAXOR_HEALTH);
+            maxHealth.setBaseValue(ENTITY_HEALTH);
         }
-        boss.setHealth((float) MAXOR_HEALTH);
+        boss.setHealth((float) ENTITY_HEALTH);
         boss.setTarget(starter);
 
         if (!level.addFreshEntity(boss)) {
@@ -158,7 +161,11 @@ public final class MaxorEncounter {
             return;
         }
 
-        BOSS_BAR.setProgress(Math.max(0.0F, Math.min(1.0F, maxor.getHealth() / (float) MAXOR_HEALTH)));
+        float progress = Math.max(0.0F, Math.min(1.0F, maxor.getHealth() / (float) ENTITY_HEALTH));
+        BOSS_BAR.setProgress(progress);
+        long displayedHp = Math.max(0L, Math.round(progress * MAXOR_HEALTH));
+        BOSS_BAR.setName(Component.literal("Maxor: " + String.format(java.util.Locale.ROOT, "%,d", displayedHp)
+                + " / 2,000,000 HP"));
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.serverLevel() == encounterLevel
                     && player.distanceToSqr(maxor) <= 96.0D * 96.0D) {
