@@ -34,7 +34,6 @@ public abstract class VoidriddenEndermanTeleportMixin {
     ) {
         if (!Boolean.TRUE.equals(cir.getReturnValue())
                 || !((Object) this instanceof VoidriddenEnderman enderman)
-                || !enderman.hasBeenHitByPlayer()
                 || !(enderman.level() instanceof ServerLevel serverLevel)) return;
         Vec3 start = new Vec3(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY + 1.0, hypixelcustomrecipe$oldZ);
         Vec3 end = new Vec3(enderman.getX(), enderman.getY() + 1.0, enderman.getZ());
