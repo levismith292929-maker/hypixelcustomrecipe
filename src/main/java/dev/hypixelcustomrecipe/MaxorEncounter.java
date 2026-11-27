@@ -16,12 +16,10 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.ItemStack;
 
@@ -97,18 +95,6 @@ public final class MaxorEncounter {
                 if (attacker instanceof ServerPlayer player) {
                     recordDamage(player, amount);
                 }
-            }
-            // A real Wither skull hit by Maxor permanently strips 2% of the
-            // player's current maximum Health for this encounter.
-            if (maxor != null && entity instanceof ServerPlayer player
-                    && source.getDirectEntity() instanceof Projectile projectile
-                    && projectile.getOwner() == maxor
-                    && projectile.getType() == EntityTypes.WITHER_SKULL) {
-                SkyblockPlayerState.get(player).addMaxorLaserStack();
-                LASER_AFFECTED.add(player.getUUID());
-                PARTICIPANTS.add(player.getUUID());
-                player.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
-                        .withStyle(style -> style.withColor(0xAA00AA)));
             }
             return true;
         });
