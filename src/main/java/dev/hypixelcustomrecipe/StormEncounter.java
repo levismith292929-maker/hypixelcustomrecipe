@@ -43,7 +43,7 @@ public final class StormEncounter {
     private static final double SAFE_ZONE_RADIUS =
             Math.sqrt((10_000.0D * 0.05D) / (SAFE_ZONE_COUNT * Math.PI));
     private static final int STRIKES_PER_WAVE = 30;
-    private static final int WARNING_TICKS = 60;
+    private static final int WARNING_TICKS = 100; // 5 seconds to reach a safe zone before the simultaneous strike
     private static final int WAVE_INTERVAL_TICKS = 100;
 
     private static ServerLevel level;
