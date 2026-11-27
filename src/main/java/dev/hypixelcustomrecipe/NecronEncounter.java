@@ -359,11 +359,11 @@ public final class NecronEncounter {
         attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
         clearDisplayList(CLOSING_WALL_DISPLAYS);
         for (int i = 0; i < 16; i++) {
-            Display.BlockDisplay segment = createBlockDisplay(Blocks.PURPLE_STAINED_GLASS.defaultBlockState(),
+            Display.BlockDisplay segment = createBlockDisplay(Blocks.AMETHYST_BLOCK.defaultBlockState(),
                     safeX, center.getY() + 5.2D, safeZ, 1.0F, 10.0F, 0.18F, new Quaternionf());
             if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
         }
-        safeZoneDisplay = createBlockDisplay(Blocks.LIME_STAINED_GLASS.defaultBlockState(),
+        safeZoneDisplay = createBlockDisplay(Blocks.EMERALD_BLOCK.defaultBlockState(),
                 safeX, center.getY() + 1.04D, safeZ, 5.0F, 0.08F, 5.0F, new Quaternionf());
         attack1Timer = random(225, 338);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
@@ -438,7 +438,7 @@ public final class NecronEncounter {
                 display.setPos(x, y, z);
                 level.addFreshEntity(display);
             }
-            Display.BlockDisplay marker = createBlockDisplay(Blocks.RED_STAINED_GLASS.defaultBlockState(),
+            Display.BlockDisplay marker = createBlockDisplay(Blocks.REDSTONE_BLOCK.defaultBlockState(),
                     x, center.getY() + 1.04D, z, 10.0F, 0.06F, 10.0F, new Quaternionf());
             BOMBS.add(new TntBomb(x, z, y, display, marker, 0));
         }
@@ -542,7 +542,7 @@ public final class NecronEncounter {
         double midX = center.getX() + 0.5D + Math.cos(laserAngle) * radius * 0.5D;
         double midZ = center.getZ() + 0.5D + Math.sin(laserAngle) * radius * 0.5D;
         if (laserBeamDisplay == null || laserBeamDisplay.isRemoved()) {
-            laserBeamDisplay = createBlockDisplay(Blocks.PURPLE_STAINED_GLASS.defaultBlockState(),
+            laserBeamDisplay = createBlockDisplay(Blocks.AMETHYST_BLOCK.defaultBlockState(),
                     midX, beamY, midZ, 0.14F, 0.14F, (float) radius, new Quaternionf().rotationY((float) laserAngle));
         } else {
             laserBeamDisplay.setPos(midX, beamY, midZ);
@@ -613,7 +613,7 @@ public final class NecronEncounter {
             boolean alongX = side < 2;
             double px = alongX ? zoneMidX : (side == 2 ? dangerMinX + 0.5D : dangerMaxX + 0.5D);
             double pz = alongX ? (side == 0 ? dangerMinZ + 0.5D : dangerMaxZ + 0.5D) : zoneMidZ;
-            Display.BlockDisplay edge = createBlockDisplay(Blocks.YELLOW_CONCRETE.defaultBlockState(),
+            Display.BlockDisplay edge = createBlockDisplay(Blocks.GOLD_BLOCK.defaultBlockState(),
                     px, zoneY, pz, alongX ? 50.0F : 0.15F, 0.08F, alongX ? 0.15F : 50.0F, new Quaternionf());
             if (edge != null) DANGER_ZONE_DISPLAYS.add(edge);
         }
@@ -897,8 +897,8 @@ public final class NecronEncounter {
     private static void updateDangerZoneDisplays(int color) {
         if (dangerDisplayColor == color) return;
         dangerDisplayColor = color;
-        net.minecraft.world.level.block.Block block = color == 0xFFFF00 ? Blocks.YELLOW_CONCRETE
-                : color == 0xFF8800 ? Blocks.ORANGE_CONCRETE : Blocks.RED_CONCRETE;
+        net.minecraft.world.level.block.Block block = color == 0xFFFF00 ? Blocks.GOLD_BLOCK
+                : color == 0xFF8800 ? Blocks.COPPER_BLOCK : Blocks.REDSTONE_BLOCK;
         for (Display.BlockDisplay display : DANGER_ZONE_DISPLAYS) display.setBlockState(block.defaultBlockState());
     }
 
