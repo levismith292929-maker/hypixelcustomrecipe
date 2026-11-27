@@ -20,6 +20,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -97,7 +99,9 @@ public final class MaxorEncounter {
             // A real Wither skull hit by Maxor permanently strips 2% of the
             // player's current maximum Health for this encounter.
             if (maxor != null && entity instanceof ServerPlayer player
-                    && source.getEntity() == maxor && source.getDirectEntity() != null && source.getDirectEntity().getType() == EntityTypes.WITHER_SKULL) {
+                    && source.getDirectEntity() instanceof Projectile projectile
+                    && projectile.getOwner() == maxor
+                    && projectile.getType() == EntityTypes.WITHER_SKULL) {
                 SkyblockPlayerState.get(player).addMaxorLaserStack();
                 LASER_AFFECTED.add(player.getUUID());
                 PARTICIPANTS.add(player.getUUID());
@@ -173,6 +177,19 @@ public final class MaxorEncounter {
             return;
         }
 
+        // Keep Maxor focused on actual players and prevent the vanilla Wither
+        // flight AI from carrying him far above the arena.
+        ServerPlayer target = nearestPlayerInEncounter();
+        if (target != null) {
+            maxor.setTarget(target);
+            double maximumY = target.getY() + 5.0D;
+            if (maxor.getY() > maximumY) {
+                maxor.setPos(maxor.getX(), maximumY, maxor.getZ());
+                Vec3 motion = maxor.getDeltaMovement();
+                maxor.setDeltaMovement(motion.x, Math.min(motion.y, -0.08D), motion.z);
+            }
+        }
+
         float progress = Math.max(0.0F, Math.min(1.0F, maxor.getHealth() / (float) ENTITY_HEALTH));
         BOSS_BAR.setProgress(progress);
         long displayedHp = Math.max(0L, Math.round(progress * MAXOR_HEALTH));
@@ -217,7 +234,7 @@ public final class MaxorEncounter {
                     maxor.getZ() + Math.sin(angle) * distance
             );
             skeleton.setPersistenceRequired();
-            ServerPlayer target = nearestParticipant();
+            ServerPlayer target = nearestPlayerInEncounter();
             if (target != null) {
                 skeleton.setTarget(target);
             }
@@ -227,12 +244,12 @@ public final class MaxorEncounter {
         }
     }
 
-    private static ServerPlayer nearestParticipant() {
+    private static ServerPlayer nearestPlayerInEncounter() {
         ServerPlayer nearest = null;
         double nearestDistance = Double.MAX_VALUE;
-        for (UUID uuid : PARTICIPANTS) {
-            ServerPlayer player = encounterLevel.getServer().getPlayerList().getPlayer(uuid);
-            if (player == null || player.level() != encounterLevel || !player.isAlive()) {
+        for (ServerPlayer player : encounterLevel.getServer().getPlayerList().getPlayers()) {
+            if (player.level() != encounterLevel || !player.isAlive()
+                    || player.distanceToSqr(maxor) > 64.0D * 64.0D) {
                 continue;
             }
             double distance = player.distanceToSqr(maxor);
