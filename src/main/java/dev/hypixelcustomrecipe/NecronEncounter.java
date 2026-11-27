@@ -120,7 +120,6 @@ public final class NecronEncounter {
         laserActive = false;
         laserAngle = 0;
         damage.clear(); participants.clear(); radiationCooldown.clear(); minions.clear(); blades.clear(); radiation.clear();
-        participants.add(starter.getUUID());
         BAR.setProgress(1.0F);
         BAR.setName(Component.literal("Necron: 55,000,000 / 55,000,000 HP"));
         BAR.addPlayer(starter);
@@ -146,6 +145,10 @@ public final class NecronEncounter {
 
     private static void tick(MinecraftServer server) {
         if (necron == null || level == null || !necron.isAlive() || necron.isRemoved()) return;
+        if (allFightersDead(server)) {
+            abortBecauseAllFightersDied();
+            return;
+        }
         float hp = necron.getHealth();
         if (hp > lastHealth) necron.setHealth(lastHealth); else lastHealth = hp;
         ServerPlayer target = nearestPlayer();
@@ -163,7 +166,7 @@ public final class NecronEncounter {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.level() != level) { BAR.removePlayer(player); continue; }
             if (player.distanceToSqr(Vec3.atCenterOf(center)) <= 110.0D * 110.0D) {
-                BAR.addPlayer(player); participants.add(player.getUUID());
+                BAR.addPlayer(player);
             } else BAR.removePlayer(player);
             if (player.isFallFlying()) player.stopFallFlying();
         }
@@ -215,7 +218,6 @@ public final class NecronEncounter {
             float amount=(float)(state.maximumHealth()*0.15D);
             if(state.applyTrueDamage(amount)){p.setHealth(0);p.die(level.damageSources().lightningBolt());}
             DamageNumberHandler.show(level,p,amount,false);
-            participants.add(p.getUUID());
         }
     }
 
@@ -317,7 +319,6 @@ public final class NecronEncounter {
             for(ServerPlayer p:level.getEntitiesOfClass(ServerPlayer.class,area)){
                 if(!patch.hit.add(p.getUUID()) || radiationCooldown.containsKey(p.getUUID())) continue;
                 SkyblockPlayerState.get(p).addNecronRadiationStack();
-                participants.add(p.getUUID());
                 radiationCooldown.put(p.getUUID(),40);
                 p.sendSystemMessage(Component.literal("RADIATION! Maximum Health permanently reduced by 5%.")
                         .withStyle(s->s.withColor(0xAA00AA).withBold(true)));
@@ -330,6 +331,26 @@ public final class NecronEncounter {
         if(necron==null || target!=necron || entityDamage<=0)return;
         damage.merge(attacker.getUUID(),entityDamage*HP_PER_ENTITY_HP,Double::sum);
         participants.add(attacker.getUUID());
+    }
+
+    private static boolean allFightersDead(MinecraftServer server) {
+        if (participants.isEmpty()) return false;
+        for (UUID id : participants) {
+            ServerPlayer fighter = server.getPlayerList().getPlayer(id);
+            if (fighter != null && fighter.isAlive()) return false;
+        }
+        return true;
+    }
+
+    private static void abortBecauseAllFightersDied() {
+        if (level == null) return;
+        BAR.removeAllPlayers();
+        for (UUID id : minions) { Entity e = level.getEntity(id); if (e != null) e.discard(); }
+        for (Blade b : blades) if (b.display != null) b.display.discard();
+        if (necron != null) necron.discard();
+        level.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("All players fighting Necron have been defeated. The encounter has ended."), false);
+        clear();
     }
 
     private static void finish() {
