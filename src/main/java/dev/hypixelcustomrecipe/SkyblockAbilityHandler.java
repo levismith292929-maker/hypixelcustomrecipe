@@ -349,7 +349,7 @@ public final class SkyblockAbilityHandler {
                         // damage, Strength, Crit Damage, and other bonuses are ignored.
                         int healthDigits = Math.max(3,
                                 Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
-                        double percentage = Math.max(0.0025D, 0.05D / healthDigits);
+                        double percentage = Math.max(0.0025D, 0.035D / healthDigits);
                         double soulBladeDamage = maximumHealth * percentage;
                         applyScytheTrueDamage(level, target, source, (float) soulBladeDamage);
                     }
