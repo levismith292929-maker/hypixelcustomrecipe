@@ -167,7 +167,7 @@ public final class MaxorEncounter {
         BOSS_BAR.setName(Component.literal("Maxor: " + String.format(java.util.Locale.ROOT, "%,d", displayedHp)
                 + " / 2,000,000 HP"));
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (player.serverLevel() == encounterLevel
+            if (player.level() == encounterLevel
                     && player.distanceToSqr(maxor) <= 96.0D * 96.0D) {
                 BOSS_BAR.addPlayer(player);
             } else {
@@ -192,13 +192,13 @@ public final class MaxorEncounter {
 
         int count = Math.min(MINION_BATCH_SIZE, MAX_LIVING_MINIONS - MINIONS.size());
         for (int i = 0; i < count; i++) {
-            WitherSkeleton skeleton = EntityType.WITHER_SKELETON.create(
+            WitherSkeleton skeleton = EntityTypes.WITHER_SKELETON.create(
                     encounterLevel, EntitySpawnReason.MOB_SUMMONED);
             if (skeleton == null) {
                 continue;
             }
             double angle = encounterLevel.getRandom().nextDouble() * Math.PI * 2.0D;
-            double distance = 3.0D + encounterLevel.random.nextDouble() * 4.0D;
+            double distance = 3.0D + encounterLevel.getRandom().nextDouble() * 4.0D;
             skeleton.setPos(
                     maxor.getX() + Math.cos(angle) * distance,
                     maxor.getY(),
@@ -220,7 +220,7 @@ public final class MaxorEncounter {
         double nearestDistance = Double.MAX_VALUE;
         for (UUID uuid : PARTICIPANTS) {
             ServerPlayer player = encounterLevel.getServer().getPlayerList().getPlayer(uuid);
-            if (player == null || player.serverLevel() != encounterLevel || !player.isAlive()) {
+            if (player == null || player.level() != encounterLevel || !player.isAlive()) {
                 continue;
             }
             double distance = player.distanceToSqr(maxor);
