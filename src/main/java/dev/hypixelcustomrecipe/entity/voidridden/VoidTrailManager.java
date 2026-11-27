@@ -7,9 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.block.Blocks;
+import com.mojang.math.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,7 +33,21 @@ public final class VoidTrailManager {
 
     public static void add(ServerLevel level, UUID ownerId, Vec3 start, Vec3 end) {
         if (start.distanceToSqr(end) < 1.0) return;
-        TRAILS.computeIfAbsent(level, ignored -> new ArrayList<>()).add(new Trail(ownerId, start, end));
+        Vec3 line = end.subtract(start);
+        Vec3 midpoint = start.add(end).scale(0.5D);
+        Vec3 horizontal = new Vec3(line.x, 0.0D, line.z);
+        float yaw = (float) Math.atan2(horizontal.x, horizontal.z);
+        Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
+        if (display != null) {
+            display.setBlockState(Blocks.PURPLE_STAINED_GLASS.defaultBlockState());
+            display.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY(yaw),
+                    new Vector3f((float) (TRAIL_HALF_WIDTH * 2.0D), (float) TRAIL_HEIGHT,
+                            (float) Math.max(1.0D, horizontal.length())), new Quaternionf()));
+            display.setNoGravity(true);
+            display.setPos(midpoint.x, midpoint.y + TRAIL_HEIGHT * 0.5D, midpoint.z);
+            if (!level.addFreshEntity(display)) display = null;
+        }
+        TRAILS.computeIfAbsent(level, ignored -> new ArrayList<>()).add(new Trail(ownerId, start, end, display));
     }
 
     private static void tick(ServerLevel level) {
@@ -40,32 +60,13 @@ public final class VoidTrailManager {
             var owner = level.getEntity(trail.ownerId);
             if (!(owner instanceof VoidriddenEnderman enderman)
                     || !enderman.isAlive()) {
+                if (trail.display != null && !trail.display.isRemoved()) trail.display.discard();
                 iterator.remove();
                 continue;
             }
-            if (now % 4L == 0L) spawnTrailParticles(level, trail);
             if (now % 10L == 0L) damagePlayersAlongEntireTrail(level, trail);
         }
         if (trails.isEmpty()) TRAILS.remove(level);
-    }
-
-    private static void spawnTrailParticles(ServerLevel level, Trail trail) {
-        Vec3 line = trail.end.subtract(trail.start);
-        Vec3 horizontal = new Vec3(line.x, 0.0, line.z);
-        Vec3 side = horizontal.lengthSqr() < 1.0E-6
-                ? new Vec3(1.0, 0.0, 0.0)
-                : new Vec3(-horizontal.z, 0.0, horizontal.x).normalize();
-        int count = Math.max(1, (int) Math.ceil(line.length() * 2.0));
-        for (int i = 0; i <= count; i++) {
-            Vec3 point = trail.start.add(line.scale(i / (double) count));
-            for (int widthStep = -1; widthStep <= 1; widthStep++) {
-                for (int heightStep = 0; heightStep <= 4; heightStep++) {
-                    Vec3 particle = point.add(side.scale(widthStep)).add(0.0, heightStep, 0.0);
-                    level.sendParticles(ParticleTypes.REVERSE_PORTAL, true, false,
-                            particle.x, particle.y, particle.z, 1, 0.08, 0.08, 0.08, 0.0);
-                }
-            }
-        }
     }
 
     private static void damagePlayersAlongEntireTrail(ServerLevel level, Trail trail) {
@@ -94,5 +95,5 @@ public final class VoidTrailManager {
         }
     }
 
-    private record Trail(UUID ownerId, Vec3 start, Vec3 end) {}
+    private record Trail(UUID ownerId, Vec3 start, Vec3 end, Display.BlockDisplay display) {}
 }
