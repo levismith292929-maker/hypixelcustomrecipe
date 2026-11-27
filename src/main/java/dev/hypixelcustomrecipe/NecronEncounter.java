@@ -26,7 +26,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Guardian;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -435,7 +435,7 @@ public final class NecronEncounter {
             laserGuardian.setInvulnerable(true);
             laserGuardian.setPersistenceRequired();
             laserTarget.setInvisible(true);
-            laserTarget.setMarker(true);
+            laserTarget.setSmall(true);
             laserTarget.setNoGravity(true);
             laserTarget.setInvulnerable(true);
             laserTarget.setPos(center.getX() + 14.5D, center.getY() + 1.6D, center.getZ() + 0.5D);
