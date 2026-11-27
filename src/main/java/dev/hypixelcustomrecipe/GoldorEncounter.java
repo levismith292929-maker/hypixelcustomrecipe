@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /** Goldor's chase-and-sword-slam encounter. */
 public final class GoldorEncounter {
@@ -131,7 +132,15 @@ public final class GoldorEncounter {
         }
 
         if (--attackTimer <= 0 && target != null) {
-            PENDING.add(new PendingSword(BlockPos.containing(target.position()), WARNING_TICKS));
+            Vec3 lockedPosition = target.position();
+            Vec3 movement = target.getDeltaMovement();
+            BlockPos locked = BlockPos.containing(lockedPosition);
+            BlockPos predictionA = BlockPos.containing(lockedPosition.add(movement.scale(8.0D)));
+            BlockPos predictionB = BlockPos.containing(lockedPosition.add(movement.scale(14.0D)));
+            double randomX = ThreadLocalRandom.current().nextDouble(-3.0D, 3.0D);
+            double randomZ = ThreadLocalRandom.current().nextDouble(-3.0D, 3.0D);
+            BlockPos randomized = BlockPos.containing(lockedPosition.add(randomX, 0.0D, randomZ));
+            PENDING.add(new PendingSword(List.of(predictionA, predictionB, locked, randomized), WARNING_TICKS));
             attackTimer = ATTACK_INTERVAL;
             target.sendSystemMessage(Component.literal("GOLDOR IS TARGETING YOU!")
                     .withStyle(s -> s.withColor(0xFF5555).withBold(true)));
@@ -140,9 +149,9 @@ public final class GoldorEncounter {
         Iterator<PendingSword> pending = PENDING.iterator();
         while (pending.hasNext()) {
             PendingSword sword = pending.next();
-            renderWarning(sword.pos);
+            for (BlockPos warningPos : sword.positions) renderWarning(warningPos);
             if (--sword.ticks <= 0) {
-                FLYING.add(createFlyingSword(sword.pos));
+                for (BlockPos destination : sword.positions) FLYING.add(createFlyingSword(destination));
                 pending.remove();
             }
         }
@@ -154,6 +163,7 @@ public final class GoldorEncounter {
             double progress = Math.min(1.0D, sword.ticks / (double) FLIGHT_TICKS);
             Vec3 position = sword.start.lerp(sword.destination, progress);
             sword.display.setPos(position.x, position.y, position.z);
+            pointSwordToward(sword.display, sword.destination.subtract(position));
             if (progress >= 1.0D) {
                 slam(sword.pos, sword.display);
                 flying.remove();
@@ -216,13 +226,20 @@ public final class GoldorEncounter {
                 new Quaternionf(), new Vector3f(4.0F, 4.0F, 4.0F), new Quaternionf()));
         Vec3 start = goldor.position().add(0.0D, 2.0D, 0.0D);
         Vec3 destination = new Vec3(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
-        Vec3 direction = destination.subtract(start);
-        float yaw = (float) (Math.atan2(direction.x, direction.z) * (180.0D / Math.PI));
-        display.setYRot(yaw);
         display.setPos(start.x, start.y, start.z);
+        pointSwordToward(display, destination.subtract(start));
         if (!encounterLevel.addFreshEntity(display)) throw new IllegalStateException("Could not spawn Goldor's sword");
         encounterLevel.playSound(null, goldor.blockPosition(), SoundEvents.TRIDENT_THROW.value(), SoundSource.HOSTILE, 2.0F, 0.6F);
         return new FlyingSword(pos, display, start, destination);
+    }
+
+    private static void pointSwordToward(Display.ItemDisplay display, Vec3 direction) {
+        if (direction.lengthSqr() < 1.0E-8D) return;
+        Vec3 normalized = direction.normalize();
+        float yaw = (float) (Math.atan2(normalized.x, normalized.z) * (180.0D / Math.PI));
+        float pitch = (float) (-Math.asin(normalized.y) * (180.0D / Math.PI));
+        display.setYRot(yaw);
+        display.setXRot(pitch);
     }
 
     private static void slam(BlockPos pos, Display.ItemDisplay display) {
@@ -272,9 +289,12 @@ public final class GoldorEncounter {
     }
 
     private static final class PendingSword {
-        private final BlockPos pos;
+        private final List<BlockPos> positions;
         private int ticks;
-        private PendingSword(BlockPos pos, int ticks) { this.pos = pos; this.ticks = ticks; }
+        private PendingSword(List<BlockPos> positions, int ticks) {
+            this.positions = positions;
+            this.ticks = ticks;
+        }
     }
 
     private static final class FlyingSword {
