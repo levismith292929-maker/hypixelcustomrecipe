@@ -408,6 +408,10 @@ public final class MaxorEncounter {
             recordDamage(attacker, entityDamage);
             return;
         }
+        if (NecronEncounter.isNecron(target)) {
+            NecronEncounter.recordDirectDamage(target, attacker, entityDamage);
+            return;
+        }
         if (GoldorEncounter.isGoldor(target)) {
             GoldorEncounter.recordDirectDamage(target, entityDamage);
             return;
