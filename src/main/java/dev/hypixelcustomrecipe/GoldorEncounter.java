@@ -60,7 +60,19 @@ public final class GoldorEncounter {
         ServerTickEvents.END_SERVER_TICK.register(GoldorEncounter::tick);
     }
 
-    public static boolean isGoldor(net.minecraft.world.entity.LivingEntity entity) {\n        return goldor != null && entity == goldor;\n    }\n\n    public static void recordDirectDamage(net.minecraft.world.entity.LivingEntity target, double entityDamage) {\n        if (goldor == null || target != goldor || entityDamage <= 0.0D) return;\n        float next = (float) Math.max(0.0D, goldor.getHealth() - entityDamage);\n        goldor.setHealth(next);\n        lastHealth = next;\n        if (next <= 0.0F) goldor.die(encounterLevel.damageSources().generic());\n    }\n\n    public static boolean summonForTesting(ServerPlayer player) {
+    public static boolean isGoldor(net.minecraft.world.entity.LivingEntity entity) {
+        return goldor != null && entity == goldor;
+    }
+
+    public static void recordDirectDamage(net.minecraft.world.entity.LivingEntity target, double entityDamage) {
+        if (goldor == null || target != goldor || entityDamage <= 0.0D) return;
+        float next = (float) Math.max(0.0D, goldor.getHealth() - entityDamage);
+        goldor.setHealth(next);
+        lastHealth = next;
+        if (next <= 0.0F) goldor.die(encounterLevel.damageSources().generic());
+    }
+
+    public static boolean summonForTesting(ServerPlayer player) {
         if (goldor != null && goldor.isAlive()) return false;
         ServerLevel level = (ServerLevel) player.level();
         WitherBoss boss = EntityTypes.WITHER.create(level, EntitySpawnReason.MOB_SUMMONED);
