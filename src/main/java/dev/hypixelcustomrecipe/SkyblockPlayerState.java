@@ -175,6 +175,27 @@ public final class SkyblockPlayerState {
         SkyblockPlayerState state = PLAYERS.get(playerId);
         if (state != null) state.clearMaxorLaserStacks();
     }
+    /** Necron's opening nuke wipes the player's progression and stored accessories. */
+    public void applyNecronNuke(ServerPlayer player) {
+        skyblockLevel = 0;
+        levelExperience = 0;
+        combatLevel = 0;
+        combatExperience = 0;
+        miningLevel = 0;
+        miningExperience = 0;
+        necronRadiationStacks = 0;
+        maxorLaserStacks = 0;
+        AccessoryBag.clear(player);
+        GemTankMenu.clear(player);
+        player.getInventory().clearContent();
+        player.experienceLevel = 0;
+        player.totalExperience = 0;
+        player.experienceProgress = 0.0F;
+        currentHealth = 0;
+        player.setHealth(0.0F);
+        player.die(player.damageSources().magic());
+    }
+
     public int level() { return skyblockLevel; }
     public int levelExperience() { return levelExperience; }
     public int levelExperienceRequired() { return 50; }
