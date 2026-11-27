@@ -366,7 +366,11 @@ public final class SkyblockAbilityHandler {
             }
             return;
         }
+        float actualDamage = Math.min(damage, target.getHealth());
         target.setHealth(Math.max(0.0F, target.getHealth() - damage));
+        if (source.getEntity() instanceof ServerPlayer attacker) {
+            MaxorEncounter.recordDirectDamage(target, attacker, actualDamage);
+        }
         DamageNumberHandler.show(level, target, damage, false);
         if (target.getHealth() <= 0.0F) target.die(source);
     }
