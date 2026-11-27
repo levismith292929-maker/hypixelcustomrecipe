@@ -18,13 +18,11 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -192,7 +190,7 @@ public final class MaxorEncounter {
             if (skeleton == null) {
                 continue;
             }
-            double angle = encounterLevel.random.nextDouble() * Math.PI * 2.0D;
+            double angle = encounterLevel.getRandom().nextDouble() * Math.PI * 2.0D;
             double distance = 3.0D + encounterLevel.random.nextDouble() * 4.0D;
             skeleton.setPos(
                     maxor.getX() + Math.cos(angle) * distance,
