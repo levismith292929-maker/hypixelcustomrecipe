@@ -70,7 +70,7 @@ public final class DatapackItems {
     public static final Item SOUL_BLADE = register("soul_blade", "Soul Blade", Items.NETHERITE_HOE,
             "Ability: Soul Slash  RIGHT CLICK",
             "Slash forward, dealing 5% of each target's Max Health as true damage.",
-            "Mana Cost: 1",
+            "Mana Cost: 100",
             "Cooldown: 1 tick");
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
             "Ability: Wither Impact  RIGHT CLICK",
