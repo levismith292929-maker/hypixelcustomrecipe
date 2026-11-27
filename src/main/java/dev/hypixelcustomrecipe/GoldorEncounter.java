@@ -69,7 +69,11 @@ public final class GoldorEncounter {
             return true;
         });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-            if (goldor != null && entity == goldor) finish();
+            if (goldor != null && entity == goldor) {
+                // Clear the encounter's temporary sword warnings and displays
+                // regardless of whether Goldor was defeated normally or /killed.
+                abortAfterBossRemoval();
+            }
         });
         ServerTickEvents.END_SERVER_TICK.register(GoldorEncounter::tick);
     }
@@ -282,6 +286,15 @@ public final class GoldorEncounter {
         clearSwords();
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("Goldor has been defeated!"), false);
+        clear();
+    }
+
+    private static void abortAfterBossRemoval() {
+        if (encounterLevel == null) return;
+        BAR.removeAllPlayers();
+        clearSwords();
+        encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("Goldor was removed. The encounter has been reset."), false);
         clear();
     }
 
