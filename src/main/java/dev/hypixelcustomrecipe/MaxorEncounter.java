@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -48,6 +49,7 @@ public final class MaxorEncounter {
 
     private static WitherBoss maxor;
     private static final Set<UUID> LASER_AFFECTED = new HashSet<>();
+    private static final Map<UUID, Integer> LASER_HIT_COOLDOWNS = new HashMap<>();
     private static ServerLevel encounterLevel;
     private static UUID altarOwner;
     private static int minionSpawnTimer;
@@ -158,6 +160,7 @@ public final class MaxorEncounter {
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
         LASER_AFFECTED.clear();
+        LASER_HIT_COOLDOWNS.clear();
         MINIONS.clear();
         PARTICIPANTS.add(starter.getUUID());
         BOSS_BAR.setName(Component.literal("Maxor"));
@@ -188,7 +191,10 @@ public final class MaxorEncounter {
                 Vec3 motion = maxor.getDeltaMovement();
                 maxor.setDeltaMovement(motion.x, Math.min(motion.y, -0.08D), motion.z);
             }
+            renderLaserBeam(target);
         }
+        LASER_HIT_COOLDOWNS.replaceAll((uuid, ticks) -> ticks - 1);
+        LASER_HIT_COOLDOWNS.values().removeIf(ticks -> ticks <= 0);
 
         float progress = Math.max(0.0F, Math.min(1.0F, maxor.getHealth() / (float) ENTITY_HEALTH));
         BOSS_BAR.setProgress(progress);
@@ -207,6 +213,35 @@ public final class MaxorEncounter {
         if (--minionSpawnTimer <= 0) {
             minionSpawnTimer = MINION_INTERVAL_TICKS;
             spawnMinionWave();
+        }
+    }
+
+    /**
+     * Draws a continuous purple guardian-style beam from Maxor to his player
+     * target. The beam applies a 2% max-Health laser stack every two seconds.
+     */
+    private static void renderLaserBeam(ServerPlayer target) {
+        Vec3 start = maxor.getEyePosition();
+        Vec3 end = target.getEyePosition();
+        Vec3 delta = end.subtract(start);
+        double distance = delta.length();
+        if (distance <= 0.0D) return;
+        int count = Math.max(1, (int) Math.ceil(distance * 2.0D));
+        Vec3 step = delta.scale(1.0D / count);
+        Vec3 point = start;
+        for (int i = 0; i <= count; i++) {
+            encounterLevel.sendParticles(ParticleTypes.DRAGON_BREATH,
+                    point.x, point.y, point.z, 2, 0.04D, 0.04D, 0.04D, 0.0D);
+            point = point.add(step);
+        }
+        UUID id = target.getUUID();
+        if (!LASER_HIT_COOLDOWNS.containsKey(id)) {
+            SkyblockPlayerState.get(target).addMaxorLaserStack();
+            LASER_AFFECTED.add(id);
+            PARTICIPANTS.add(id);
+            LASER_HIT_COOLDOWNS.put(id, 40);
+            target.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
+                    .withStyle(style -> style.withColor(0xAA00AA)));
         }
     }
 
