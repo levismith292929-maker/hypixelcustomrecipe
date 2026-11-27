@@ -666,6 +666,7 @@ public final class NecronEncounter {
                 WitherSkull skull = EntityTypes.WITHER_SKULL.create(level, EntitySpawnReason.MOB_SUMMONED);
                 if (skull != null) {
                     skull.setOwner(necron);
+                    skull.setDangerous(false);
                     skull.setPos(start.x, start.y, start.z);
                     skull.setDeltaMovement(direction.scale(1.15D));
                     if (level.addFreshEntity(skull)) PROJECTILES.add(skull.getUUID());
