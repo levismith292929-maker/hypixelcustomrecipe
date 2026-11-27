@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "sss",
+    "sps",
+    "sss"
+  ],
+  "key": {
+    "s": [
+      "hypixel:soul_shard"
+    ],
+    "p": [
+      "hypixel:pure_void_shard"
+    ]
+  },
+  "result": {
+    "id": "hypixel:soul",
+    "count": 1
+  }
+}
