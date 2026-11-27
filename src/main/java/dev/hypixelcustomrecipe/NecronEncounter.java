@@ -197,9 +197,18 @@ public final class NecronEncounter {
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 saveAndPlaceBedrock(new BlockPos(x, center.getY(), z));
-                if (x == minX || x == maxX || z == minZ || z == maxZ) {
-                    for (int y = 1; y <= WALL_HEIGHT; y++) {
-                        saveAndPlaceBedrock(new BlockPos(x, center.getY() + y, z));
+                boolean boundary = x == minX || x == maxX || z == minZ || z == maxZ;
+                for (int y = 1; y <= WALL_HEIGHT; y++) {
+                    BlockPos pos = new BlockPos(x, center.getY() + y, z);
+                    if (boundary) {
+                        saveAndPlaceBedrock(pos);
+                    } else {
+                        BlockPos immutable = pos.immutable();
+                        BlockState original = level.getBlockState(immutable);
+                        if (!original.isAir()) {
+                            ORIGINAL_ARENA.putIfAbsent(immutable, original);
+                            level.setBlock(immutable, Blocks.AIR.defaultBlockState(), 3);
+                        }
                     }
                 }
             }
@@ -438,14 +447,14 @@ public final class NecronEncounter {
         laserGuardian = EntityTypes.GUARDIAN.create(level, EntitySpawnReason.MOB_SUMMONED);
         laserTarget = EntityTypes.ARMOR_STAND.create(level, EntitySpawnReason.COMMAND);
         if (laserGuardian != null && laserTarget != null) {
-            laserGuardian.setPos(center.getX() + 0.5D, center.getY() + 0.1D, center.getZ() + 0.5D);
+            laserGuardian.setPos(center.getX() + 0.5D, center.getY() + 1.2D, center.getZ() + 0.5D);
             laserGuardian.setNoGravity(true);
             laserGuardian.setInvulnerable(true);
             laserGuardian.setPersistenceRequired();
             laserTarget.setInvisible(true);
             laserTarget.setNoGravity(true);
             laserTarget.setInvulnerable(true);
-            laserTarget.setPos(center.getX() + 14.5D, center.getY() + 1.6D, center.getZ() + 0.5D);
+            laserTarget.setPos(center.getX() + 48.0D, center.getY() + 1.6D, center.getZ() + 0.5D);
             level.addFreshEntity(laserTarget);
             level.addFreshEntity(laserGuardian);
             laserGuardian.setTarget(laserTarget);
@@ -459,7 +468,7 @@ public final class NecronEncounter {
     private static void tickGuardianLaser() {
         if (attack3Timer > 0) attack3Timer--;
         laserAngle += Math.PI * 2.0D / 160.0D;
-        double radius = 14.5D;
+        double radius = 48.0D;
         double endX = center.getX() + 0.5D + Math.cos(laserAngle) * radius;
         double endZ = center.getZ() + 0.5D + Math.sin(laserAngle) * radius;
         double beamY = center.getY() + 1.6D;
