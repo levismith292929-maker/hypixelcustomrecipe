@@ -3,13 +3,16 @@
   "show_notification": true,
   "category": "equipment",
   "pattern": [
-    "eee",
+    "vee",
     "ese",
     "eee"
   ],
   "key": {
     "s": [
       "minecraft:diamond_sword"
+    ],
+    "v": [
+      "hypixel:void_fragment"
     ],
     "e": [
       "minecraft:ender_pearl"
