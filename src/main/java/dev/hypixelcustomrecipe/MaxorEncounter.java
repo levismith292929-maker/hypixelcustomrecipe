@@ -91,11 +91,11 @@ public final class MaxorEncounter {
         });
 
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-            if (maxor != null && entity == maxor && amount > 0.0F) {
-                Entity attacker = source.getEntity();
-                if (attacker instanceof ServerPlayer player) {
-                    recordDamage(player, amount);
-                }
+            // Bosses in the Wither Altar encounter are immune to every ordinary
+            // damage source. Soul Blade damage is applied through its dedicated
+            // true-damage path and therefore bypasses this vanilla damage event.
+            if (maxor != null && entity == maxor) {
+                return false;
             }
             return true;
         });
