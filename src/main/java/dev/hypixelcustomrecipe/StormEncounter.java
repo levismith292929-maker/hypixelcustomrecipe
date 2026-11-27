@@ -73,10 +73,6 @@ public final class StormEncounter {
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (storm != null && entity == storm) {
                 finishSuccessfully();
-            } else if (entity instanceof ServerPlayer player
-                    && PARTICIPANTS.contains(player.getUUID())) {
-                abortBecausePlayerDied(player);
-            }
         });
 
         ServerTickEvents.END_SERVER_TICK.register(StormEncounter::tick);
@@ -90,7 +86,6 @@ public final class StormEncounter {
         arenaCenter = center.immutable();
         altarOwner = owner;
         PARTICIPANTS.clear();
-        PARTICIPANTS.addAll(participants);
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
         STRIKES.clear();
@@ -123,6 +118,10 @@ public final class StormEncounter {
             return;
         }
         if (!storm.isAlive() || storm.isRemoved()) return;
+        if (allFightersDead(server)) {
+            abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
+            return;
+        }
 
         ServerPlayer target = nearestPlayer();
         if (target != null) storm.setTarget(target);
@@ -160,7 +159,6 @@ public final class StormEncounter {
         arenaCenter = player.blockPosition().immutable();
         altarOwner = player.getUUID();
         PARTICIPANTS.clear();
-        PARTICIPANTS.add(player.getUUID());
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
         STRIKES.clear();
@@ -300,7 +298,6 @@ public final class StormEncounter {
             if (Math.abs(player.getY() - Math.max(arenaCenter.getY(), groundY)) > 5.0D) continue;
 
             // The entire arena is struck at once, but each player can only take one hit per wave.
-            PARTICIPANTS.add(player.getUUID());
             SkyblockPlayerState state = SkyblockPlayerState.get(player);
             float damage = (float) (state.maximumHealth() * 0.10D);
             boolean defeated = state.applyTrueDamage(damage);
@@ -334,7 +331,6 @@ public final class StormEncounter {
             if (player.level() == level
                     && player.distanceToSqr(Vec3.atCenterOf(arenaCenter)) <= 100.0D * 100.0D) {
                 BOSS_BAR.addPlayer(player);
-                PARTICIPANTS.add(player.getUUID());
             } else {
                 BOSS_BAR.removePlayer(player);
             }
@@ -371,11 +367,13 @@ public final class StormEncounter {
         clear();
     }
 
-    private static void abortBecausePlayerDied(ServerPlayer deadPlayer) {
-        if (level == null) return;
-        MinecraftServer server = level.getServer();
-        if (storm != null) storm.discard();
-        abortAndReturnAltar(deadPlayer.getName().getString() + " died. The Storm encounter has ended.");
+    private static boolean allFightersDead(MinecraftServer server) {
+        if (PARTICIPANTS.isEmpty()) return false;
+        for (UUID id : PARTICIPANTS) {
+            ServerPlayer fighter = server.getPlayerList().getPlayer(id);
+            if (fighter != null && fighter.isAlive()) return false;
+        }
+        return true;
     }
 
     private static void abortAndReturnAltar(String message) {
