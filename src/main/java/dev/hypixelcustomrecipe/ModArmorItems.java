@@ -235,8 +235,23 @@ public final class ModArmorItems {
             String itemId = voidUpgraded ? baseId + "_3star_void"
                     : (stars == 0 ? baseId : baseId + "_" + stars + "star");
             String displayName = set.displayName + " " + slotName
-                    + (voidUpgraded ? " ★★★ Void" : (stars == 0 ? "" : " " + "★".repeat(stars)));
-            Stats scaled = voidUpgraded ? baseStats.scale(3).multiply(6) : baseStats.scale(stars);
+                    + (voidUpgraded ? " VOID" : (stars == 0 ? "" : " " + "★".repeat(stars)));
+            Stats scaled;
+            if (voidUpgraded) {
+                Stats threeStar = baseStats.scale(3);
+                // Void armor keeps the existing +500% bonus to its other stats,
+                // while Intelligence receives a +1000% bonus (11x total).
+                scaled = new Stats(
+                        threeStar.health * 6,
+                        threeStar.defense * 6,
+                        threeStar.strength * 6,
+                        threeStar.intelligence * 11,
+                        threeStar.critChance * 6,
+                        threeStar.critDamage * 6
+                );
+            } else {
+                scaled = baseStats.scale(stars);
+            }
             List<Component> lore = new ArrayList<>();
             lore.add(ItemFormatting.lore("Health: " + Integer.toString((int) Math.round(scaled.health / 10.0))));
             lore.add(ItemFormatting.lore("Defense: " + scaled.defense));
