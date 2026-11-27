@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "vvv",
+    "vvv",
+    "vvv"
+  ],
+  "key": {
+    "v": [
+      "hypixel:void_shard"
+    ]
+  },
+  "result": {
+    "id": "hypixel:fine_void_shard",
+    "count": 1
+  }
+}
