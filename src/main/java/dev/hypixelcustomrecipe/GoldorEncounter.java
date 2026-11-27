@@ -4,7 +4,6 @@ import com.mojang.math.Transformation;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -169,7 +168,7 @@ public final class GoldorEncounter {
                 randomTargets.add(BlockPos.containing(lockedPosition.x + offsetX,
                         lockedPosition.y, lockedPosition.z + offsetZ));
             }
-            PENDING.add(new PendingSword(randomTargets, WARNING_TICKS));
+            PENDING.add(new PendingSword(randomTargets, WARNING_TICKS, createWarningDisplays(randomTargets)));
             attackTimer = ATTACK_INTERVAL;
             target.sendSystemMessage(Component.literal("GOLDOR IS TARGETING YOU!")
                     .withStyle(s -> s.withColor(0xFF5555).withBold(true)));
@@ -178,8 +177,8 @@ public final class GoldorEncounter {
         Iterator<PendingSword> pending = PENDING.iterator();
         while (pending.hasNext()) {
             PendingSword sword = pending.next();
-            for (BlockPos warningPos : sword.positions) renderWarning(warningPos);
             if (--sword.ticks <= 0) {
+                for (Display.BlockDisplay warning : sword.warnings) warning.discard();
                 for (BlockPos destination : sword.positions) FLYING.add(createFlyingSword(destination));
                 pending.remove();
             }
@@ -240,10 +239,19 @@ public final class GoldorEncounter {
         return nearest;
     }
 
-    private static void renderWarning(BlockPos pos) {
-        double x = pos.getX() + 0.5D, y = pos.getY(), z = pos.getZ() + 0.5D;
-        encounterLevel.sendParticles(ParticleTypes.FLAME, x, y + 0.08D, z, 18, 0.35D, 0.02D, 0.35D, 0.01D);
-        encounterLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + 0.1D, z, 10, 0.35D, 0.02D, 0.35D, 0.02D);
+    private static List<Display.BlockDisplay> createWarningDisplays(List<BlockPos> positions) {
+        List<Display.BlockDisplay> displays = new ArrayList<>();
+        for (BlockPos pos : positions) {
+            Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
+            if (display == null) continue;
+            display.setBlockState(Blocks.ORANGE_STAINED_GLASS.defaultBlockState());
+            display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
+                    new Vector3f(1.5F, 0.08F, 1.5F), new Quaternionf()));
+            display.setNoGravity(true);
+            display.setPos(pos.getX() + 0.5D, pos.getY() + 0.08D, pos.getZ() + 0.5D);
+            if (encounterLevel.addFreshEntity(display)) displays.add(display);
+        }
+        return displays;
     }
 
     private static FlyingSword createFlyingSword(BlockPos pos) {
@@ -330,6 +338,7 @@ public final class GoldorEncounter {
 
     private static void clearSwords() {
         if (encounterLevel != null) {
+            for (PendingSword sword : PENDING) for (Display.BlockDisplay warning : sword.warnings) warning.discard();
             for (FlyingSword sword : FLYING) sword.display.discard();
             for (ActiveSword sword : ACTIVE) sword.display.discard();
         }
@@ -351,10 +360,12 @@ public final class GoldorEncounter {
 
     private static final class PendingSword {
         private final List<BlockPos> positions;
+        private final List<Display.BlockDisplay> warnings;
         private int ticks;
-        private PendingSword(List<BlockPos> positions, int ticks) {
+        private PendingSword(List<BlockPos> positions, int ticks, List<Display.BlockDisplay> warnings) {
             this.positions = positions;
             this.ticks = ticks;
+            this.warnings = warnings;
         }
     }
 
