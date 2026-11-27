@@ -172,16 +172,18 @@ public final class MaxorEncounter {
         ServerPlayer target = nearestPlayerInEncounter();
         if (target != null) {
             maxor.setTarget(target);
-            double maximumY = target.getY() + 5.0D;
+            double maximumY = target.getY() + 2.0D;
             if (maxor.getY() > maximumY) {
                 maxor.setPos(maxor.getX(), maximumY, maxor.getZ());
                 Vec3 motion = maxor.getDeltaMovement();
-                maxor.setDeltaMovement(motion.x, Math.min(motion.y, -0.08D), motion.z);
+                maxor.setDeltaMovement(motion.x, Math.min(motion.y, -0.12D), motion.z);
             }
-            renderLaserBeam(target);
         }
         LASER_HIT_COOLDOWNS.replaceAll((uuid, ticks) -> ticks - 1);
         LASER_HIT_COOLDOWNS.values().removeIf(ticks -> ticks <= 0);
+        if (target != null) {
+            renderLaserBeam(target);
+        }
 
         float progress = Math.max(0.0F, Math.min(1.0F, maxor.getHealth() / (float) ENTITY_HEALTH));
         BOSS_BAR.setProgress(progress);
@@ -205,7 +207,7 @@ public final class MaxorEncounter {
 
     /**
      * Draws a continuous purple guardian-style beam from Maxor to his player
-     * target. The beam applies a 2% max-Health laser stack every two seconds.
+     * target. The beam applies a 2% max-Health laser stack every five seconds.
      */
     private static void renderLaserBeam(ServerPlayer target) {
         Vec3 start = maxor.getEyePosition();
@@ -226,7 +228,7 @@ public final class MaxorEncounter {
             SkyblockPlayerState.get(target).addMaxorLaserStack();
             LASER_AFFECTED.add(id);
             PARTICIPANTS.add(id);
-            LASER_HIT_COOLDOWNS.put(id, 40);
+            LASER_HIT_COOLDOWNS.put(id, 100);
             target.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
                     .withStyle(style -> style.withColor(0xAA00AA)));
         }
