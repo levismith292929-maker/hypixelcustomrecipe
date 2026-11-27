@@ -42,7 +42,6 @@ public final class StormEncounter {
     // Five circles with this radius cover exactly 5% of a 100 x 100 square.
     private static final double SAFE_ZONE_RADIUS =
             Math.sqrt((10_000.0D * 0.05D) / (SAFE_ZONE_COUNT * Math.PI));
-    private static final int STRIKES_PER_WAVE = 30;
     private static final int WARNING_TICKS = 100; // 5 seconds to reach a safe zone before the simultaneous strike
     private static final int WAVE_INTERVAL_TICKS = 100;
 
@@ -144,6 +143,7 @@ public final class StormEncounter {
                 for (Strike strike : STRIKES) {
                     strike(strike);
                 }
+                damagePlayersCaughtInBarrage();
                 SAFE_ZONES.clear();
                 STRIKES.clear();
                 waveTimer = WAVE_INTERVAL_TICKS;
@@ -230,15 +230,14 @@ public final class StormEncounter {
                 }
             }
         }
-        for (int i = 0; i < STRIKES_PER_WAVE; i++) {
-            for (int attempt = 0; attempt < 100; attempt++) {
-                double x = arenaCenter.getX() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
-                        * ARENA_HALF_SIZE;
-                double z = arenaCenter.getZ() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
-                        * ARENA_HALF_SIZE;
+        // Place one lightning strike at the center of every block in the 100 x 100 arena,
+        // excluding every block whose center falls inside one of the safe zones.
+        for (int xOffset = -ARENA_HALF_SIZE; xOffset < ARENA_HALF_SIZE; xOffset++) {
+            for (int zOffset = -ARENA_HALF_SIZE; zOffset < ARENA_HALF_SIZE; zOffset++) {
+                double x = arenaCenter.getX() + xOffset + 0.5D;
+                double z = arenaCenter.getZ() + zOffset + 0.5D;
                 if (!isSafe(x, z)) {
                     STRIKES.add(new Strike(x, z));
-                    break;
                 }
             }
         }
@@ -285,13 +284,21 @@ public final class StormEncounter {
             level.addFreshEntity(bolt);
         }
 
+    }
+
+    private static void damagePlayersCaughtInBarrage() {
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             if (player.level() != level || !player.isAlive()) continue;
-            double dx = player.getX() - strike.x;
-            double dz = player.getZ() - strike.z;
-            if (dx * dx + dz * dz > 2.25D * 2.25D
-                    || Math.abs(player.getY() - y) > 5.0D
+            double xOffset = player.getX() - arenaCenter.getX();
+            double zOffset = player.getZ() - arenaCenter.getZ();
+            if (xOffset < -ARENA_HALF_SIZE || xOffset >= ARENA_HALF_SIZE
+                    || zOffset < -ARENA_HALF_SIZE || zOffset >= ARENA_HALF_SIZE
                     || isSafe(player.getX(), player.getZ())) continue;
+            int groundY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+                    player.blockPosition().getX(), player.blockPosition().getZ());
+            if (Math.abs(player.getY() - Math.max(arenaCenter.getY(), groundY)) > 5.0D) continue;
+
+            // The entire arena is struck at once, but each player can only take one hit per wave.
             PARTICIPANTS.add(player.getUUID());
             SkyblockPlayerState state = SkyblockPlayerState.get(player);
             float damage = (float) (state.maximumHealth() * 0.10D);
