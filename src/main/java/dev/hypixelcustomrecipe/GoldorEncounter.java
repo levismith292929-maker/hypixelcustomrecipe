@@ -31,6 +31,8 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -48,6 +50,7 @@ public final class GoldorEncounter {
     private static ServerLevel encounterLevel;
     private static int attackTimer;
     private static float lastHealth;
+    private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final List<PendingSword> PENDING = new ArrayList<>();
     private static final List<FlyingSword> FLYING = new ArrayList<>();
     private static final List<ActiveSword> ACTIVE = new ArrayList<>();
@@ -75,8 +78,10 @@ public final class GoldorEncounter {
         return goldor != null && entity == goldor;
     }
 
-    public static void recordDirectDamage(net.minecraft.world.entity.LivingEntity target, double entityDamage) {
+    public static void recordDirectDamage(net.minecraft.world.entity.LivingEntity target,
+                                          ServerPlayer attacker, double entityDamage) {
         if (goldor == null || target != goldor || entityDamage <= 0.0D) return;
+        PARTICIPANTS.add(attacker.getUUID());
         float next = (float) Math.max(0.0D, goldor.getHealth() - entityDamage);
         goldor.setHealth(next);
         lastHealth = next;
@@ -104,6 +109,7 @@ public final class GoldorEncounter {
         attackTimer = 60;
         lastHealth = (float) ENTITY_HEALTH;
         clearSwords();
+        PARTICIPANTS.clear();
         BAR.setName(Component.literal("Goldor: 25,000,000 / 25,000,000 HP"));
         BAR.setProgress(1.0F);
         BAR.addPlayer(player);
@@ -115,6 +121,10 @@ public final class GoldorEncounter {
 
     private static void tick(MinecraftServer server) {
         if (goldor == null || encounterLevel == null || !goldor.isAlive() || goldor.isRemoved()) return;
+        if (allFightersDead(server)) {
+            abortBecauseAllFightersDied();
+            return;
+        }
 
         float current = goldor.getHealth();
         if (current > lastHealth) goldor.setHealth(lastHealth);
@@ -275,6 +285,25 @@ public final class GoldorEncounter {
         clear();
     }
 
+    private static boolean allFightersDead(MinecraftServer server) {
+        if (PARTICIPANTS.isEmpty()) return false;
+        for (UUID id : PARTICIPANTS) {
+            ServerPlayer fighter = server.getPlayerList().getPlayer(id);
+            if (fighter != null && fighter.isAlive()) return false;
+        }
+        return true;
+    }
+
+    private static void abortBecauseAllFightersDied() {
+        if (encounterLevel == null) return;
+        if (goldor != null) goldor.discard();
+        BAR.removeAllPlayers();
+        clearSwords();
+        encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("All players fighting Goldor have been defeated. The encounter has ended."), false);
+        clear();
+    }
+
     private static void clearSwords() {
         if (encounterLevel != null) {
             for (FlyingSword sword : FLYING) sword.display.discard();
@@ -293,6 +322,7 @@ public final class GoldorEncounter {
         PENDING.clear();
         FLYING.clear();
         ACTIVE.clear();
+        PARTICIPANTS.clear();
     }
 
     private static final class PendingSword {
