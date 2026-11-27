@@ -21,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
+import com.mojang.math.Transformation;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,11 +31,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import net.minecraft.world.entity.decoration.Display.ItemDisplay;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.LivingEntity;
-
 import java.util.*;
 
 public final class NecronEncounter {
@@ -239,7 +235,7 @@ public final class NecronEncounter {
         ItemDisplay d=EntityTypes.ITEM_DISPLAY.create(level,EntitySpawnReason.COMMAND);
         if(d==null)return null;
         d.setItemStack(new ItemStack(Items.NETHERITE_SWORD)); d.setItemTransform(ItemDisplayContext.FIXED);
-        d.setTransformation(new Display.Transformation(new Vector3f(),new Quaternionf(),new Vector3f(4,4,4),new Quaternionf()));
+        d.setTransformation(new Transformation(new Vector3f(),new Quaternionf(),new Vector3f(4,4,4),new Quaternionf()));
         d.setPos(necron.getX(),necron.getY()+2,necron.getZ());
         Vec3 end=Vec3.atCenterOf(pos); Vec3 dir=end.subtract(d.position()).normalize();
         Quaternionf q=new Quaternionf().rotationTo(new Vector3f(0,1,0),new Vector3f((float)dir.x,(float)dir.y,(float)dir.z));
