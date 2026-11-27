@@ -168,6 +168,10 @@ public final class SkyblockPlayerState {
     public int maximumHealth() { return maximumHealth; }
     public void addMaxorLaserStack() { maxorLaserStacks++; }
     public void clearMaxorLaserStacks() { maxorLaserStacks = 0; }
+    public static void clearMaxorLaserStacksFor(UUID playerId) {
+        SkyblockPlayerState state = PLAYERS.get(playerId);
+        if (state != null) state.clearMaxorLaserStacks();
+    }
     public int level() { return skyblockLevel; }
     public int levelExperience() { return levelExperience; }
     public int levelExperienceRequired() { return 50; }
