@@ -34,7 +34,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
     }
 
     @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
-    private void hypixelcustomrecipe$createStarUpgrade(CallbackInfo ci) {
+    private void hypixelcustomrecipe$createArmorUpgrade(CallbackInfo ci) {
         ItemStack left = this.inputSlots.getItem(0);
         if (left.isEmpty()) {
             return;
@@ -58,7 +58,12 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
         String nextId = null;
         Item requiredShard = null;
 
-        if (currentId.endsWith("_1star")) {
+        if (currentId.endsWith("_3star_void")) {
+            // Void-upgraded armor is the final upgrade tier.
+        } else if (currentId.endsWith("_3star")) {
+            nextId = currentId + "_void";
+            requiredShard = ModItems.PURE_VOID_SHARD;
+        } else if (currentId.endsWith("_1star")) {
             nextId = currentId.substring(0, currentId.length() - "_1star".length()) + "_2star";
             requiredShard = ModItems.STAR_SHARD_2;
         } else if (currentId.endsWith("_2star")) {
