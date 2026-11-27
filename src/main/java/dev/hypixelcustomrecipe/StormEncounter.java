@@ -39,10 +39,9 @@ public final class StormEncounter {
     private static final int BREAK_TICKS = 5 * 60 * 20;
     private static final int ARENA_HALF_SIZE = 50;
     private static final int SAFE_ZONE_COUNT = 5;
-    // Five circles with this radius cover exactly 5% of a 100 x 100 square.
-    private static final double SAFE_ZONE_RADIUS =
-            Math.sqrt((10_000.0D * 0.05D) / (SAFE_ZONE_COUNT * Math.PI));
-    private static final int WARNING_TICKS = 100; // 5 seconds to reach a safe zone before the simultaneous strike
+    // Each safe zone is 4 blocks across (2-block radius).
+    private static final double SAFE_ZONE_RADIUS = 2.0D;
+    private static final int WARNING_TICKS = 160; // 8 seconds to reach a safe zone before the simultaneous strike
     private static final int WAVE_INTERVAL_TICKS = 100;
 
     private static ServerLevel level;
