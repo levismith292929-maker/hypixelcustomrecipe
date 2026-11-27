@@ -41,6 +41,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         MaxorEncounter.initialize();
         StormEncounter.initialize();
         GoldorEncounter.initialize();
+        NecronEncounter.initialize();
         BossTestCommand.initialize();
         LOGGER.info("Registered the migrated SkyBlock item, recipe, stat, and ability systems. Holy Dragon content is excluded.");
     }
