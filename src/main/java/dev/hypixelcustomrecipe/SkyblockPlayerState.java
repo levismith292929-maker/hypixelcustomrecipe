@@ -81,7 +81,6 @@ public final class SkyblockPlayerState {
     private int currentHealth;
     private int maximumHealth;
     private int maxorLaserStacks;
-    private int necronRadiationStacks;
     private int necronCorruptDamage;
     private int necronFlameWallStacks;
     private boolean healthInitialized;
@@ -173,8 +172,6 @@ public final class SkyblockPlayerState {
     public int maximumHealth() { return maximumHealth; }
     public void addMaxorLaserStack() { maxorLaserStacks++; }
     public void clearMaxorLaserStacks() { maxorLaserStacks = 0; }
-    /** Radiation permanently reduces maximum Health by 5% per exposure. */
-    public void addNecronRadiationStack() { necronRadiationStacks++; }
     /** Corrupt damage permanently lowers the encounter's healing ceiling until reset. */
     public boolean applyNecronCorruptDamage(float damage) {
         int effective = (int) Math.round(Math.max(0.0F, damage));
@@ -207,7 +204,6 @@ public final class SkyblockPlayerState {
         combatExperience = 0;
         miningLevel = 0;
         miningExperience = 0;
-        necronRadiationStacks = 0;
         maxorLaserStacks = 0;
         AccessoryBag.clear(player);
         GemTankMenu.clear(player);
@@ -358,7 +354,6 @@ public final class SkyblockPlayerState {
     public void savePersistentData(ServerPlayer player, ValueOutput output) {
         output.putInt("hypixel_health", currentHealth);
         output.putInt("hypixel_max_health", maximumHealth);
-        output.putInt("hypixel_necron_radiation_stacks", necronRadiationStacks);
         output.putInt("hypixel_pet", activePet.ordinal());
         output.putInt("hypixel_necron_guard_cooldown", necronGuardCooldownTicks);
         output.putInt("hypixel_skyblock_level", skyblockLevel);
@@ -378,7 +373,6 @@ public final class SkyblockPlayerState {
         player.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
         if (player.isAlive()) player.setHealth(1000000000.0F);
 
-        necronRadiationStacks = Math.max(0, input.getIntOr("hypixel_necron_radiation_stacks", 0));
         int savedMaximum = input.getIntOr("hypixel_max_health", 0);
         int savedHealth = input.getIntOr("hypixel_health", -1);
         if (savedMaximum > 0 && savedHealth >= 0) {
@@ -632,8 +626,7 @@ public final class SkyblockPlayerState {
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel);
 
         int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health()
-                * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.95D, necronRadiationStacks)
-                * Math.pow(0.90D, necronFlameWallStacks)));
+                * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.90D, necronFlameWallStacks)));
         if (!healthInitialized) {
             maximumHealth = recalculatedMaximum;
             currentHealth = maximumHealth;
