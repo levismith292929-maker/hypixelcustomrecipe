@@ -343,7 +343,9 @@ public final class SkyblockAbilityHandler {
                     if (hitTargets.add(target.getUUID())) {
                         double maximumHealth = target instanceof ServerPlayer targetPlayer
                                 ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
-                                : target.getMaxHealth();
+                                : NecronEncounter.isNecron(target)
+                                    ? NecronEncounter.logicalMaximumHealth()
+                                    : target.getMaxHealth();
                         // Soul Blade damage is determined ONLY by the target's maximum
                         // Health and its digit count. Attacker stats, accessories, weapon
                         // damage, Strength, Crit Damage, and other bonuses are ignored.
@@ -351,6 +353,9 @@ public final class SkyblockAbilityHandler {
                                 Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
                         double percentage = Math.max(0.0025D, 0.035D / healthDigits);
                         double soulBladeDamage = maximumHealth * percentage;
+                        if (NecronEncounter.isNecron(target)) {
+                            soulBladeDamage = NecronEncounter.toEntityDamage(soulBladeDamage);
+                        }
                         applyScytheTrueDamage(level, target, source, (float) soulBladeDamage);
                     }
                 }
@@ -404,6 +409,9 @@ public final class SkyblockAbilityHandler {
         target.setHealth(Math.max(0.0F, target.getHealth() - damage));
         if (source.getEntity() instanceof ServerPlayer attacker) {
             MaxorEncounter.recordDirectDamage(target, attacker, actualDamage);
+            StormEncounter.recordDirectDamage(target, attacker, actualDamage);
+            GoldorEncounter.recordDirectDamage(target, attacker, actualDamage);
+            NecronEncounter.recordDirectDamage(target, attacker, actualDamage);
         }
         DamageNumberHandler.show(level, target, damage, false);
         if (target.getHealth() <= 0.0F) target.die(source);
