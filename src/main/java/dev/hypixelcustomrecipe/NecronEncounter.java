@@ -291,7 +291,7 @@ public final class NecronEncounter {
 
         if (attack1Ticks == 0 && --attack1Timer <= 0
                 && attack4Ticks == 0 && attack6Ticks == 0) beginAttack1();
-        if (BOMBS.isEmpty() && --attack2Timer <= 0
+        if (BOMBS.isEmpty() && attack2Timer <= 0
                 && attack6Ticks == 0) beginAttack2();
         if (attack4Ticks == 0 && attack4Timer <= 0) beginAttack4();
         if (attack5Timer > 0) attack5Timer--;
@@ -450,6 +450,7 @@ public final class NecronEncounter {
     }
 
     private static void tickGuardianLaser() {
+        if (attack3Timer > 0) attack3Timer--;
         laserAngle += Math.PI * 2.0D / 160.0D;
         double radius = 14.5D;
         double endX = center.getX() + 0.5D + Math.cos(laserAngle) * radius;
@@ -518,9 +519,9 @@ public final class NecronEncounter {
     }
 
     private static void tickAttack4() {
+        if (attack4Timer > 0) attack4Timer--;
         if (attack4Ticks <= 0) return;
         int elapsed = DANGER_LIFETIME_TICKS - attack4Ticks;
-        if (attack4Timer > 0) attack4Timer--;
         int color = elapsed < 60 ? 0xFFFF00 : elapsed < DANGER_WARNING_TICKS ? 0xFF8800 : 0xFF0000;
         DustParticleOptions dust = new DustParticleOptions(color, 1.35F);
         double y = center.getY() + 1.08D;
