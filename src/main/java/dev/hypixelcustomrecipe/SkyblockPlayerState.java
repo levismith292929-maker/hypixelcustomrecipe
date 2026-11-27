@@ -177,7 +177,7 @@ public final class SkyblockPlayerState {
     public void addNecronRadiationStack() { necronRadiationStacks++; }
     /** Corrupt damage permanently lowers the encounter's healing ceiling until reset. */
     public boolean applyNecronCorruptDamage(float damage) {
-        int effective = (int) Math.round(Math.max(0.0F, damage) * 10.0D);
+        int effective = (int) Math.round(Math.max(0.0F, damage));
         if (effective > 0) {
             necronCorruptDamage = (int) Math.min(Integer.MAX_VALUE,
                     (long) necronCorruptDamage + effective);
