@@ -268,6 +268,13 @@ public final class SkyblockPlayerState {
         return currentHealth <= 0;
     }
 
+    /** Applies fixed percentage damage without the Defense reduction. */
+    public boolean applyTrueDamage(float damage) {
+        int effective = (int) Math.round(Math.max(0.0F, damage) * 10.0);
+        if (effective > 0) currentHealth = Math.max(0, currentHealth - effective);
+        return currentHealth <= 0;
+    }
+
     /** Keeps Health regeneration paused for five seconds after entity combat. */
     public void markCombat() {
         combatTicksRemaining = 100;
