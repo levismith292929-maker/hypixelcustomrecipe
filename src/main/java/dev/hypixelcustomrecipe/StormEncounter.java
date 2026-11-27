@@ -63,6 +63,8 @@ public final class StormEncounter {
     private StormEncounter() {
     }
 
+    public static boolean isActive() { return storm != null && storm.isAlive(); }
+
     public static void initialize() {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
                 storm == null || entity != storm
