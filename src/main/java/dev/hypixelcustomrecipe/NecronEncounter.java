@@ -73,6 +73,7 @@ public final class NecronEncounter {
 
     private static final Map<BlockPos, BlockState> ORIGINAL_ARENA = new LinkedHashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
+    private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final Set<UUID> MINIONS = new HashSet<>();
     private static final Set<UUID> PROJECTILES = new HashSet<>();
     private static final Set<UUID> FLAME_HIT_PLAYERS = new HashSet<>();
@@ -89,6 +90,13 @@ public final class NecronEncounter {
             return true;
         });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
+                DEAD_PARTICIPANTS.add(player.getUUID());
+                if (level != null && allFightersDead(player.level().getServer())) {
+                    finish(false);
+                    return;
+                }
+            }
             if (necron != null && entity == necron) finish(true);
         });
         ServerTickEvents.END_SERVER_TICK.register(NecronEncounter::tick);
@@ -160,6 +168,7 @@ public final class NecronEncounter {
         testMode = testing;
         lastHealth = (float) ENTITY_HP;
         PARTICIPANTS.clear();
+        DEAD_PARTICIPANTS.clear();
         MINIONS.clear();
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
@@ -785,7 +794,7 @@ public final class NecronEncounter {
         if (PARTICIPANTS.isEmpty()) return false;
         for (UUID id : PARTICIPANTS) {
             ServerPlayer fighter = server.getPlayerList().getPlayer(id);
-            if (fighter != null && fighter.isAlive()) return false;
+            if (!DEAD_PARTICIPANTS.contains(id) && fighter != null && fighter.isAlive()) return false;
         }
         return true;
     }
