@@ -250,15 +250,24 @@ public final class StormEncounter {
     private static void renderSafeZones() {
         double y = arenaCenter.getY() + 0.15D;
         for (SafeZone zone : SAFE_ZONES) {
+            for (int i = 0; i < 96; i++) {
+                double angle = Math.PI * 2.0D * i / 96.0D;
+                double x = zone.x + Math.cos(angle) * SAFE_ZONE_RADIUS;
+                double z = zone.z + Math.sin(angle) * SAFE_ZONE_RADIUS;
+                level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                        x, y, z, 2, 0.015D, 0.015D, 0.015D, 0.0D);
+            }
+            // Bright green fill particles make the protected area obvious, not just its edge.
+            level.sendParticles(ParticleTypes.HAPPY_VILLAGER, zone.x, y + 0.05D, zone.z,
+                    28, SAFE_ZONE_RADIUS * 0.65D, 0.025D, SAFE_ZONE_RADIUS * 0.65D, 0.0D);
+            // A second, slightly raised ring makes the safe-zone boundary visible from a distance.
             for (int i = 0; i < 48; i++) {
                 double angle = Math.PI * 2.0D * i / 48.0D;
                 double x = zone.x + Math.cos(angle) * SAFE_ZONE_RADIUS;
                 double z = zone.z + Math.sin(angle) * SAFE_ZONE_RADIUS;
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                        x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                        x, y + 0.65D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
             }
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER, zone.x, y, zone.z,
-                    12, SAFE_ZONE_RADIUS * 0.55D, 0.02D, SAFE_ZONE_RADIUS * 0.55D, 0.0D);
         }
     }
 
