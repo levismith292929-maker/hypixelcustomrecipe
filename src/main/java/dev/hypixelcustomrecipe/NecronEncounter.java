@@ -96,6 +96,7 @@ public final class NecronEncounter {
 
     public static boolean isActive() { return necron != null && necron.isAlive(); }
     public static boolean isNecron(LivingEntity entity) { return necron != null && entity == necron; }
+    public static boolean isNecronMinion(UUID entityId) { return MINIONS.contains(entityId); }
     public static double logicalMaximumHealth() { return MAX_HP; }
     public static double toEntityDamage(double logicalDamage) { return logicalDamage / HP_PER_ENTITY_HP; }
     public static double toLogicalDamage(double entityDamage) { return entityDamage * HP_PER_ENTITY_HP; }
