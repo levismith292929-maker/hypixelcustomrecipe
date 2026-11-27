@@ -105,8 +105,6 @@ public final class StormEncounter {
         altarOwner = owner;
         PARTICIPANTS.clear();
         PARTICIPANTS.addAll(participants);
-        DEAD_PARTICIPANTS.clear();
-        DEAD_PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
         STRIKES.clear();
