@@ -60,6 +60,7 @@ public final class MaxorEncounter {
     private static boolean testMode;
     private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
+    private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final List<UUID> MINIONS = new ArrayList<>();
     private static final ServerBossEvent BOSS_BAR = new ServerBossEvent(
             UUID.randomUUID(),
@@ -109,6 +110,13 @@ public final class MaxorEncounter {
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
+                DEAD_PARTICIPANTS.add(player.getUUID());
+                if (maxor != null && allFightersDead(player.level().getServer())) {
+                    abortBecauseAllFightersDied();
+                    return;
+                }
+            }
             if (maxor != null && entity.getUUID().equals(maxor.getUUID())) {
                 if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                     // /kill must reset the phase, not count as a legitimate boss clear.
@@ -163,6 +171,7 @@ public final class MaxorEncounter {
         lastKnownHealth = (float) ENTITY_HEALTH;
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
+        DEAD_PARTICIPANTS.clear();
         LASER_AFFECTED.clear();
         LASER_HIT_COOLDOWNS.clear();
         MINIONS.clear();
@@ -367,7 +376,7 @@ public final class MaxorEncounter {
         if (PARTICIPANTS.isEmpty()) return false;
         for (UUID id : PARTICIPANTS) {
             ServerPlayer fighter = server.getPlayerList().getPlayer(id);
-            if (fighter != null && fighter.isAlive()) return false;
+            if (!DEAD_PARTICIPANTS.contains(id) && fighter != null && fighter.isAlive()) return false;
         }
         return true;
     }
