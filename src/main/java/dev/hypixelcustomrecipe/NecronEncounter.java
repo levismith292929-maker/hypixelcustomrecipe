@@ -303,6 +303,11 @@ public final class NecronEncounter {
         tickAttack4();
         tickAttack6();
         tickAttack7(target);
+        if (attack1Timer > 0) attack1Timer--;
+        if (attack2Timer > 0) attack2Timer--;
+        if (attack4Timer > 0) attack4Timer--;
+        if (attack5Timer > 0) attack5Timer--;
+        if (attack6Timer > 0) attack6Timer--;
 
         if (attack3Timer > 0) attack3Timer--;
         if (attack7Ticks <= 0 && attack7Timer > 0) attack7Timer--;
@@ -677,7 +682,6 @@ public final class NecronEncounter {
     }
 
     private static void tickAttack6() {
-        if (attack6Timer > 0) attack6Timer--;
         if (attack6Ticks <= 0) return;
         double plane;
         boolean verticalX = flameSide < 2;
