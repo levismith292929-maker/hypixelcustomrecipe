@@ -128,7 +128,35 @@ public final class NecronEncounter {
                 .withStyle(s -> s.withColor(0xAA0000).withBold(true)));
         starter.sendSystemMessage(Component.literal("Elytras are disabled during this encounter.")
                 .withStyle(s -> s.withColor(0xFF5555)));
+        // The encounter opens with one 10-block-radius nuke and the laser together.
+        detonateOpeningNuke();
+        beginLaser();
         return true;
+    }
+
+    private static void detonateOpeningNuke() {
+        level.playSound(null, center, SoundEvents.GENERIC_EXPLODE.value(),
+                SoundSource.HOSTILE, 8.0F, 0.55F);
+        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                center.getX() + 0.5D, center.getY() + 2.0D, center.getZ() + 0.5D,
+                1, 0.0D, 0.0D, 0.0D, 0.0D);
+        level.sendParticles(ParticleTypes.FLAME,
+                center.getX() + 0.5D, center.getY() + 2.0D, center.getZ() + 0.5D,
+                180, 5.0D, 3.0D, 5.0D, 0.08D);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE,
+                center.getX() + 0.5D, center.getY() + 2.0D, center.getZ() + 0.5D,
+                100, 4.0D, 2.0D, 4.0D, 0.025D);
+        AABB blast = new AABB(center).inflate(10.0D);
+        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, blast)) {
+            if (!player.isAlive()) continue;
+            player.sendSystemMessage(Component.literal(
+                    "NECRON'S OPENING NUKE HAS ERASED YOUR INVENTORY AND PROGRESSION!")
+                    .withStyle(s -> s.withColor(0xAA0000).withBold(true)));
+            SkyblockPlayerState.get(player).applyNecronNuke(player);
+        }
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON HAS DETONATED HIS OPENING NUKE! The laser is active.")
+                .withStyle(s -> s.withColor(0xAA0000).withBold(true)), false);
     }
 
     private static void clearArena() {
