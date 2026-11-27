@@ -110,9 +110,12 @@ public final class MaxorEncounter {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (maxor != null && entity.getUUID().equals(maxor.getUUID())) {
-                // /kill and every other forced removal abort the encounter:
-                // do not award progression or advance to Storm.
-                abortEncounter("Maxor was removed. The encounter has been reset.");
+                if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+                    // /kill must reset the phase, not count as a legitimate boss clear.
+                    abortEncounter("Maxor was removed. The encounter has been reset.");
+                } else {
+                    finishSuccessfully();
+                }
             }
         });
 
