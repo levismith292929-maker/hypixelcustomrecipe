@@ -41,7 +41,7 @@ public final class GoldorEncounter {
     private static final int WARNING_TICKS = 40;
     private static final int SWORD_LIFETIME = 600;
     private static final int FLIGHT_TICKS = 4;
-    private static final int ATTACK_INTERVAL = 100;
+    private static final int ATTACK_INTERVAL = 60;
     private static final double SWORD_RADIUS = 1.5D;
 
     private static WitherBoss goldor;
