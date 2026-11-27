@@ -333,7 +333,10 @@ public final class SkyblockAbilityHandler {
                             ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
                             : target.getMaxHealth();
                     if (soulBlade) {
-                        applyScytheTrueDamage(level, target, source, (float) (maximumHealth * 0.05D));
+                        int healthDigits = Math.max(3,
+                                Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
+                        double percentage = Math.max(0.0025D, 0.05D / healthDigits);
+                        applyScytheTrueDamage(level, target, source, (float) (maximumHealth * percentage));
                     } else {
                         target.hurtServer(level, source, (float) (maximumHealth * 0.025D));
                     }
