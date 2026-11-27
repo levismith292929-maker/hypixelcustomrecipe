@@ -256,8 +256,6 @@ public final class StormEncounter {
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, strike.x, y + i * 0.65D,
                     strike.z, 3, 0.18D, 0.2D, 0.18D, 0.02D);
         }
-        level.sendParticles(ParticleTypes.FLASH, strike.x, y + 0.2D, strike.z,
-                1, 0.0D, 0.0D, 0.0D, 0.0D);
         level.playSound(null, BlockPos.containing(strike.x, y, strike.z),
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.8F, 1.2F);
 
