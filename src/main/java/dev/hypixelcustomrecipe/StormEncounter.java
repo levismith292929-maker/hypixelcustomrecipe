@@ -16,6 +16,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -58,7 +59,6 @@ public final class StormEncounter {
     private static WitherBoss storm;
     private static int breakTimer;
     private static int warningTimer = -1;
-    private static int nextStrike;
     private static int waveTimer = WAVE_INTERVAL_TICKS;
     private static boolean testMode;
 
@@ -138,11 +138,12 @@ public final class StormEncounter {
 
         if (warningTimer >= 0) {
             renderSafeZones();
-            if (warningTimer % 2 == 0 && nextStrike < STRIKES.size()) {
-                strike(STRIKES.get(nextStrike++));
-            }
             warningTimer--;
             if (warningTimer < 0) {
+                // Spawn every strike in the same server tick so the whole arena is hit at once.
+                for (Strike strike : STRIKES) {
+                    strike(strike);
+                }
                 SAFE_ZONES.clear();
                 STRIKES.clear();
                 waveTimer = WAVE_INTERVAL_TICKS;
@@ -241,7 +242,6 @@ public final class StormEncounter {
                 }
             }
         }
-        nextStrike = 0;
         warningTimer = WARNING_TICKS;
         level.getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("Storm is charging a lightning barrage! Find the green safe zones!")
@@ -276,12 +276,14 @@ public final class StormEncounter {
         int groundY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
                 (int) Math.floor(strike.x), (int) Math.floor(strike.z));
         double y = Math.max(arenaCenter.getY(), groundY);
-        for (int i = 0; i < 18; i++) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, strike.x, y + i * 0.65D,
-                    strike.z, 3, 0.18D, 0.2D, 0.18D, 0.02D);
+        // Use the vanilla lightning entity for its normal bolt visuals, but keep its
+        // vanilla damage/fire disabled because this encounter applies its own true damage.
+        LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
+        if (bolt != null) {
+            bolt.setVisualOnly(true);
+            bolt.setPos(strike.x, y, strike.z);
+            level.addFreshEntity(bolt);
         }
-        level.playSound(null, BlockPos.containing(strike.x, y, strike.z),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.8F, 1.2F);
 
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             if (player.level() != level || !player.isAlive()) continue;
@@ -393,7 +395,6 @@ public final class StormEncounter {
         breakTimer = 0;
         warningTimer = -1;
         waveTimer = WAVE_INTERVAL_TICKS;
-        nextStrike = 0;
         PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
