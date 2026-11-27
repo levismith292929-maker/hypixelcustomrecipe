@@ -76,6 +76,7 @@ public final class NecronEncounter {
     }
 
     public static boolean isActive() { return necron != null && necron.isAlive(); }
+    public static boolean isNecron(LivingEntity entity) { return necron != null && entity == necron; }
     public static boolean isLaserActive() { return isActive() && laserActive; }
 
     public static boolean canPlaceBlock(ServerPlayer player, BlockPos pos) {
@@ -231,8 +232,8 @@ public final class NecronEncounter {
         }
     }
 
-    private static ItemDisplay spawnBlade(BlockPos pos) {
-        ItemDisplay d=EntityTypes.ITEM_DISPLAY.create(level,EntitySpawnReason.COMMAND);
+    private static Display.ItemDisplay spawnBlade(BlockPos pos) {
+        Display.ItemDisplay d=EntityTypes.ITEM_DISPLAY.create(level,EntitySpawnReason.COMMAND);
         if(d==null)return null;
         d.setItemStack(new ItemStack(Items.NETHERITE_SWORD)); d.setItemTransform(ItemDisplayContext.FIXED);
         d.setTransformation(new Transformation(new Vector3f(),new Quaternionf(),new Vector3f(4,4,4),new Quaternionf()));
@@ -347,8 +348,8 @@ public final class NecronEncounter {
     }
 
     private static final class Blade {
-        final BlockPos pos; final ItemDisplay display; int age;
-        Blade(BlockPos pos,ItemDisplay display,int age){this.pos=pos;this.display=display;this.age=age;}
+        final BlockPos pos; final Display.ItemDisplay display; int age;
+        Blade(BlockPos pos,Display.ItemDisplay display,int age){this.pos=pos;this.display=display;this.age=age;}
     }
     private static final class Radiation {
         final Vec3 pos; final Set<UUID> hit;
