@@ -438,7 +438,6 @@ public final class NecronEncounter {
             laserGuardian.setInvulnerable(true);
             laserGuardian.setPersistenceRequired();
             laserTarget.setInvisible(true);
-            laserTarget.setSmall(true);
             laserTarget.setNoGravity(true);
             laserTarget.setInvulnerable(true);
             laserTarget.setPos(center.getX() + 14.5D, center.getY() + 1.6D, center.getZ() + 0.5D);
