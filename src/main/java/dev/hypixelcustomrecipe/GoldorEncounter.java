@@ -57,6 +57,8 @@ public final class GoldorEncounter {
 
     private GoldorEncounter() {}
 
+    public static boolean isActive() { return goldor != null && goldor.isAlive(); }
+
     public static void initialize() {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
             if (goldor != null && entity == goldor
