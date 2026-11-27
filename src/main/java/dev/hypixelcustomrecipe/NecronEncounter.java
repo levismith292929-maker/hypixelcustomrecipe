@@ -26,6 +26,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Guardian;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -290,7 +292,7 @@ public final class NecronEncounter {
             return;
         }
 
-        if (attack4Ticks == 0 && attack4Timer <= 0) beginAttack4();
+        if (attack4Ticks == 0 && --attack4Timer <= 0) beginAttack4();
         if (attack6Ticks == 0 && attack6Timer <= 0) beginAttack6();
         if (attack1Ticks == 0 && --attack1Timer <= 0
                 && attack4Ticks == 0 && attack6Ticks == 0) beginAttack1();
@@ -513,14 +515,12 @@ public final class NecronEncounter {
         dangerMaxX = dangerMinX + 49;
         dangerMaxZ = dangerMinZ + 49;
         attack4Ticks = DANGER_LIFETIME_TICKS;
-        attack4Timer = random(800, 1_000);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: DANGER ZONE! Leave the outlined area before it turns red!")
                 .withStyle(s -> s.withColor(0xFFFF55).withBold(true)), false);
     }
 
     private static void tickAttack4() {
-        if (attack4Timer > 0) attack4Timer--;
         if (attack4Ticks <= 0) return;
         int elapsed = DANGER_LIFETIME_TICKS - attack4Ticks;
         int color = elapsed < 60 ? 0xFFFF00 : elapsed < DANGER_WARNING_TICKS ? 0xFF8800 : 0xFF0000;
@@ -543,6 +543,7 @@ public final class NecronEncounter {
         }
         attack4Ticks--;
         if (attack4Ticks <= 0) {
+            attack4Timer = random(800, 1_000);
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
         }
     }
@@ -704,6 +705,14 @@ public final class NecronEncounter {
     private static void finish(boolean defeated) {
         if (level == null) return;
         BAR.removeAllPlayers();
+        if (!defeated && necron != null) necron.discard();
+        if (defeated && necron != null) {
+            AABB deathArea = new AABB(necron.blockPosition()).inflate(6.0D);
+            for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, deathArea)) {
+                if (item.getItem().is(Items.NETHER_STAR)) item.discard();
+            }
+            for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, deathArea)) orb.discard();
+        }
         for (UUID id : MINIONS) {
             Entity entity = level.getEntity(id);
             if (entity != null) entity.discard();
