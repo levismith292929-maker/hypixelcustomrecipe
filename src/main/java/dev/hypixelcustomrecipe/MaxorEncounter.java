@@ -17,6 +17,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.item.ItemStack;
 
@@ -42,7 +44,8 @@ public final class MaxorEncounter {
     private static final int MINION_BATCH_SIZE = 8;
     private static final int MAX_LIVING_MINIONS = 48;
 
-    private static WitherSkeleton maxor;
+    private static WitherBoss maxor;
+    private static final Set<UUID> LASER_AFFECTED = new HashSet<>();
     private static ServerLevel encounterLevel;
     private static UUID altarOwner;
     private static int minionSpawnTimer;
@@ -85,13 +88,21 @@ public final class MaxorEncounter {
         });
 
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-            if (maxor == null || entity != maxor || amount <= 0.0F) {
-                return true;
+            if (maxor != null && entity == maxor && amount > 0.0F) {
+                Entity attacker = source.getEntity();
+                if (attacker instanceof ServerPlayer player) {
+                    recordDamage(player, amount);
+                }
             }
-            Entity attacker = source.getEntity();
-            if (attacker instanceof ServerPlayer player) {
-                PLAYER_DAMAGE.merge(player.getUUID(), (double) amount * BOSS_HP_PER_ENTITY_HP, Double::sum);
+            // A real Wither skull hit by Maxor permanently strips 2% of the
+            // player's current maximum Health for this encounter.
+            if (maxor != null && entity instanceof ServerPlayer player
+                    && source.getEntity() == maxor && source.getDirectEntity() instanceof WitherSkull) {
+                SkyblockPlayerState.get(player).addMaxorLaserStack();
+                LASER_AFFECTED.add(player.getUUID());
                 PARTICIPANTS.add(player.getUUID());
+                player.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
+                        .withStyle(style -> style.withColor(0xAA00AA)));
             }
             return true;
         });
@@ -110,7 +121,7 @@ public final class MaxorEncounter {
     }
 
     private static void start(ServerPlayer starter, ServerLevel level) {
-        WitherSkeleton boss = EntityTypes.WITHER_SKELETON.create(level, EntitySpawnReason.MOB_SUMMONED);
+        WitherBoss boss = EntityTypes.WITHER.create(level, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) {
             starter.sendSystemMessage(Component.literal("Maxor could not be summoned here.")
                     .withStyle(style -> style.withColor(0xFF5555)));
@@ -142,6 +153,7 @@ public final class MaxorEncounter {
         minionSpawnTimer = MINION_INTERVAL_TICKS;
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
+        LASER_AFFECTED.clear();
         MINIONS.clear();
         PARTICIPANTS.add(starter.getUUID());
         BOSS_BAR.setName(Component.literal("Maxor"));
@@ -234,6 +246,7 @@ public final class MaxorEncounter {
 
     private static void finishSuccessfully() {
         MinecraftServer server = encounterLevel.getServer();
+        restoreLaserHealth(server);
         int rewarded = 0;
         for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
             if (entry.getValue() < REWARD_THRESHOLD) {
@@ -268,6 +281,7 @@ public final class MaxorEncounter {
             return;
         }
         MinecraftServer server = encounterLevel.getServer();
+        restoreLaserHealth(server);
         for (UUID uuid : MINIONS) {
             Entity entity = encounterLevel.getEntity(uuid);
             if (entity != null) {
@@ -293,6 +307,27 @@ public final class MaxorEncounter {
         clearEncounter();
     }
 
+    private static void restoreLaserHealth(MinecraftServer server) {
+        for (UUID uuid : LASER_AFFECTED) {
+            ServerPlayer player = server.getPlayerList().getPlayer(uuid);
+            if (player != null) {
+                SkyblockPlayerState.get(player).clearMaxorLaserStacks();
+            }
+        }
+        LASER_AFFECTED.clear();
+    }
+
+    /** Also called by direct-damage abilities that bypass hurtServer. */
+    public static void recordDirectDamage(LivingEntity target, ServerPlayer attacker, double entityDamage) {
+        if (maxor == null || target != maxor || entityDamage <= 0.0D) return;
+        recordDamage(attacker, entityDamage);
+    }
+
+    private static void recordDamage(ServerPlayer player, double entityDamage) {
+        PLAYER_DAMAGE.merge(player.getUUID(), entityDamage * BOSS_HP_PER_ENTITY_HP, Double::sum);
+        PARTICIPANTS.add(player.getUUID());
+    }
+
     private static void clearEncounter() {
         maxor = null;
         encounterLevel = null;
@@ -300,6 +335,7 @@ public final class MaxorEncounter {
         minionSpawnTimer = 0;
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
+        LASER_AFFECTED.clear();
         MINIONS.clear();
     }
 }
