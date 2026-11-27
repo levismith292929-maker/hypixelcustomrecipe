@@ -162,7 +162,11 @@ public final class SkyblockAbilityHandler {
 
         Vec3 destination = player.position().add(player.getLookAngle().scale(5.0));
         player.teleportTo(destination.x, destination.y, destination.z);
+
+        // Clear motion after teleporting and synchronize the zero velocity to
+        // the client so the old movement packet cannot carry the player onward.
         player.setDeltaMovement(Vec3.ZERO);
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(player));
         player.fallDistance = 0.0F;
         playSound(player, net.minecraft.sounds.SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
     }
