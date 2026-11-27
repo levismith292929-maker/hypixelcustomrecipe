@@ -102,6 +102,14 @@ public final class NecronEncounter {
     public static double toLogicalDamage(double entityDamage) { return entityDamage * HP_PER_ENTITY_HP; }
     public static boolean isLaserActive() { return isActive() && laserActive; }
 
+    public static boolean isInsideArenaForVoidridden(double x, double z) {
+        if (!isActive() || center == null) return true;
+        return x >= center.getX() - HALF_ARENA + 2.0D
+                && x < center.getX() + HALF_ARENA - 2.0D
+                && z >= center.getZ() - HALF_ARENA + 2.0D
+                && z < center.getZ() + HALF_ARENA - 2.0D;
+    }
+
     public static boolean canPlaceBlock(ServerPlayer player, BlockPos pos) {
         if (!isActive() || player.level() != level || !insideArena(pos)) return true;
         return !laserActive;
