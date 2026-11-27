@@ -311,7 +311,11 @@ public final class NecronEncounter {
     private static void beginAttack1() {
         safeX = center.getX() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
         safeZ = center.getZ() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
-        safeRadius = Math.sqrt(2.0D) * HALF_ARENA + 2.0D;
+        double farX = Math.max(Math.abs(safeX - (center.getX() - HALF_ARENA)),
+                Math.abs(safeX - (center.getX() + HALF_ARENA)));
+        double farZ = Math.max(Math.abs(safeZ - (center.getZ() - HALF_ARENA)),
+                Math.abs(safeZ - (center.getZ() + HALF_ARENA)));
+        safeRadius = Math.sqrt(farX * farX + farZ * farZ) + 2.0D;
         attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
         attack1Timer = random(600, 900);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
