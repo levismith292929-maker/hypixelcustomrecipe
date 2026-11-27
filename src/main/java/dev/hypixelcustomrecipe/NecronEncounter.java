@@ -148,7 +148,7 @@ public final class NecronEncounter {
         level.sendParticles(ParticleTypes.END_ROD, x, y, z, 5, 0.2D, 0.3D, 0.2D, 0.0D);
         if (openingNukeTicks % 20 == 0 && openingNukeTicks > 0) {
             int seconds = openingNukeTicks / 20;
-            level.playSound(null, center, SoundEvents.NOTE_BLOCK_PLING, SoundSource.HOSTILE,
+            level.playSound(null, center, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.HOSTILE,
                     2.0F, 0.5F + (5 - seconds) * 0.2F);
             level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                     "NUKE IMPACT IN " + seconds + "...")
