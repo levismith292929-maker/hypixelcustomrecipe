@@ -730,7 +730,7 @@ public final class NecronEncounter {
     }
 
     private static void kill(ServerPlayer player, String cause) {
-        if (!player.isAlive()) return;
+        if (!player.isAlive() || isInsideClosingWallSafeZone(player)) return;
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
         state.applyTrueDamage(state.maximumHealth() / 10.0F + 1.0F);
         player.setHealth(0.0F);
