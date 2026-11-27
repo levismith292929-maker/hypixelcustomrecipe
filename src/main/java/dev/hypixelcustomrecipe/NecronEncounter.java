@@ -50,7 +50,7 @@ public final class NecronEncounter {
     private static boolean testMode;
     private static boolean laserActive;
     private static float lastHealth;
-    private static int minionTimer, lightningTimer, swordTimer, laserTimer, laserTicks;
+    private static int minionTimer, lightningTimer, swordTimer, laserTimer, laserTicks, openingNukeTicks;
     private static double laserAngle;
     private static final Map<UUID, Double> damage = new HashMap<>();
     private static final Set<UUID> participants = new HashSet<>();
@@ -117,6 +117,7 @@ public final class NecronEncounter {
         swordTimer = SWORD_INTERVAL;
         laserTimer = LASER_INTERVAL;
         laserTicks = 0;
+        openingNukeTicks = 100;
         laserActive = false;
         laserAngle = 0;
         damage.clear(); participants.clear(); radiationCooldown.clear(); minions.clear(); blades.clear(); radiation.clear();
@@ -128,13 +129,37 @@ public final class NecronEncounter {
                 .withStyle(s -> s.withColor(0xAA0000).withBold(true)));
         starter.sendSystemMessage(Component.literal("Elytras are disabled during this encounter.")
                 .withStyle(s -> s.withColor(0xFF5555)));
-        // The encounter opens with one 10-block-radius nuke and the laser together.
-        detonateOpeningNuke();
+        // The laser starts immediately. The opening nuke takes five seconds to fall.
+        starter.sendSystemMessage(Component.literal("INCOMING NUKE! Impact in 5 seconds — RUN!")
+                .withStyle(s -> s.withColor(0xFF5555).withBold(true)));
         beginLaser();
         return true;
     }
 
+    private static void tickOpeningNuke() {
+        int elapsed = 100 - openingNukeTicks;
+        double progress = elapsed / 100.0D;
+        double x = center.getX() + 0.5D;
+        double z = center.getZ() + 0.5D;
+        double y = center.getY() + 35.0D - progress * 34.0D;
+        // Visible falling fireball trail over the full five-second countdown.
+        level.sendParticles(ParticleTypes.FLAME, x, y, z, 18, 0.45D, 0.7D, 0.45D, 0.025D);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y - 1.0D, z, 10, 0.55D, 0.9D, 0.55D, 0.01D);
+        level.sendParticles(ParticleTypes.END_ROD, x, y, z, 5, 0.2D, 0.3D, 0.2D, 0.0D);
+        if (openingNukeTicks % 20 == 0 && openingNukeTicks > 0) {
+            int seconds = openingNukeTicks / 20;
+            level.playSound(null, center, SoundEvents.NOTE_BLOCK_PLING, SoundSource.HOSTILE,
+                    2.0F, 0.5F + (5 - seconds) * 0.2F);
+            level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                    "NUKE IMPACT IN " + seconds + "...")
+                    .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
+        }
+        openingNukeTicks--;
+        if (openingNukeTicks <= 0) detonateOpeningNuke();
+    }
+
     private static void detonateOpeningNuke() {
+        openingNukeTicks = 0;
         level.playSound(null, center, SoundEvents.GENERIC_EXPLODE.value(),
                 SoundSource.HOSTILE, 8.0F, 0.55F);
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
@@ -177,6 +202,7 @@ public final class NecronEncounter {
             abortBecauseAllFightersDied();
             return;
         }
+        if (openingNukeTicks > 0) tickOpeningNuke();
         float hp = necron.getHealth();
         if (hp > lastHealth) necron.setHealth(lastHealth); else lastHealth = hp;
         ServerPlayer target = nearestPlayer();
@@ -392,7 +418,7 @@ public final class NecronEncounter {
     }
 
     private static void clear() {
-        necron=null;level=null;center=null;testMode=false;laserActive=false;
+        necron=null;level=null;center=null;testMode=false;laserActive=false;openingNukeTicks=0;
         damage.clear();participants.clear();radiationCooldown.clear();minions.clear();blades.clear();radiation.clear();
     }
 
