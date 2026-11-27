@@ -344,11 +344,14 @@ public final class SkyblockAbilityHandler {
                         double maximumHealth = target instanceof ServerPlayer targetPlayer
                                 ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
                                 : target.getMaxHealth();
+                        // Soul Blade damage is determined ONLY by the target's maximum
+                        // Health and its digit count. Attacker stats, accessories, weapon
+                        // damage, Strength, Crit Damage, and other bonuses are ignored.
                         int healthDigits = Math.max(3,
                                 Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
                         double percentage = Math.max(0.0025D, 0.05D / healthDigits);
-                        applyScytheTrueDamage(level, target, source,
-                                (float) (maximumHealth * percentage));
+                        double soulBladeDamage = maximumHealth * percentage;
+                        applyScytheTrueDamage(level, target, source, (float) soulBladeDamage);
                     }
                 }
             }
