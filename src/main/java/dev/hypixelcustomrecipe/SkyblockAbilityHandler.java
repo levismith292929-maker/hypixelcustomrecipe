@@ -317,11 +317,42 @@ public final class SkyblockAbilityHandler {
         if (!beginAbility(player, abilityId, soulBlade ? 100 : 1, 1)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
-        Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
+        Vec3 origin = player.getEyePosition();
         Set<UUID> hitTargets = new HashSet<>();
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
-        double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
 
+        if (soulBlade) {
+            // Soul Blade fires a narrow, visible five-block beam in the exact
+            // direction the player is looking.
+            for (double distance = 0.15D; distance <= 5.0D; distance += 0.15D) {
+                Vec3 point = origin.add(direction.scale(distance));
+                level.sendParticles(ParticleTypes.END_ROD,
+                        point.x, point.y, point.z, 1, 0.015D, 0.015D, 0.015D, 0.0D);
+                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                        point.x, point.y, point.z, 1, 0.025D, 0.025D, 0.025D, 0.0D);
+
+                AABB area = new AABB(point, point).inflate(0.55D);
+                for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
+                        entity -> isValidScytheTarget(entity, player)
+                                && entity.distanceToSqr(point) <= 0.3025D)) {
+                    if (hitTargets.add(target.getUUID())) {
+                        double maximumHealth = target instanceof ServerPlayer targetPlayer
+                                ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
+                                : target.getMaxHealth();
+                        int healthDigits = Math.max(3,
+                                Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
+                        double percentage = Math.max(0.0025D, 0.05D / healthDigits);
+                        applyScytheTrueDamage(level, target, source,
+                                (float) (maximumHealth * percentage));
+                    }
+                }
+            }
+            playSound(player, net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 0.8F);
+            return;
+        }
+
+        // Necron's Scythe keeps its original short-range area attack and slash.
+        double[] scanDistances = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.0};
         for (double distance : scanDistances) {
             Vec3 center = origin.add(direction.scale(distance));
             AABB area = new AABB(center, center).inflate(1.5);
@@ -332,14 +363,7 @@ public final class SkyblockAbilityHandler {
                     double maximumHealth = target instanceof ServerPlayer targetPlayer
                             ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
                             : target.getMaxHealth();
-                    if (soulBlade) {
-                        int healthDigits = Math.max(3,
-                                Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
-                        double percentage = Math.max(0.0025D, 0.05D / healthDigits);
-                        applyScytheTrueDamage(level, target, source, (float) (maximumHealth * percentage));
-                    } else {
-                        target.hurtServer(level, source, (float) (maximumHealth * 0.025D));
-                    }
+                    target.hurtServer(level, source, (float) (maximumHealth * 0.025D));
                 }
             }
         }
