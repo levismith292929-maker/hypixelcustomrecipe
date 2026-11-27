@@ -26,6 +26,15 @@ public final class BossTestCommand {
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 }))
+                                .then(Commands.literal("goldor").executes(context -> {
+                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                    if (!GoldorEncounter.summonForTesting(player)) {
+                                        context.getSource().sendFailure(Component.literal(
+                                                "Could not summon Goldor. Another boss encounter may already be active."));
+                                        return 0;
+                                    }
+                                    return Command.SINGLE_SUCCESS;
+                                }))
                                 .then(Commands.literal("storm").executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
                                     if (!StormEncounter.summonForTesting(player)) {
