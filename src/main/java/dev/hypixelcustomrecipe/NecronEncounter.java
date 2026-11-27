@@ -5,7 +5,6 @@ import dev.hypixelcustomrecipe.entity.voidridden.VoidriddenMobs;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -60,6 +59,12 @@ public final class NecronEncounter {
     private static int laserTicks;
     private static double laserAngle;
     private static Guardian laserGuardian;
+    private static Display.BlockDisplay laserBeamDisplay;
+    private static Display.BlockDisplay safeZoneDisplay;
+    private static final List<Display.BlockDisplay> CLOSING_WALL_DISPLAYS = new ArrayList<>();
+    private static final List<Display.BlockDisplay> DANGER_ZONE_DISPLAYS = new ArrayList<>();
+    private static final List<Display.BlockDisplay> FLAME_WALL_DISPLAYS = new ArrayList<>();
+    private static int dangerDisplayColor = -1;
     private static ArmorStand laserTarget;
     private static int attack1Timer, attack2Timer, attack3Timer, attack4Timer;
     private static int attack5Timer, attack6Timer, attack7Timer;
@@ -352,6 +357,14 @@ public final class NecronEncounter {
                 Math.abs(safeZ - (center.getZ() + HALF_ARENA)));
         safeRadius = Math.sqrt(farX * farX + farZ * farZ) + 2.0D;
         attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
+        clearDisplayList(CLOSING_WALL_DISPLAYS);
+        for (int i = 0; i < 16; i++) {
+            Display.BlockDisplay segment = createBlockDisplay(Blocks.PURPLE_STAINED_GLASS.defaultBlockState(),
+                    safeX, center.getY() + 5.2D, safeZ, 1.0F, 10.0F, 0.18F, new Quaternionf());
+            if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
+        }
+        safeZoneDisplay = createBlockDisplay(Blocks.LIME_STAINED_GLASS.defaultBlockState(),
+                safeX, center.getY() + 1.04D, safeZ, 5.0F, 0.08F, 5.0F, new Quaternionf());
         attack1Timer = random(225, 338);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: EVAPORATION! Reach the 5-block safe circle!")
@@ -388,21 +401,7 @@ public final class NecronEncounter {
         if (attack1Ticks <= 0) return;
         double previous = safeRadius;
         safeRadius = Math.max(2.5D, safeRadius - 0.25D);
-        for (double y = center.getY() + 0.2D; y <= center.getY() + 10.2D; y += 2.5D) {
-            for (int i = 0; i < 80; i++) {
-                double angle = Math.PI * 2.0D * i / 80.0D;
-                double x = safeX + Math.cos(angle) * safeRadius;
-                double z = safeZ + Math.sin(angle) * safeRadius;
-                level.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0.0D, 0.015D, 0.0D, 0.0D);
-            }
-        }
-        double safeY = center.getY() + 1.15D;
-        for (int i = 0; i < 32; i++) {
-            double angle = Math.PI * 2.0D * i / 32.0D;
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                    safeX + Math.cos(angle) * 2.5D, safeY, safeZ + Math.sin(angle) * 2.5D,
-                    1, 0.0D, 0.0D, 0.0D, 0.0D);
-        }
+        updateClosingWallDisplays();
         AABB arena = new AABB(center.getX() - HALF_ARENA, center.getY() + 1,
                 center.getZ() - HALF_ARENA, center.getX() + HALF_ARENA,
                 center.getY() + WALL_HEIGHT, center.getZ() + HALF_ARENA);
@@ -416,6 +415,9 @@ public final class NecronEncounter {
         attack1Ticks--;
         if (attack1Timer > 0) attack1Timer--;
         if (attack1Ticks <= 0) {
+            clearDisplayList(CLOSING_WALL_DISPLAYS);
+            discardDisplay(safeZoneDisplay);
+            safeZoneDisplay = null;
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.2F);
         }
     }
@@ -436,7 +438,9 @@ public final class NecronEncounter {
                 display.setPos(x, y, z);
                 level.addFreshEntity(display);
             }
-            BOMBS.add(new TntBomb(x, z, y, display, 0));
+            Display.BlockDisplay marker = createBlockDisplay(Blocks.RED_STAINED_GLASS.defaultBlockState(),
+                    x, center.getY() + 1.04D, z, 10.0F, 0.06F, 10.0F, new Quaternionf());
+            BOMBS.add(new TntBomb(x, z, y, display, marker, 0));
         }
         attack2Timer = random(150, 263);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
@@ -454,23 +458,11 @@ public final class NecronEncounter {
             bomb.y = Math.max(center.getY() + 1.0D, bomb.y - 0.45D);
             if (bomb.display != null && !bomb.display.isRemoved()) {
                 bomb.display.setPos(bomb.x, bomb.y, bomb.z);
-                level.sendParticles(ParticleTypes.SMOKE, bomb.x, bomb.y + 0.25D, bomb.z,
-                        2, 0.12D, 0.18D, 0.12D, 0.01D);
-            }
-
-            // Clearly outline the full 10-block-diameter blast footprint while
-            // the TNT is falling, so players can see exactly where it will hit.
-            double markerY = center.getY() + 1.08D;
-            for (int point = 0; point < 40; point++) {
-                double angle = Math.PI * 2.0D * point / 40.0D;
-                double markerX = bomb.x + Math.cos(angle) * 5.0D;
-                double markerZ = bomb.z + Math.sin(angle) * 5.0D;
-                level.sendParticles(ParticleTypes.END_ROD, markerX, markerY, markerZ,
-                        1, 0.0D, 0.0D, 0.0D, 0.0D);
             }
 
             if (bomb.y <= center.getY() + 1.0D || bomb.age >= 80) {
                 if (bomb.display != null) bomb.display.discard();
+                discardDisplay(bomb.marker);
                 detonateBomb(bomb.x, bomb.z);
                 iterator.remove();
             }
@@ -480,8 +472,6 @@ public final class NecronEncounter {
     private static void detonateBomb(double x, double z) {
         double y = center.getY() + 1.1D;
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-        level.sendParticles(ParticleTypes.FLAME, x, y, z, 32, 1.4D, 0.6D, 1.4D, 0.06D);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 18, 1.0D, 0.5D, 1.0D, 0.025D);
         level.playSound(null, BlockPos.containing(x, y, z), SoundEvents.GENERIC_EXPLODE.value(),
                 SoundSource.HOSTILE, 2.0F, 0.85F);
         AABB area = new AABB(x - 5.0D, center.getY(), z - 5.0D,
@@ -549,13 +539,15 @@ public final class NecronEncounter {
             laserGuardian.setTarget(laserTarget);
         }
 
-        // Render the jump-rope beam with particles because Guardian beam rendering is unreliable
-        // while its target moves continuously around the arena.
-        for (double distance = 0.0D; distance <= radius; distance += 0.45D) {
-            double px = center.getX() + 0.5D + Math.cos(laserAngle) * distance;
-            double pz = center.getZ() + 0.5D + Math.sin(laserAngle) * distance;
-            level.sendParticles(ParticleTypes.END_ROD, px, beamY, pz, 2,
-                    0.025D, 0.025D, 0.025D, 0.0D);
+        double midX = center.getX() + 0.5D + Math.cos(laserAngle) * radius * 0.5D;
+        double midZ = center.getZ() + 0.5D + Math.sin(laserAngle) * radius * 0.5D;
+        if (laserBeamDisplay == null || laserBeamDisplay.isRemoved()) {
+            laserBeamDisplay = createBlockDisplay(Blocks.PURPLE_STAINED_GLASS.defaultBlockState(),
+                    midX, beamY, midZ, 0.14F, 0.14F, (float) radius, new Quaternionf().rotationY((float) laserAngle));
+        } else {
+            laserBeamDisplay.setPos(midX, beamY, midZ);
+            laserBeamDisplay.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY((float) laserAngle),
+                    new Vector3f(0.14F, 0.14F, (float) radius), new Quaternionf()));
         }
 
         // Damage follows the same radial path as the rendered Guardian beam.
@@ -610,6 +602,19 @@ public final class NecronEncounter {
         } while (attack1Ticks > 0 && circleOverlapsRectangle(
                 safeX, safeZ, 2.5D, dangerMinX, dangerMaxX + 1.0D, dangerMinZ, dangerMaxZ + 1.0D));
         attack4Ticks = DANGER_LIFETIME_TICKS;
+        clearDisplayList(DANGER_ZONE_DISPLAYS);
+        dangerDisplayColor = -1;
+        double zoneMidX = (dangerMinX + dangerMaxX + 1.0D) * 0.5D;
+        double zoneMidZ = (dangerMinZ + dangerMaxZ + 1.0D) * 0.5D;
+        double zoneY = center.getY() + 1.08D;
+        for (int side = 0; side < 4; side++) {
+            boolean alongX = side < 2;
+            double px = alongX ? zoneMidX : (side == 2 ? dangerMinX + 0.5D : dangerMaxX + 0.5D);
+            double pz = alongX ? (side == 0 ? dangerMinZ + 0.5D : dangerMaxZ + 0.5D) : zoneMidZ;
+            Display.BlockDisplay edge = createBlockDisplay(Blocks.YELLOW_CONCRETE.defaultBlockState(),
+                    px, zoneY, pz, alongX ? 50.0F : 0.15F, 0.08F, alongX ? 0.15F : 50.0F, new Quaternionf());
+            if (edge != null) DANGER_ZONE_DISPLAYS.add(edge);
+        }
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: DANGER ZONE! Leave the outlined area before it turns red!")
                 .withStyle(s -> s.withColor(0xFFFF55).withBold(true)), false);
@@ -619,16 +624,7 @@ public final class NecronEncounter {
         if (attack4Ticks <= 0) return;
         int elapsed = DANGER_LIFETIME_TICKS - attack4Ticks;
         int color = elapsed < 60 ? 0xFFFF00 : elapsed < DANGER_WARNING_TICKS ? 0xFF8800 : 0xFF0000;
-        DustParticleOptions dust = new DustParticleOptions(color, 1.35F);
-        double y = center.getY() + 1.08D;
-        for (int x = dangerMinX; x <= dangerMaxX; x += 2) {
-            sendDust(dust, x + 0.5D, y, dangerMinZ + 0.5D);
-            sendDust(dust, x + 0.5D, y, dangerMaxZ + 0.5D);
-        }
-        for (int z = dangerMinZ; z <= dangerMaxZ; z += 2) {
-            sendDust(dust, dangerMinX + 0.5D, y, z + 0.5D);
-            sendDust(dust, dangerMaxX + 0.5D, y, z + 0.5D);
-        }
+        updateDangerZoneDisplays(color);
         if (elapsed >= DANGER_WARNING_TICKS) {
             AABB zone = new AABB(dangerMinX, center.getY() + 1, dangerMinZ,
                     dangerMaxX + 1.0D, center.getY() + WALL_HEIGHT, dangerMaxZ + 1.0D);
@@ -640,13 +636,11 @@ public final class NecronEncounter {
         }
         attack4Ticks--;
         if (attack4Ticks <= 0) {
+            clearDisplayList(DANGER_ZONE_DISPLAYS);
+            dangerDisplayColor = -1;
             attack4Timer = random(300, 375);
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
         }
-    }
-
-    private static void sendDust(DustParticleOptions dust, double x, double y, double z) {
-        level.sendParticles(dust, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
     }
 
     // Attack 5 — summon the existing custom Voidridden mobs.
@@ -682,6 +676,12 @@ public final class NecronEncounter {
         flameGap = level.getRandom().nextInt(41) - 20;
         flameOffset = 0.0D;
         attack6Ticks = 200;
+        clearDisplayList(FLAME_WALL_DISPLAYS);
+        for (int i = 0; i < 3; i++) {
+            Display.BlockDisplay fire = createBlockDisplay(Blocks.FIRE.defaultBlockState(),
+                    center.getX(), center.getY() + 1.0D, center.getZ(), 1.0F, 1.0F, 1.0F, new Quaternionf());
+            if (fire != null) FLAME_WALL_DISPLAYS.add(fire);
+        }
         FLAME_HIT_PLAYERS.clear();
         attack6Timer = 450;
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
@@ -700,16 +700,7 @@ public final class NecronEncounter {
         else plane = center.getZ() + HALF_ARENA - flameOffset;
 
         double yBottom = center.getY() + 1.0D;
-        for (int along = -HALF_ARENA + 1; along < HALF_ARENA - 1; along += 2) {
-            for (int height = 0; height <= 10; height += 2) {
-                if (height < 3 && Math.abs(along - flameGap) < 2) continue;
-                double y = yBottom + height;
-                double x = verticalX ? plane : center.getX() + along + 0.5D;
-                double z = verticalX ? center.getZ() + along + 0.5D : plane;
-                level.sendParticles(ParticleTypes.FLAME, x, y, z, 2, 0.08D, 0.12D, 0.08D, 0.015D);
-                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 1, 0.04D, 0.08D, 0.04D, 0.0D);
-            }
-        }
+        updateFlameWallDisplays(plane, verticalX, yBottom);
 
         AABB wall = verticalX
                 ? new AABB(plane - 1.0D, center.getY() + 1, center.getZ() - HALF_ARENA,
@@ -734,7 +725,10 @@ public final class NecronEncounter {
 
         flameOffset += 0.5D;
         attack6Ticks--;
-        if (attack6Ticks <= 0) FLAME_HIT_PLAYERS.clear();
+        if (attack6Ticks <= 0) {
+            FLAME_HIT_PLAYERS.clear();
+            clearDisplayList(FLAME_WALL_DISPLAYS);
+        }
     }
 
     // Attack 7 — a ten-second stream of real Wither Skulls aimed at the current player target.
@@ -754,11 +748,6 @@ public final class NecronEncounter {
         if (target != null) {
             Vec3 start = necron.position().add(0.0D, 1.6D, 0.0D);
             Vec3 direction = target.getEyePosition().subtract(start).normalize();
-            for (double d = 0.0D; d < 18.0D; d += 1.0D) {
-                Vec3 p = start.add(direction.scale(d));
-                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y, p.z,
-                        1, 0.015D, 0.015D, 0.015D, 0.0D);
-            }
             if (++skullFireTicks >= 5) {
                 skullFireTicks = 0;
                 WitherSkull skull = EntityTypes.WITHER_SKULL.create(level, EntitySpawnReason.MOB_SUMMONED);
@@ -820,7 +809,13 @@ public final class NecronEncounter {
         }
         for (TntBomb bomb : BOMBS) {
             if (bomb.display != null) bomb.display.discard();
+            discardDisplay(bomb.marker);
         }
+        discardDisplay(laserBeamDisplay);
+        discardDisplay(safeZoneDisplay);
+        clearDisplayList(CLOSING_WALL_DISPLAYS);
+        clearDisplayList(DANGER_ZONE_DISPLAYS);
+        clearDisplayList(FLAME_WALL_DISPLAYS);
         if (laserGuardian != null) laserGuardian.discard();
         if (laserTarget != null) laserTarget.discard();
         SkyblockPlayerState.clearNecronEncounterEffectsForAllPlayers();
@@ -847,6 +842,9 @@ public final class NecronEncounter {
         laserTicks = 0;
         laserGuardian = null;
         laserTarget = null;
+        laserBeamDisplay = null;
+        safeZoneDisplay = null;
+        dangerDisplayColor = -1;
         attack1Ticks = attack4Ticks = attack6Ticks = attack7Ticks = 0;
         attack1Timer = attack2Timer = attack3Timer = attack4Timer = 0;
         attack5Timer = attack6Timer = attack7Timer = 0;
@@ -858,18 +856,90 @@ public final class NecronEncounter {
         ORIGINAL_ARENA.clear();
     }
 
+
+    private static Display.BlockDisplay createBlockDisplay(BlockState state, double x, double y, double z,
+                                                              float sx, float sy, float sz, Quaternionf rotation) {
+        Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
+        if (display == null) return null;
+        display.setBlockState(state);
+        display.setTransformation(new Transformation(new Vector3f(), rotation, new Vector3f(sx, sy, sz), new Quaternionf()));
+        display.setNoGravity(true);
+        display.setPos(x, y, z);
+        if (!level.addFreshEntity(display)) return null;
+        return display;
+    }
+
+    private static void discardDisplay(Display.BlockDisplay display) {
+        if (display != null && !display.isRemoved()) display.discard();
+    }
+
+    private static void clearDisplayList(List<Display.BlockDisplay> displays) {
+        for (Display.BlockDisplay display : displays) discardDisplay(display);
+        displays.clear();
+    }
+
+    private static void updateClosingWallDisplays() {
+        int count = CLOSING_WALL_DISPLAYS.size();
+        if (count == 0) return;
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0D * i / count;
+            double arcLength = Math.max(1.0D, Math.PI * 2.0D * safeRadius / count);
+            Display.BlockDisplay display = CLOSING_WALL_DISPLAYS.get(i);
+            display.setPos(safeX + Math.cos(angle) * safeRadius, center.getY() + 5.2D,
+                    safeZ + Math.sin(angle) * safeRadius);
+            display.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY((float) (Math.PI / 2.0D - angle)),
+                    new Vector3f((float) arcLength, 10.0F, 0.18F), new Quaternionf()));
+        }
+    }
+
+    private static void updateDangerZoneDisplays(int color) {
+        if (dangerDisplayColor == color) return;
+        dangerDisplayColor = color;
+        net.minecraft.world.level.block.Block block = color == 0xFFFF00 ? Blocks.YELLOW_CONCRETE
+                : color == 0xFF8800 ? Blocks.ORANGE_CONCRETE : Blocks.RED_CONCRETE;
+        for (Display.BlockDisplay display : DANGER_ZONE_DISPLAYS) display.setBlockState(block.defaultBlockState());
+    }
+
+    private static void updateFlameWallDisplays(double plane, boolean verticalX, double yBottom) {
+        if (FLAME_WALL_DISPLAYS.size() != 3) return;
+        double gapStart = flameGap - 1.5D;
+        double gapEnd = flameGap + 1.5D;
+        double leftWidth = Math.max(0.1D, gapStart + 49.0D);
+        double rightWidth = Math.max(0.1D, 49.0D - gapEnd);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(0), plane,
+                (verticalX ? center.getZ() : center.getX()) + (-49.0D + gapStart) * 0.5D,
+                yBottom + 1.5D, verticalX, leftWidth, 3.0F);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(1), plane,
+                (verticalX ? center.getZ() : center.getX()) + (gapEnd + 49.0D) * 0.5D,
+                yBottom + 1.5D, verticalX, rightWidth, 3.0F);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(2), plane,
+                verticalX ? center.getZ() : center.getX(), yBottom + 7.0D, verticalX, 98.0D, 8.0F);
+    }
+
+    private static void setFlameDisplay(Display.BlockDisplay display, double plane, double alongCenter,
+                                        double y, boolean verticalX, double width, float height) {
+        double x = verticalX ? plane : alongCenter;
+        double z = verticalX ? alongCenter : plane;
+        display.setPos(x, y, z);
+        display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
+                verticalX ? new Vector3f(0.18F, height, (float) width)
+                        : new Vector3f((float) width, height, 0.18F), new Quaternionf()));
+    }
+
     private static final class TntBomb {
         final double x;
         final double z;
         final Display.ItemDisplay display;
+        final Display.BlockDisplay marker;
         double y;
         int age;
 
-        TntBomb(double x, double z, double y, Display.ItemDisplay display, int age) {
+        TntBomb(double x, double z, double y, Display.ItemDisplay display, Display.BlockDisplay marker, int age) {
             this.x = x;
             this.z = z;
             this.y = y;
             this.display = display;
+            this.marker = marker;
             this.age = age;
         }
     }
