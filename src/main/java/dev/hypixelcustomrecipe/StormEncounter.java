@@ -72,7 +72,9 @@ public final class StormEncounter {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (storm != null && entity == storm) {
-                finishSuccessfully();
+                // A forced kill is an aborted encounter, not a successful clear:
+                // return the altar, remove encounter state, and do not award XP.
+                abortAndReturnAltar("Storm was removed. The encounter has been reset.");
             }
         });
 
