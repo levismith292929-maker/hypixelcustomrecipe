@@ -160,6 +160,10 @@ public final class NecronEncounter {
 
     private static void detonateOpeningNuke() {
         openingNukeTicks = 0;
+        // Start the normal attack cadence after the opening sequence, not during it.
+        minionTimer = MINION_INTERVAL;
+        lightningTimer = LIGHTNING_INTERVAL;
+        swordTimer = SWORD_INTERVAL;
         level.playSound(null, center, SoundEvents.GENERIC_EXPLODE.value(),
                 SoundSource.HOSTILE, 8.0F, 0.55F);
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
@@ -206,8 +210,9 @@ public final class NecronEncounter {
         float hp = necron.getHealth();
         if (hp > lastHealth) necron.setHealth(lastHealth); else lastHealth = hp;
         ServerPlayer target = nearestPlayer();
+        // Never let the Wither AI acquire hostile mobs or other non-player targets.
+        necron.setTarget(target);
         if (target != null) {
-            necron.setTarget(target);
             if (laserActive) {
                 necron.getNavigation().stop();
                 necron.setDeltaMovement(Vec3.ZERO);
@@ -216,6 +221,12 @@ public final class NecronEncounter {
                 // Necron's movement leaves permanent radiation marks behind.
                 if (necron.tickCount % 8 == 0) addRadiation(necron.position());
             }
+        }
+        // Keep every Necron minion locked to a player, even if its vanilla AI
+        // tries to switch to another mob after spawning.
+        for (UUID id : minions) {
+            Entity minion = level.getEntity(id);
+            if (minion instanceof WitherSkeleton skeleton) skeleton.setTarget(target);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.level() != level) { BAR.removePlayer(player); continue; }
@@ -229,9 +240,12 @@ public final class NecronEncounter {
         applyRadiation();
         tickBlades();
         minions.removeIf(id -> { Entity e=level.getEntity(id); return e==null || !e.isAlive(); });
-        if (--minionTimer <= 0) { minionTimer=MINION_INTERVAL; spawnMinions(); }
-        if (--lightningTimer <= 0) { lightningTimer=LIGHTNING_INTERVAL; lightningBarrage(); }
-        if (--swordTimer <= 0) { swordTimer=SWORD_INTERVAL; launchSwords(); }
+        // The opening nuke is the intro. Regular attacks begin only after it detonates.
+        if (openingNukeTicks <= 0) {
+            if (--minionTimer <= 0) { minionTimer=MINION_INTERVAL; spawnMinions(); }
+            if (--lightningTimer <= 0) { lightningTimer=LIGHTNING_INTERVAL; lightningBarrage(); }
+            if (--swordTimer <= 0) { swordTimer=SWORD_INTERVAL; launchSwords(); }
+        }
         if (laserActive) tickLaser();
         else if (--laserTimer <= 0) beginLaser();
         float progress=Math.max(0.0F,Math.min(1.0F,necron.getHealth()/(float)ENTITY_HP));
