@@ -185,11 +185,25 @@ public final class StormEncounter {
         SAFE_ZONES.clear();
         STRIKES.clear();
         for (int i = 0; i < SAFE_ZONE_COUNT; i++) {
-            double x = arenaCenter.getX() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
-                    * (ARENA_HALF_SIZE - SAFE_ZONE_RADIUS);
-            double z = arenaCenter.getZ() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
-                    * (ARENA_HALF_SIZE - SAFE_ZONE_RADIUS);
-            SAFE_ZONES.add(new SafeZone(x, z));
+            for (int attempt = 0; attempt < 200; attempt++) {
+                double x = arenaCenter.getX() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
+                        * (ARENA_HALF_SIZE - SAFE_ZONE_RADIUS);
+                double z = arenaCenter.getZ() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
+                        * (ARENA_HALF_SIZE - SAFE_ZONE_RADIUS);
+                boolean overlaps = false;
+                for (SafeZone existing : SAFE_ZONES) {
+                    double dx = existing.x - x;
+                    double dz = existing.z - z;
+                    if (dx * dx + dz * dz < 4.0D * SAFE_ZONE_RADIUS * SAFE_ZONE_RADIUS) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+                if (!overlaps) {
+                    SAFE_ZONES.add(new SafeZone(x, z));
+                    break;
+                }
+            }
         }
         for (int i = 0; i < STRIKES_PER_WAVE; i++) {
             for (int attempt = 0; attempt < 100; attempt++) {
@@ -252,7 +266,8 @@ public final class StormEncounter {
             double dx = player.getX() - strike.x;
             double dz = player.getZ() - strike.z;
             if (dx * dx + dz * dz > 2.25D * 2.25D
-                    || Math.abs(player.getY() - y) > 5.0D) continue;
+                    || Math.abs(player.getY() - y) > 5.0D
+                    || isSafe(player.getX(), player.getZ())) continue;
             PARTICIPANTS.add(player.getUUID());
             SkyblockPlayerState state = SkyblockPlayerState.get(player);
             float damage = (float) (state.maximumHealth() * 0.10D);
@@ -287,6 +302,7 @@ public final class StormEncounter {
             if (player.level() == level
                     && player.distanceToSqr(Vec3.atCenterOf(arenaCenter)) <= 100.0D * 100.0D) {
                 BOSS_BAR.addPlayer(player);
+                PARTICIPANTS.add(player.getUUID());
             } else {
                 BOSS_BAR.removePlayer(player);
             }
