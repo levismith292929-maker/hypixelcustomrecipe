@@ -23,8 +23,8 @@ public abstract class BlockItemPlacementMixin {
         if (context.getPlayer() instanceof ServerPlayer player
                 && context.getLevel() instanceof ServerLevel
                 && !NecronEncounter.canPlaceBlock(player, context.getClickedPos())) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                    "Building is disabled during Necron's attacks. Build during the laser phase!"), true);
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "Building is disabled during Necron's attacks. Build during the laser phase!"));
             cir.setReturnValue(InteractionResult.FAIL);
         }
     }
