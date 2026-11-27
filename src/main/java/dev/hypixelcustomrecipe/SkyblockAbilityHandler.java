@@ -327,9 +327,9 @@ public final class SkyblockAbilityHandler {
         DamageSource source = level.damageSources().source(DamageTypes.DRAGON_BREATH, null, player);
 
         if (soulBlade) {
-            // Soul Blade fires a narrow, visible five-block beam in the exact
+            // Soul Blade fires a narrow, visible ten-block beam in the exact
             // direction the player is looking.
-            for (double distance = 0.15D; distance <= 5.0D; distance += 0.15D) {
+            for (double distance = 0.15D; distance <= 10.0D; distance += 0.15D) {
                 Vec3 point = origin.add(direction.scale(distance));
                 level.sendParticles(ParticleTypes.END_ROD,
                         point.x, point.y, point.z, 1, 0.015D, 0.015D, 0.015D, 0.0D);
