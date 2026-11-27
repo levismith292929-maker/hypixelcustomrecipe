@@ -67,6 +67,9 @@ public final class DatapackItems {
     public static final Item VOIDSPLIT_KATANA = register("voidsplit_katana", "Voidsplit Katana", Items.NETHERITE_SWORD,
             "A blade forged using the power of the Void.",
             "Crafted with 8 Void Fragments and an Aspect of the Void.");
+    public static final Item SOUL_BLADE = register("soul_blade", "Soul Blade", Items.NETHERITE_HOE,
+            "Damage: 5% of the target's Max Health",
+            "Every hit deals true damage equal to 5% of the target's maximum health.");
     public static final Item NECRONS_SCYTHE = register("necrons_scythe", "Necron's Scythe", Items.DIAMOND_HOE,
             "Ability: Wither Impact  RIGHT CLICK",
             "Slash forward with a sweeping strike, damaging nearby enemies.",
