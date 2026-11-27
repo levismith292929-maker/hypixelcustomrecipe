@@ -572,6 +572,8 @@ public final class NecronEncounter {
         laserTicks--;
         if (laserTicks <= 0) {
             laserActive = false;
+            discardDisplay(laserBeamDisplay);
+            laserBeamDisplay = null;
             if (laserGuardian != null) laserGuardian.discard();
             if (laserTarget != null) laserTarget.discard();
             laserGuardian = null;
