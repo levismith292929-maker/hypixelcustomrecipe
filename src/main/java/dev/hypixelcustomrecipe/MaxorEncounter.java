@@ -110,8 +110,9 @@ public final class MaxorEncounter {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (maxor != null && entity.getUUID().equals(maxor.getUUID())) {
-                finishSuccessfully();
-                return;
+                // /kill and every other forced removal abort the encounter:
+                // do not award progression or advance to Storm.
+                abortEncounter("Maxor was removed. The encounter has been reset.");
             }
         });
 
@@ -369,30 +370,28 @@ public final class MaxorEncounter {
     }
 
     private static void abortBecauseAllFightersDied() {
-        if (maxor == null) return;
+        abortEncounter("All players fighting Maxor have been defeated. The encounter has ended.");
+    }
+
+    private static void abortEncounter(String message) {
+        if (maxor == null || encounterLevel == null) return;
         MinecraftServer server = encounterLevel.getServer();
         restoreLaserHealth(server);
         for (UUID uuid : MINIONS) {
             Entity entity = encounterLevel.getEntity(uuid);
-            if (entity != null) {
-                entity.discard();
-            }
+            if (entity != null) entity.discard();
         }
-        maxor.discard();
+        if (maxor.isAlive()) maxor.discard();
         BOSS_BAR.removeAllPlayers();
 
         ServerPlayer owner = testMode ? null : server.getPlayerList().getPlayer(altarOwner);
         if (owner != null) {
             ItemStack altar = new ItemStack(ModItems.WITHER_ALTAR);
-            if (!owner.getInventory().add(altar)) {
-                owner.drop(altar, false);
-            }
+            if (!owner.getInventory().add(altar)) owner.drop(altar, false);
             owner.sendSystemMessage(Component.literal("The encounter failed. Your Wither Altar has been returned.")
                     .withStyle(style -> style.withColor(0xFF5555)));
         }
-        server.getPlayerList().broadcastSystemMessage(
-                Component.literal("All players fighting Maxor have been defeated. The encounter has ended."),
-                false);
+        server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
         clearEncounter();
     }
 
