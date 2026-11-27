@@ -345,10 +345,11 @@ public final class NecronEncounter {
                 level.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0.0D, 0.015D, 0.0D, 0.0D);
             }
         }
+        double safeY = center.getY() + 1.15D;
         for (int i = 0; i < 32; i++) {
             double angle = Math.PI * 2.0D * i / 32.0D;
             level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                    safeX + Math.cos(angle) * 2.5D, y, safeZ + Math.sin(angle) * 2.5D,
+                    safeX + Math.cos(angle) * 2.5D, safeY, safeZ + Math.sin(angle) * 2.5D,
                     1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         AABB arena = new AABB(center.getX() - HALF_ARENA, center.getY() + 1,
