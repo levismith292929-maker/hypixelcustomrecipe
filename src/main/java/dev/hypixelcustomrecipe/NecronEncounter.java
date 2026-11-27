@@ -672,7 +672,6 @@ public final class NecronEncounter {
     private static void beginAttack7() {
         attack7Ticks = 200;
         skullFireTicks = 0;
-        attack7Timer = random(100, 160);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: WITHER SKULL BARRAGE! Keep moving!")
                 .withStyle(s -> s.withColor(0xAA00AA).withBold(true)), false);
@@ -680,8 +679,10 @@ public final class NecronEncounter {
     }
 
     private static void tickAttack7(ServerPlayer target) {
-        if (attack7Timer > 0) attack7Timer--;
-        if (attack7Ticks <= 0) return;
+        if (attack7Ticks <= 0) {
+            if (attack7Timer > 0) attack7Timer--;
+            return;
+        }
         if (target != null) {
             Vec3 start = necron.position().add(0.0D, 1.6D, 0.0D);
             Vec3 direction = target.getEyePosition().subtract(start).normalize();
@@ -703,6 +704,7 @@ public final class NecronEncounter {
             }
         }
         attack7Ticks--;
+        if (attack7Ticks <= 0) attack7Timer = random(100, 160);
     }
 
     private static void kill(ServerPlayer player, String cause) {
