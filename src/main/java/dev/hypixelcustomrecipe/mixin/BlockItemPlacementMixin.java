@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe.mixin;
 
 import dev.hypixelcustomrecipe.PlayerPlacedBlockData;
+import dev.hypixelcustomrecipe.NecronEncounter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -14,6 +15,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Marks successful block placements made by players. */
 @Mixin(BlockItem.class)
 public abstract class BlockItemPlacementMixin {
+    @Inject(method = "place", at = @At("HEAD"), cancellable = true)
+    private void hypixelcustomrecipe$restrictNecronArenaBuilding(
+            BlockPlaceContext context,
+            CallbackInfoReturnable<InteractionResult> cir
+    ) {
+        if (context.getPlayer() instanceof ServerPlayer player
+                && context.getLevel() instanceof ServerLevel
+                && !NecronEncounter.canPlaceBlock(player, context.getClickedPos())) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
+                    "Building is disabled during Necron's attacks. Build during the laser phase!"), true);
+            cir.setReturnValue(InteractionResult.FAIL);
+        }
+    }
+
     @Inject(method = "place", at = @At("RETURN"))
     private void hypixelcustomrecipe$recordPlayerPlacement(
             BlockPlaceContext context,
