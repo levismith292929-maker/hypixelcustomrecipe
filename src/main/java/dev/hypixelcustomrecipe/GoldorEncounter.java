@@ -1,5 +1,6 @@
 package dev.hypixelcustomrecipe;
 
+import com.mojang.math.Transformation;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
@@ -15,11 +16,17 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -30,17 +37,18 @@ import java.util.UUID;
 public final class GoldorEncounter {
     private static final double MAX_HEALTH = 25_000_000.0D;
     private static final double ENTITY_HEALTH = 1_024.0D;
-    private static final double HP_SCALE = MAX_HEALTH / ENTITY_HEALTH;
     private static final int WARNING_TICKS = 40;
     private static final int SWORD_LIFETIME = 600;
+    private static final int FLIGHT_TICKS = 12;
     private static final int ATTACK_INTERVAL = 100;
+    private static final double SWORD_RADIUS = 1.5D;
 
     private static WitherBoss goldor;
     private static ServerLevel encounterLevel;
-    private static boolean testMode;
     private static int attackTimer;
     private static float lastHealth;
     private static final List<PendingSword> PENDING = new ArrayList<>();
+    private static final List<FlyingSword> FLYING = new ArrayList<>();
     private static final List<ActiveSword> ACTIVE = new ArrayList<>();
     private static final ServerBossEvent BAR = new ServerBossEvent(
             UUID.randomUUID(), Component.literal("Goldor"),
@@ -90,11 +98,9 @@ public final class GoldorEncounter {
 
         goldor = boss;
         encounterLevel = level;
-        testMode = true;
         attackTimer = 60;
         lastHealth = (float) ENTITY_HEALTH;
-        PENDING.clear();
-        ACTIVE.clear();
+        clearSwords();
         BAR.setName(Component.literal("Goldor: 25,000,000 / 25,000,000 HP"));
         BAR.setProgress(1.0F);
         BAR.addPlayer(player);
@@ -125,8 +131,6 @@ public final class GoldorEncounter {
         }
 
         if (--attackTimer <= 0 && target != null) {
-            // Lock the player's position when the warning begins: the slam aims
-            // where they were, not where they run during the warning.
             PENDING.add(new PendingSword(BlockPos.containing(target.position()), WARNING_TICKS));
             attackTimer = ATTACK_INTERVAL;
             target.sendSystemMessage(Component.literal("GOLDOR IS TARGETING YOU!")
@@ -138,22 +142,36 @@ public final class GoldorEncounter {
             PendingSword sword = pending.next();
             renderWarning(sword.pos);
             if (--sword.ticks <= 0) {
-                slam(sword.pos);
+                FLYING.add(createFlyingSword(sword.pos));
                 pending.remove();
+            }
+        }
+
+        Iterator<FlyingSword> flying = FLYING.iterator();
+        while (flying.hasNext()) {
+            FlyingSword sword = flying.next();
+            sword.ticks++;
+            double progress = Math.min(1.0D, sword.ticks / (double) FLIGHT_TICKS);
+            Vec3 position = sword.start.lerp(sword.destination, progress);
+            sword.display.setPos(position.x, position.y, position.z);
+            if (progress >= 1.0D) {
+                slam(sword.pos, sword.display);
+                flying.remove();
             }
         }
 
         Iterator<ActiveSword> active = ACTIVE.iterator();
         while (active.hasNext()) {
             ActiveSword sword = active.next();
-            if (--sword.ticks <= 0) {
+            if (--sword.ticks <= 0 || sword.display.isRemoved()) {
+                sword.display.discard();
                 active.remove();
                 continue;
             }
-            renderSword(sword.pos);
-            AABB hitbox = new AABB(sword.pos.getX() + 0.12D, sword.pos.getY(),
-                    sword.pos.getZ() + 0.12D, sword.pos.getX() + 0.88D,
-                    sword.pos.getY() + 4.0D, sword.pos.getZ() + 0.88D);
+            AABB hitbox = new AABB(sword.pos.getX() + 0.5D - SWORD_RADIUS, sword.pos.getY(),
+                    sword.pos.getZ() + 0.5D - SWORD_RADIUS,
+                    sword.pos.getX() + 0.5D + SWORD_RADIUS, sword.pos.getY() + 4.0D,
+                    sword.pos.getZ() + 0.5D + SWORD_RADIUS);
             for (ServerPlayer player : encounterLevel.getEntitiesOfClass(ServerPlayer.class, hitbox)) {
                 player.setHealth(0.0F);
                 player.die(encounterLevel.damageSources().generic());
@@ -189,51 +207,67 @@ public final class GoldorEncounter {
         encounterLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + 0.1D, z, 10, 0.35D, 0.02D, 0.35D, 0.02D);
     }
 
-    private static void slam(BlockPos pos) {
-        // Break exactly two layers. The third layer is the stopping layer and
-        // is left untouched; bedrock is never removed.
-        for (int depth = 1; depth <= 2; depth++) {
-            BlockPos block = pos.below(depth);
-            if (encounterLevel.getBlockState(block).is(Blocks.BEDROCK)) break;
-            if (!encounterLevel.getBlockState(block).isAir()) {
-                encounterLevel.destroyBlock(block, false);
-            }
-        }
-        ACTIVE.add(new ActiveSword(pos, SWORD_LIFETIME));
-        encounterLevel.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 2.0F, 0.65F);
-        renderSword(pos);
+    private static FlyingSword createFlyingSword(BlockPos pos) {
+        Display.ItemDisplay display = EntityTypes.ITEM_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
+        if (display == null) throw new IllegalStateException("Could not create Goldor's sword display");
+        display.setItemStack(new ItemStack(Items.NETHERITE_SWORD));
+        display.setItemTransform(ItemDisplayContext.FIXED);
+        display.setTransformation(new Transformation(new Vector3f(0.0F, 0.0F, 0.0F),
+                new Quaternionf(), new Vector3f(4.0F, 4.0F, 4.0F), new Quaternionf()));
+        Vec3 start = goldor.position().add(0.0D, 2.0D, 0.0D);
+        Vec3 destination = new Vec3(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
+        Vec3 direction = destination.subtract(start);
+        float yaw = (float) (Math.atan2(direction.x, direction.z) * (180.0D / Math.PI));
+        display.setYRot(yaw);
+        display.setPos(start.x, start.y, start.z);
+        if (!encounterLevel.addFreshEntity(display)) throw new IllegalStateException("Could not spawn Goldor's sword");
+        encounterLevel.playSound(null, goldor.blockPosition(), SoundEvents.TRIDENT_THROW, SoundSource.HOSTILE, 2.0F, 0.6F);
+        return new FlyingSword(pos, display, start, destination);
     }
 
-    /** Particle-built four-block sword silhouette; active hitbox lasts 30 seconds. */
-    private static void renderSword(BlockPos pos) {
-        double x = pos.getX() + 0.5D, z = pos.getZ() + 0.5D, y = pos.getY();
-        for (int i = 0; i < 4; i++) {
-            encounterLevel.sendParticles(ParticleTypes.CRIT, x, y + i + 0.5D, z,
-                    5, 0.10D, 0.10D, 0.10D, 0.01D);
-            encounterLevel.sendParticles(ParticleTypes.END_ROD, x, y + i + 0.5D, z,
-                    2, 0.035D, 0.035D, 0.035D, 0.0D);
+    private static void slam(BlockPos pos, Display.ItemDisplay display) {
+        // The impact footprint is a 3-block diameter (1.5-block radius).
+        // Each column loses the first two layers; its third layer is untouched.
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx * dx + dz * dz > SWORD_RADIUS * SWORD_RADIUS) continue;
+                for (int depth = 1; depth <= 2; depth++) {
+                    BlockPos block = pos.offset(dx, -depth, dz);
+                    if (encounterLevel.getBlockState(block).is(Blocks.BEDROCK)) break;
+                    if (!encounterLevel.getBlockState(block).isAir()) encounterLevel.destroyBlock(block, false);
+                }
+            }
         }
-        encounterLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + 3.8D, z,
-                4, 0.12D, 0.08D, 0.12D, 0.02D);
+        ACTIVE.add(new ActiveSword(pos, display, SWORD_LIFETIME));
+        encounterLevel.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 2.0F, 0.65F);
     }
 
     private static void finish() {
         if (encounterLevel == null) return;
         BAR.removeAllPlayers();
-        PENDING.clear();
-        ACTIVE.clear();
+        clearSwords();
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("Goldor has been defeated!"), false);
         clear();
     }
 
+    private static void clearSwords() {
+        if (encounterLevel != null) {
+            for (FlyingSword sword : FLYING) sword.display.discard();
+            for (ActiveSword sword : ACTIVE) sword.display.discard();
+        }
+        PENDING.clear();
+        FLYING.clear();
+        ACTIVE.clear();
+    }
+
     private static void clear() {
         goldor = null;
         encounterLevel = null;
-        testMode = false;
         attackTimer = 0;
         lastHealth = 0.0F;
         PENDING.clear();
+        FLYING.clear();
         ACTIVE.clear();
     }
 
@@ -242,9 +276,24 @@ public final class GoldorEncounter {
         private int ticks;
         private PendingSword(BlockPos pos, int ticks) { this.pos = pos; this.ticks = ticks; }
     }
+
+    private static final class FlyingSword {
+        private final BlockPos pos;
+        private final Display.ItemDisplay display;
+        private final Vec3 start;
+        private final Vec3 destination;
+        private int ticks;
+        private FlyingSword(BlockPos pos, Display.ItemDisplay display, Vec3 start, Vec3 destination) {
+            this.pos = pos; this.display = display; this.start = start; this.destination = destination;
+        }
+    }
+
     private static final class ActiveSword {
         private final BlockPos pos;
+        private final Display.ItemDisplay display;
         private int ticks;
-        private ActiveSword(BlockPos pos, int ticks) { this.pos = pos; this.ticks = ticks; }
+        private ActiveSword(BlockPos pos, Display.ItemDisplay display, int ticks) {
+            this.pos = pos; this.display = display; this.ticks = ticks;
+        }
     }
 }
