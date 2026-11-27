@@ -217,6 +217,13 @@ public final class AccessoryBag {
                 NonNullList.withSize(SIZE, ItemStack.EMPTY));
     }
 
+    public static void clear(ServerPlayer player) {
+        NonNullList<ItemStack> items = contents(player);
+        for (int i = 0; i < SIZE; i++) items.set(i, ItemStack.EMPTY);
+        RECENT_KILLS.remove(player.getUUID());
+        TARANTULA_HITS.remove(player.getUUID());
+    }
+
     public static void open(ServerPlayer player) {
         NonNullList<ItemStack> saved = contents(player);
         boolean[] loading = {true};
