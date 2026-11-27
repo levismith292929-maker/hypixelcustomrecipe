@@ -156,12 +156,12 @@ public final class NecronEncounter {
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
         BOMBS.clear();
-        attack1Timer = random(300, 450);
-        attack2Timer = random(200, 350);
-        attack3Timer = random(200, 400);
-        attack4Timer = random(400, 500);
-        attack5Timer = random(200, 400);
-        attack6Timer = 600;
+        attack1Timer = random(225, 338);
+        attack2Timer = random(150, 263);
+        attack3Timer = random(150, 300);
+        attack4Timer = random(300, 375);
+        attack5Timer = random(150, 300);
+        attack6Timer = 450;
         attack7Timer = random(100, 160);
         laserActive = false;
         laserTicks = 0;
@@ -311,26 +311,45 @@ public final class NecronEncounter {
         if (attack5Timer > 0) attack5Timer--;
         if (attack5Timer <= 0) {
             spawnVoidriddenWave(target);
-            attack5Timer = random(200, 400);
+            attack5Timer = random(150, 300);
         }
         if (attack7Ticks == 0 && attack7Timer <= 0) beginAttack7();
     }
 
     // Attack 1 — a smooth end-rod ring closes toward a five-block safe circle at 5 blocks/second.
     private static void beginAttack1() {
-        safeX = center.getX() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
-        safeZ = center.getZ() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+        // Keep the entire safe circle outside an active Danger Zone.
+        do {
+            safeX = center.getX() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+            safeZ = center.getZ() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+        } while (overlapsDangerZone(safeX, safeZ, 2.5D));
         double farX = Math.max(Math.abs(safeX - (center.getX() - HALF_ARENA)),
                 Math.abs(safeX - (center.getX() + HALF_ARENA)));
         double farZ = Math.max(Math.abs(safeZ - (center.getZ() - HALF_ARENA)),
                 Math.abs(safeZ - (center.getZ() + HALF_ARENA)));
         safeRadius = Math.sqrt(farX * farX + farZ * farZ) + 2.0D;
         attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
-        attack1Timer = random(300, 450);
+        attack1Timer = random(225, 338);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: EVAPORATION! Reach the 5-block safe circle!")
                 .withStyle(s -> s.withColor(0x55FFFF).withBold(true)), false);
         level.playSound(null, center, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.0F, 1.4F);
+    }
+
+    private static boolean overlapsDangerZone(double x, double z, double radius) {
+        if (attack4Ticks <= 0) return false;
+        double closestX = Math.max(dangerMinX, Math.min(x, dangerMaxX + 1.0D));
+        double closestZ = Math.max(dangerMinZ, Math.min(z, dangerMaxZ + 1.0D));
+        double dx = x - closestX;
+        double dz = z - closestZ;
+        return dx * dx + dz * dz <= radius * radius;
+    }
+
+    private static boolean isInsideClosingWallSafeZone(ServerPlayer player) {
+        if (attack1Ticks <= 0) return false;
+        double dx = player.getX() - safeX;
+        double dz = player.getZ() - safeZ;
+        return dx * dx + dz * dz <= 2.5D * 2.5D;
     }
 
     private static void tickAttack1() {
@@ -357,7 +376,8 @@ public final class NecronEncounter {
                 center.getY() + WALL_HEIGHT, center.getZ() + HALF_ARENA);
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, arena)) {
             double distance = Math.sqrt(player.distanceToSqr(safeX, player.getY(), safeZ));
-            if (distance > 2.5D && distance >= safeRadius - 0.9D && distance <= previous + 0.9D) {
+            if (!isInsideClosingWallSafeZone(player) && distance > 2.5D
+                    && distance >= safeRadius - 0.9D && distance <= previous + 0.9D) {
                 kill(player, "Necron's closing wall");
             }
         }
@@ -385,7 +405,7 @@ public final class NecronEncounter {
             }
             BOMBS.add(new TntBomb(x, z, y, display, 0));
         }
-        attack2Timer = random(200, 350);
+        attack2Timer = random(150, 263);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: TNT RAIN! Keep moving!")
                 .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
@@ -452,7 +472,7 @@ public final class NecronEncounter {
     private static void beginLaser() {
         laserActive = true;
         laserTicks = LASER_DURATION;
-        attack3Timer = random(200, 400);
+        attack3Timer = random(150, 300);
         laserAngle = 0.0D;
         if (necron != null) {
             necron.setPos(center.getX() + 0.5D, center.getY() + 5.0D, center.getZ() + 0.5D);
@@ -565,12 +585,14 @@ public final class NecronEncounter {
             AABB zone = new AABB(dangerMinX, center.getY() + 1, dangerMinZ,
                     dangerMaxX + 1.0D, center.getY() + WALL_HEIGHT, dangerMaxZ + 1.0D);
             for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, zone)) {
-                if (player.isAlive()) kill(player, "Necron's danger zone");
+                if (player.isAlive() && !isInsideClosingWallSafeZone(player)) {
+                    kill(player, "Necron's danger zone");
+                }
             }
         }
         attack4Ticks--;
         if (attack4Ticks <= 0) {
-            attack4Timer = random(400, 500);
+            attack4Timer = random(300, 375);
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
         }
     }
@@ -613,7 +635,7 @@ public final class NecronEncounter {
         flameOffset = 0.0D;
         attack6Ticks = 200;
         FLAME_HIT_PLAYERS.clear();
-        attack6Timer = 600;
+        attack6Timer = 450;
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: FLAME WALL! Find the 3x3 opening at the bottom!")
                 .withStyle(s -> s.withColor(0xFF8800).withBold(true)), false);
