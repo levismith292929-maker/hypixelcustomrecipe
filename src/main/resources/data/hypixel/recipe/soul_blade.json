@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "show_notification": true,
+  "category": "equipment",
+  "ingredients": [
+    "hypixel:soul",
+    "hypixel:necrons_scythe"
+  ],
+  "result": {
+    "id": "hypixel:soul_blade",
+    "count": 1
+  }
+}
