@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -91,10 +92,10 @@ public final class MaxorEncounter {
         });
 
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-            // Bosses in the Wither Altar encounter are immune to every ordinary
-            // damage source. Soul Blade damage is applied through its dedicated
-            // true-damage path and therefore bypasses this vanilla damage event.
-            if (maxor != null && entity == maxor) {
+            // Keep Maxor immune to normal attacks, but let operator /kill work.
+            // Soul Blade uses its separate direct true-damage path.
+            if (maxor != null && entity == maxor
+                    && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                 return false;
             }
             return true;
