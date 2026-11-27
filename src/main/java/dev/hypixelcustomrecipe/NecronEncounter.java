@@ -345,6 +345,15 @@ public final class NecronEncounter {
         return dx * dx + dz * dz <= radius * radius;
     }
 
+    private static boolean circleOverlapsRectangle(double x, double z, double radius,
+                                                       double minX, double maxX, double minZ, double maxZ) {
+        double closestX = Math.max(minX, Math.min(x, maxX));
+        double closestZ = Math.max(minZ, Math.min(z, maxZ));
+        double dx = x - closestX;
+        double dz = z - closestZ;
+        return dx * dx + dz * dz <= radius * radius;
+    }
+
     private static boolean isInsideClosingWallSafeZone(ServerPlayer player) {
         if (attack1Ticks <= 0) return false;
         double dx = player.getX() - safeX;
@@ -557,10 +566,14 @@ public final class NecronEncounter {
 
     // Attack 4 — a yellow/orange/red outline warns about a lethal 50x50 square.
     private static void beginAttack4() {
-        dangerMinX = center.getX() - HALF_ARENA + level.getRandom().nextInt(51);
-        dangerMinZ = center.getZ() - HALF_ARENA + level.getRandom().nextInt(51);
-        dangerMaxX = dangerMinX + 49;
-        dangerMaxZ = dangerMinZ + 49;
+        // Never place a new Danger Zone over the active Closing Wall safe circle.
+        do {
+            dangerMinX = center.getX() - HALF_ARENA + level.getRandom().nextInt(51);
+            dangerMinZ = center.getZ() - HALF_ARENA + level.getRandom().nextInt(51);
+            dangerMaxX = dangerMinX + 49;
+            dangerMaxZ = dangerMinZ + 49;
+        } while (attack1Ticks > 0 && circleOverlapsRectangle(
+                safeX, safeZ, 2.5D, dangerMinX, dangerMaxX + 1.0D, dangerMinZ, dangerMaxZ + 1.0D));
         attack4Ticks = DANGER_LIFETIME_TICKS;
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: DANGER ZONE! Leave the outlined area before it turns red!")
