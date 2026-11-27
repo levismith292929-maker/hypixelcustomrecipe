@@ -60,6 +60,7 @@ public final class StormEncounter {
     private static int warningTimer = -1;
     private static int nextStrike;
     private static int waveTimer = WAVE_INTERVAL_TICKS;
+    private static boolean testMode;
 
     private StormEncounter() {
     }
@@ -84,6 +85,7 @@ public final class StormEncounter {
     /** Called immediately after Maxor is defeated. */
     public static void beginBreak(ServerLevel encounterLevel, BlockPos center,
                                   UUID owner, Set<UUID> participants) {
+        testMode = false;
         level = encounterLevel;
         arenaCenter = center.immutable();
         altarOwner = owner;
@@ -150,11 +152,30 @@ public final class StormEncounter {
         }
     }
 
-    private static void summonStorm() {
+    public static boolean summonForTesting(ServerPlayer player) {
+        if (level != null) return false;
+        level = (ServerLevel) player.level();
+        arenaCenter = player.blockPosition().immutable();
+        altarOwner = player.getUUID();
+        PARTICIPANTS.clear();
+        PARTICIPANTS.add(player.getUUID());
+        PLAYER_DAMAGE.clear();
+        SAFE_ZONES.clear();
+        STRIKES.clear();
+        breakTimer = 0;
+        warningTimer = -1;
+        waveTimer = WAVE_INTERVAL_TICKS;
+        testMode = true;
+        BOSS_BAR.removeAllPlayers();
+        BOSS_BAR.addPlayer(player);
+        return summonStorm();
+    }
+
+    private static boolean summonStorm() {
         WitherBoss boss = EntityTypes.WITHER.create(level, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) {
             abortAndReturnAltar("Storm could not be summoned.");
-            return;
+            return false;
         }
         boss.setPos(arenaCenter.getX() + 0.5D, arenaCenter.getY(),
                 arenaCenter.getZ() + 0.5D);
@@ -169,7 +190,7 @@ public final class StormEncounter {
         if (target != null) boss.setTarget(target);
         if (!level.addFreshEntity(boss)) {
             abortAndReturnAltar("Storm could not be spawned.");
-            return;
+            return false;
         }
         storm = boss;
         breakTimer = 0;
@@ -179,8 +200,9 @@ public final class StormEncounter {
         level.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN,
                 SoundSource.HOSTILE, 2.0F, 0.9F);
         level.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("STORM HAS AWAKENED!").withStyle(style ->
+                Component.literal(testMode ? "STORM TEST SUMMONED!" : "STORM HAS AWAKENED!").withStyle(style ->
                         style.withColor(0x5555FF).withBold(true)), false);
+        return true;
     }
 
     private static void beginLightningWave() {
@@ -320,20 +342,22 @@ public final class StormEncounter {
     private static void finishSuccessfully() {
         MinecraftServer server = level.getServer();
         int rewarded = 0;
-        for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
-            if (entry.getValue() < REWARD_THRESHOLD) continue;
-            ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-            if (player == null) continue;
-            SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
-            player.sendSystemMessage(Component.literal("Storm defeated! +100 Player Levels")
-                    .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
-            rewarded++;
+        if (!testMode) {
+            for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
+                if (entry.getValue() < REWARD_THRESHOLD) continue;
+                ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+                if (player == null) continue;
+                SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
+                player.sendSystemMessage(Component.literal("Storm defeated! +100 Player Levels")
+                        .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
+                rewarded++;
+            }
         }
         BOSS_BAR.removeAllPlayers();
         level.playSound(null, storm.blockPosition(), SoundEvents.WITHER_DEATH,
                 SoundSource.HOSTILE, 2.0F, 0.9F);
         server.getPlayerList().broadcastSystemMessage(Component.literal(
-                "Storm has been defeated! " + rewarded + " player(s) earned the reward."), false);
+                (testMode ? "Storm test encounter completed. No progression or rewards were triggered." : "Storm has been defeated! " + rewarded + " player(s) earned the reward.")), false);
         clear();
     }
 
@@ -348,7 +372,7 @@ public final class StormEncounter {
         if (level == null) return;
         MinecraftServer server = level.getServer();
         if (storm != null) storm.discard();
-        ServerPlayer owner = server.getPlayerList().getPlayer(altarOwner);
+        ServerPlayer owner = testMode ? null : server.getPlayerList().getPlayer(altarOwner);
         if (owner != null) {
             net.minecraft.world.item.ItemStack altar = new net.minecraft.world.item.ItemStack(ModItems.WITHER_ALTAR);
             if (!owner.getInventory().add(altar)) owner.drop(altar, false);
@@ -362,6 +386,7 @@ public final class StormEncounter {
 
     private static void clear() {
         storm = null;
+        testMode = false;
         level = null;
         arenaCenter = null;
         altarOwner = null;
