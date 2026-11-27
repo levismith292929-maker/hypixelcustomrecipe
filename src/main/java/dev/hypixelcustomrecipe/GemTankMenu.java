@@ -32,6 +32,11 @@ public final class GemTankMenu {
                 NonNullList.withSize(SIZE, ItemStack.EMPTY));
     }
 
+    public static void clear(ServerPlayer player) {
+        NonNullList<ItemStack> items = contents(player);
+        for (int i = 0; i < SIZE; i++) items.set(i, ItemStack.EMPTY);
+    }
+
     public static boolean isGemstone(ItemStack stack) {
         if (stack.isEmpty()) return false;
         return gemstoneType(stack) >= 0;
