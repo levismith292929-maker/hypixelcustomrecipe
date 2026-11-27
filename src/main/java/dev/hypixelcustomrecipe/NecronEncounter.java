@@ -337,12 +337,13 @@ public final class NecronEncounter {
         if (attack1Ticks <= 0) return;
         double previous = safeRadius;
         safeRadius = Math.max(2.5D, safeRadius - 0.25D);
-        double y = center.getY() + 1.15D;
-        for (int i = 0; i < 56; i++) {
-            double angle = Math.PI * 2.0D * i / 56.0D;
-            double x = safeX + Math.cos(angle) * safeRadius;
-            double z = safeZ + Math.sin(angle) * safeRadius;
-            level.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0.0D, 0.015D, 0.0D, 0.0D);
+        for (double y = center.getY() + 0.2D; y <= center.getY() + 10.2D; y += 2.5D) {
+            for (int i = 0; i < 80; i++) {
+                double angle = Math.PI * 2.0D * i / 80.0D;
+                double x = safeX + Math.cos(angle) * safeRadius;
+                double z = safeZ + Math.sin(angle) * safeRadius;
+                level.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0.0D, 0.015D, 0.0D, 0.0D);
+            }
         }
         for (int i = 0; i < 32; i++) {
             double angle = Math.PI * 2.0D * i / 32.0D;
