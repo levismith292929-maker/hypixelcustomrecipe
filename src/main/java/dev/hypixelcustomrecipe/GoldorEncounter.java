@@ -70,9 +70,11 @@ public final class GoldorEncounter {
         });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (goldor != null && entity == goldor) {
-                // Clear the encounter's temporary sword warnings and displays
-                // regardless of whether Goldor was defeated normally or /killed.
-                abortAfterBossRemoval();
+                if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+                    abortAfterBossRemoval();
+                } else {
+                    finish();
+                }
             }
         });
         ServerTickEvents.END_SERVER_TICK.register(GoldorEncounter::tick);
