@@ -40,7 +40,7 @@ public final class GoldorEncounter {
     private static final double ENTITY_HEALTH = 1_024.0D;
     private static final int WARNING_TICKS = 40;
     private static final int SWORD_LIFETIME = 600;
-    private static final int FLIGHT_TICKS = 12;
+    private static final int FLIGHT_TICKS = 4;
     private static final int ATTACK_INTERVAL = 100;
     private static final double SWORD_RADIUS = 1.5D;
 
@@ -133,14 +133,16 @@ public final class GoldorEncounter {
 
         if (--attackTimer <= 0 && target != null) {
             Vec3 lockedPosition = target.position();
-            Vec3 movement = target.getDeltaMovement();
-            BlockPos locked = BlockPos.containing(lockedPosition);
-            BlockPos predictionA = BlockPos.containing(lockedPosition.add(movement.scale(8.0D)));
-            BlockPos predictionB = BlockPos.containing(lockedPosition.add(movement.scale(14.0D)));
-            double randomX = ThreadLocalRandom.current().nextDouble(-3.0D, 3.0D);
-            double randomZ = ThreadLocalRandom.current().nextDouble(-3.0D, 3.0D);
-            BlockPos randomized = BlockPos.containing(lockedPosition.add(randomX, 0.0D, randomZ));
-            PENDING.add(new PendingSword(List.of(predictionA, predictionB, locked, randomized), WARNING_TICKS));
+            List<BlockPos> randomTargets = new ArrayList<>(4);
+            for (int i = 0; i < 4; i++) {
+                double angle = ThreadLocalRandom.current().nextDouble(0.0D, Math.PI * 2.0D);
+                double radius = Math.sqrt(ThreadLocalRandom.current().nextDouble()) * 4.0D;
+                double offsetX = Math.cos(angle) * radius;
+                double offsetZ = Math.sin(angle) * radius;
+                randomTargets.add(BlockPos.containing(lockedPosition.x + offsetX,
+                        lockedPosition.y, lockedPosition.z + offsetZ));
+            }
+            PENDING.add(new PendingSword(randomTargets, WARNING_TICKS));
             attackTimer = ATTACK_INTERVAL;
             target.sendSystemMessage(Component.literal("GOLDOR IS TARGETING YOU!")
                     .withStyle(s -> s.withColor(0xFF5555).withBold(true)));
@@ -236,10 +238,13 @@ public final class GoldorEncounter {
     private static void pointSwordToward(Display.ItemDisplay display, Vec3 direction) {
         if (direction.lengthSqr() < 1.0E-8D) return;
         Vec3 normalized = direction.normalize();
-        float yaw = (float) (Math.atan2(normalized.x, normalized.z) * (180.0D / Math.PI));
-        float pitch = (float) (-Math.asin(normalized.y) * (180.0D / Math.PI));
-        display.setYRot(yaw);
-        display.setXRot(pitch);
+        // A sword's blade runs along the item's local +Y axis. Rotate the item itself
+        // so the blade tip, rather than only the display entity, faces the destination.
+        Quaternionf bladeRotation = new Quaternionf().rotationTo(
+                new Vector3f(0.0F, 1.0F, 0.0F),
+                new Vector3f((float) normalized.x, (float) normalized.y, (float) normalized.z));
+        display.setTransformation(new Transformation(new Vector3f(0.0F, 0.0F, 0.0F),
+                bladeRotation, new Vector3f(4.0F, 4.0F, 4.0F), new Quaternionf()));
     }
 
     private static void slam(BlockPos pos, Display.ItemDisplay display) {
