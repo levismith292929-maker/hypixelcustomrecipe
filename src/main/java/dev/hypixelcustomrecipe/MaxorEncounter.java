@@ -54,6 +54,9 @@ public final class MaxorEncounter {
     private static UUID altarOwner;
     private static int minionSpawnTimer;
     private static int laserBeamTimer;
+    // Vanilla Withers regenerate naturally; remember the last legitimate HP value
+    // so Maxor cannot recover health during the encounter.
+    private static float lastKnownHealth;
     private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final List<UUID> MINIONS = new ArrayList<>();
@@ -147,6 +150,7 @@ public final class MaxorEncounter {
         altarOwner = starter.getUUID();
         minionSpawnTimer = MINION_INTERVAL_TICKS;
         laserBeamTimer = 0;
+        lastKnownHealth = (float) ENTITY_HEALTH;
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
         LASER_AFFECTED.clear();
@@ -168,6 +172,15 @@ public final class MaxorEncounter {
         }
         if (!maxor.isAlive() || maxor.isRemoved()) {
             return;
+        }
+
+        // Vanilla Withers regenerate over time. Maxor must not heal, so discard
+        // any increase above the last health value observed by the encounter.
+        float currentHealth = maxor.getHealth();
+        if (currentHealth > lastKnownHealth) {
+            maxor.setHealth(lastKnownHealth);
+        } else {
+            lastKnownHealth = currentHealth;
         }
 
         // Keep Maxor focused on actual players and prevent the vanilla Wither
@@ -391,6 +404,7 @@ public final class MaxorEncounter {
 
     private static void clearEncounter() {
         maxor = null;
+        lastKnownHealth = 0.0F;
         encounterLevel = null;
         altarOwner = null;
         minionSpawnTimer = 0;
