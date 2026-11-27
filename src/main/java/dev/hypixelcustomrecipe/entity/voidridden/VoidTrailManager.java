@@ -39,7 +39,7 @@ public final class VoidTrailManager {
             Trail trail = iterator.next();
             var owner = level.getEntity(trail.ownerId);
             if (!(owner instanceof VoidriddenEnderman enderman)
-                    || !enderman.isAlive() || !enderman.hasBeenHitByPlayer()) {
+                    || !enderman.isAlive()) {
                 iterator.remove();
                 continue;
             }
