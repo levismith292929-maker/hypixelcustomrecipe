@@ -413,7 +413,9 @@ public final class SkyblockAbilityHandler {
             GoldorEncounter.recordDirectDamage(target, attacker, actualDamage);
             NecronEncounter.recordDirectDamage(target, attacker, actualDamage);
         }
-        DamageNumberHandler.show(level, target, damage, false);
+        float shownDamage = NecronEncounter.isNecron(target)
+                ? (float) NecronEncounter.toLogicalDamage(damage) : damage;
+        DamageNumberHandler.show(level, target, shownDamage, false);
         if (target.getHealth() <= 0.0F) target.die(source);
     }
 
