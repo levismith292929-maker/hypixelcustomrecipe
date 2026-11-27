@@ -48,6 +48,7 @@ public final class StormEncounter {
     private static BlockPos arenaCenter;
     private static UUID altarOwner;
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
+    private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final List<SafeZone> SAFE_ZONES = new ArrayList<>();
     private static final List<Strike> STRIKES = new ArrayList<>();
@@ -71,6 +72,13 @@ public final class StormEncounter {
                         || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
+                DEAD_PARTICIPANTS.add(player.getUUID());
+                if (level != null && allFightersDead(player.level().getServer())) {
+                    abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
+                    return;
+                }
+            }
             if (storm != null && entity == storm) {
                 if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                     // /kill aborts the phase instead of awarding a legitimate clear.
@@ -92,6 +100,9 @@ public final class StormEncounter {
         arenaCenter = center.immutable();
         altarOwner = owner;
         PARTICIPANTS.clear();
+        PARTICIPANTS.addAll(participants);
+        DEAD_PARTICIPANTS.clear();
+        DEAD_PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
         STRIKES.clear();
@@ -109,6 +120,10 @@ public final class StormEncounter {
 
     private static void tick(MinecraftServer server) {
         if (level == null) return;
+        if (allFightersDead(server)) {
+            abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
+            return;
+        }
         if (storm == null) {
             if (--breakTimer <= 0) summonStorm();
             else {
@@ -386,7 +401,7 @@ public final class StormEncounter {
         if (PARTICIPANTS.isEmpty()) return false;
         for (UUID id : PARTICIPANTS) {
             ServerPlayer fighter = server.getPlayerList().getPlayer(id);
-            if (fighter != null && fighter.isAlive()) return false;
+            if (!DEAD_PARTICIPANTS.contains(id) && fighter != null && fighter.isAlive()) return false;
         }
         return true;
     }
