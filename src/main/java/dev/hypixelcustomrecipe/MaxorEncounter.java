@@ -271,7 +271,7 @@ public final class MaxorEncounter {
         float yaw = (float) Math.atan2(delta.x, delta.z);
         laserBeamDisplay = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
         if (laserBeamDisplay != null) {
-            laserBeamDisplay.setBlockState(Blocks.PURPLE_STAINED_GLASS.defaultBlockState());
+            laserBeamDisplay.setBlockState(Blocks.AMETHYST_BLOCK.defaultBlockState());
             laserBeamDisplay.setTransformation(new com.mojang.math.Transformation(new org.joml.Vector3f(),
                     new org.joml.Quaternionf().rotationY(yaw),
                     new org.joml.Vector3f(0.12F, 0.12F, (float) distance), new org.joml.Quaternionf()));
