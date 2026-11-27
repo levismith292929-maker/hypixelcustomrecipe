@@ -221,7 +221,7 @@ public final class GoldorEncounter {
         display.setYRot(yaw);
         display.setPos(start.x, start.y, start.z);
         if (!encounterLevel.addFreshEntity(display)) throw new IllegalStateException("Could not spawn Goldor's sword");
-        encounterLevel.playSound(null, goldor.blockPosition(), SoundEvents.TRIDENT_THROW, SoundSource.HOSTILE, 2.0F, 0.6F);
+        encounterLevel.playSound(null, goldor.blockPosition(), SoundEvents.TRIDENT_THROW.value(), SoundSource.HOSTILE, 2.0F, 0.6F);
         return new FlyingSword(pos, display, start, destination);
     }
 
