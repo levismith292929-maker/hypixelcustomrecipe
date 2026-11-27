@@ -53,6 +53,7 @@ public final class MaxorEncounter {
     private static ServerLevel encounterLevel;
     private static UUID altarOwner;
     private static int minionSpawnTimer;
+    private static int laserBeamTimer;
     private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final List<UUID> MINIONS = new ArrayList<>();
@@ -145,6 +146,7 @@ public final class MaxorEncounter {
         encounterLevel = level;
         altarOwner = starter.getUUID();
         minionSpawnTimer = MINION_INTERVAL_TICKS;
+        laserBeamTimer = 0;
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
         LASER_AFFECTED.clear();
@@ -182,8 +184,13 @@ public final class MaxorEncounter {
         }
         LASER_HIT_COOLDOWNS.replaceAll((uuid, ticks) -> ticks - 1);
         LASER_HIT_COOLDOWNS.values().removeIf(ticks -> ticks <= 0);
-        if (target != null) {
-            renderLaserBeam(target);
+        // Fire the visible laser as a short pulse every five seconds,
+        // matching the existing 100-tick (5-second) laser effect cooldown.
+        if (--laserBeamTimer <= 0) {
+            if (target != null) {
+                renderLaserBeam(target);
+            }
+            laserBeamTimer = 100;
         }
 
         float progress = Math.max(0.0F, Math.min(1.0F, maxor.getHealth() / (float) ENTITY_HEALTH));
