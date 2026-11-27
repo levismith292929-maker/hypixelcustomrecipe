@@ -105,11 +105,6 @@ public abstract class LivingEntityMixin {
         float adjusted = amount;
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target
                 && source.getDirectEntity() == attacker) {
-            if (soulBladeAttack) {
-                adjusted = target instanceof ServerPlayer defenderTarget
-                        ? SkyblockPlayerState.get(defenderTarget).maximumHealth() * 0.05F
-                        : target.getMaxHealth() * 0.05F;
-            } else {
             SkyblockPlayerState attackerState = SkyblockPlayerState.get(attacker);
             SkyblockStats attackStats = SkyblockLevelBonuses.apply(
                     AccessoryBag.applyGemstoneAccessories(attacker,
@@ -131,7 +126,6 @@ public abstract class LivingEntityMixin {
             if (chance > 0 && attacker.getRandom().nextInt(100) < chance) {
                 adjusted *= (float) attackStats.criticalMultiplier();
                 hypixelcustomrecipe$criticalHit = true;
-            }
             }
         }
 
