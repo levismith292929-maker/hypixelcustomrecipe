@@ -297,14 +297,15 @@ public final class NecronEncounter {
         tickAttack7(target);
 
         if (attack3Timer > 0) attack3Timer--;
+        if (attack7Ticks <= 0 && attack7Timer > 0) attack7Timer--;
         if (attack3Timer <= 0 && attack4Ticks == 0) {
             beginLaser();
             return;
         }
 
-        if (attack4Ticks == 0 && --attack4Timer <= 0) beginAttack4();
+        if (attack4Ticks == 0 && attack4Timer <= 0) beginAttack4();
         if (attack6Ticks == 0 && attack6Timer <= 0) beginAttack6();
-        if (attack1Ticks == 0 && --attack1Timer <= 0
+        if (attack1Ticks == 0 && attack1Timer <= 0
                 && attack4Ticks == 0 && attack6Ticks == 0) beginAttack1();
         if (BOMBS.isEmpty() && attack2Timer <= 0
                 && attack6Ticks == 0) beginAttack2();
@@ -409,6 +410,7 @@ public final class NecronEncounter {
                 display.setItemTransform(ItemDisplayContext.FIXED);
                 display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
                         new Vector3f(0.75F), new Quaternionf()));
+                display.setNoGravity(true);
                 display.setPos(x, y, z);
                 level.addFreshEntity(display);
             }
@@ -430,6 +432,8 @@ public final class NecronEncounter {
             bomb.y = Math.max(center.getY() + 1.0D, bomb.y - 0.45D);
             if (bomb.display != null && !bomb.display.isRemoved()) {
                 bomb.display.setPos(bomb.x, bomb.y, bomb.z);
+                level.sendParticles(ParticleTypes.SMOKE, bomb.x, bomb.y + 0.25D, bomb.z,
+                        2, 0.12D, 0.18D, 0.12D, 0.01D);
             }
 
             // Clearly outline the full 10-block-diameter blast footprint while
@@ -521,6 +525,15 @@ public final class NecronEncounter {
         if (laserGuardian != null && !laserGuardian.isRemoved()) {
             laserGuardian.setPos(center.getX() + 0.5D, center.getY() + 0.1D, center.getZ() + 0.5D);
             laserGuardian.setTarget(laserTarget);
+        }
+
+        // Render the jump-rope beam with particles because Guardian beam rendering is unreliable
+        // while its target moves continuously around the arena.
+        for (double distance = 0.0D; distance <= radius; distance += 0.45D) {
+            double px = center.getX() + 0.5D + Math.cos(laserAngle) * distance;
+            double pz = center.getZ() + 0.5D + Math.sin(laserAngle) * distance;
+            level.sendParticles(ParticleTypes.END_ROD, px, beamY, pz, 2,
+                    0.025D, 0.025D, 0.025D, 0.0D);
         }
 
         // Damage follows the same radial path as the rendered Guardian beam.
@@ -715,7 +728,6 @@ public final class NecronEncounter {
 
     private static void tickAttack7(ServerPlayer target) {
         if (attack7Ticks <= 0) {
-            if (attack7Timer > 0) attack7Timer--;
             return;
         }
         if (target != null) {
