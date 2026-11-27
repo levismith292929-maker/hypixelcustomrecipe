@@ -66,6 +66,20 @@ public final class ModItems {
             "Dropped by Voidridden enemies."
     );
 
+    public static final Item VOID_SHARD = registerMaterialItem("void_shard", "Void Shard", Items.AMETHYST_SHARD, false);
+    public static final Item FINE_VOID_SHARD = registerMaterialItem("fine_void_shard", "Fine Void Shard", Items.PRISMARINE_SHARD, true);
+    public static final Item PURE_VOID_SHARD = registerMaterialItem("pure_void_shard", "Pure Void Shard", Items.NETHER_STAR, true);
+    public static final Item SOUL_SHARD = registerTexturedHeadFromValue(
+            "soul_shard", "Soul Shard",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTRiOGYzZGJlYTA4YjM2NDA1NTU3MjljMzJkNzQ2MWFhNDllZTIyOWI5ZDZiYjliYTNjOTA3ZmRjNDVmYTk1MiJ9fX0=", 64,
+            "A rare drop from Voidridden enemies."
+    );
+    public static final Item SOUL = registerTexturedHeadFromValue(
+            "soul", "Soul",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjM4ZmU5MjAzNzU3NTkwNjU1YWNkNzUzM2IzY2ZmNGUwNjBjNjVhMmEzZDE5NWNiYWNmZWJhYzEyODcyMDhmMyJ9fX0=", 64,
+            "A soul formed from the power of the Void."
+    );
+
     public static final Item NECRON_CORE = registerNecronCore();
 
     // Star-upgrade materials. Each shard is used for its matching anvil upgrade.
@@ -94,6 +108,16 @@ public final class ModItems {
             "Cooldown: 2 ticks");
 
     private ModItems() {
+    }
+
+    private static Item registerMaterialItem(String path, String displayName, Item fallback, boolean glint) {
+        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
+                Identifier.fromNamespaceAndPath(ITEM_NAMESPACE, path));
+        Item.Properties properties = new Item.Properties().setId(key).stacksTo(64)
+                .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, glint);
+        Item item = new SimplePolymerItem(properties, fallback);
+        return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
     private static Item registerNecronCore() {
