@@ -501,7 +501,7 @@ public final class SkyblockPlayerState {
     private static boolean isArmorPiece(ServerPlayer player, EquipmentSlot slot, String itemId) {
         String path = BuiltInRegistries.ITEM.getKey(player.getItemBySlot(slot).getItem()).getPath();
         return path.equals(itemId) || (path.startsWith(itemId + "_")
-                && path.substring((itemId + "_").length()).matches("[0-9]+star"));
+                && path.substring((itemId + "_").length()).matches("(?:[0-9]+star|3star_void)"));
     }
 
     private void tickHealthRegeneration(ServerPlayer player) {
