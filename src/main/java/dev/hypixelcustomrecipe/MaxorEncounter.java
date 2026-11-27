@@ -219,8 +219,12 @@ public final class MaxorEncounter {
         Vec3 step = delta.scale(1.0D / count);
         Vec3 point = start;
         for (int i = 0; i <= count; i++) {
-            encounterLevel.sendParticles(ParticleTypes.WITCH,
-                    point.x, point.y, point.z, 2, 0.04D, 0.04D, 0.04D, 0.0D);
+            // Bright end rods form the visible core; purple portal particles
+            // add a second layer so the beam reads clearly as Maxor's laser.
+            encounterLevel.sendParticles(ParticleTypes.END_ROD,
+                    point.x, point.y, point.z, 2, 0.015D, 0.015D, 0.015D, 0.0D);
+            encounterLevel.sendParticles(ParticleTypes.PORTAL,
+                    point.x, point.y, point.z, 1, 0.025D, 0.025D, 0.025D, 0.0D);
             point = point.add(step);
         }
         UUID id = target.getUUID();
