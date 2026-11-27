@@ -81,6 +81,7 @@ public final class SkyblockPlayerState {
     private int currentHealth;
     private int maximumHealth;
     private int maxorLaserStacks;
+    private int necronRadiationStacks;
     private boolean healthInitialized;
     private int combatTicksRemaining;
     private double healthRegenerationProgress;
@@ -168,6 +169,8 @@ public final class SkyblockPlayerState {
     public int maximumHealth() { return maximumHealth; }
     public void addMaxorLaserStack() { maxorLaserStacks++; }
     public void clearMaxorLaserStacks() { maxorLaserStacks = 0; }
+    /** Radiation permanently reduces maximum Health by 5% per exposure. */
+    public void addNecronRadiationStack() { necronRadiationStacks++; }
     public static void clearMaxorLaserStacksFor(UUID playerId) {
         SkyblockPlayerState state = PLAYERS.get(playerId);
         if (state != null) state.clearMaxorLaserStacks();
@@ -310,6 +313,7 @@ public final class SkyblockPlayerState {
     public void savePersistentData(ServerPlayer player, ValueOutput output) {
         output.putInt("hypixel_health", currentHealth);
         output.putInt("hypixel_max_health", maximumHealth);
+        output.putInt("hypixel_necron_radiation_stacks", necronRadiationStacks);
         output.putInt("hypixel_pet", activePet.ordinal());
         output.putInt("hypixel_necron_guard_cooldown", necronGuardCooldownTicks);
         output.putInt("hypixel_skyblock_level", skyblockLevel);
@@ -329,6 +333,7 @@ public final class SkyblockPlayerState {
         player.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0);
         if (player.isAlive()) player.setHealth(1000000000.0F);
 
+        necronRadiationStacks = Math.max(0, input.getIntOr("hypixel_necron_radiation_stacks", 0));
         int savedMaximum = input.getIntOr("hypixel_max_health", 0);
         int savedHealth = input.getIntOr("hypixel_health", -1);
         if (savedMaximum > 0 && savedHealth >= 0) {
@@ -581,7 +586,8 @@ public final class SkyblockPlayerState {
         stats = SkyblockLevelBonuses.apply(AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel);
 
-        int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health() * Math.pow(0.98D, maxorLaserStacks)));
+        int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health()
+                * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.95D, necronRadiationStacks)));
         if (!healthInitialized) {
             maximumHealth = recalculatedMaximum;
             currentHealth = maximumHealth;
