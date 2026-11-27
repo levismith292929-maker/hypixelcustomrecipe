@@ -1,5 +1,6 @@
 package dev.hypixelcustomrecipe.mixin;
 
+import dev.hypixelcustomrecipe.NecronEncounter;
 import dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEnderman;
 import dev.hypixelcustomrecipe.entity.voidridden.VoidTrailManager;
 import net.minecraft.server.level.ServerLevel;
@@ -35,6 +36,11 @@ public abstract class VoidriddenEndermanTeleportMixin {
         if (!Boolean.TRUE.equals(cir.getReturnValue())
                 || !((Object) this instanceof VoidriddenEnderman enderman)
                 || !(enderman.level() instanceof ServerLevel serverLevel)) return;
+        if (!NecronEncounter.isInsideArenaForVoidridden(enderman.getX(), enderman.getZ())) {
+            enderman.setPos(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY, hypixelcustomrecipe$oldZ);
+            cir.setReturnValue(false);
+            return;
+        }
         Vec3 start = new Vec3(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY + 1.0, hypixelcustomrecipe$oldZ);
         Vec3 end = new Vec3(enderman.getX(), enderman.getY() + 1.0, enderman.getZ());
         VoidTrailManager.add(serverLevel, enderman.getUUID(), start, end);
