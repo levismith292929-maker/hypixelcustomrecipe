@@ -202,7 +202,7 @@ public final class ModArmorItems {
                                       EquipmentSlot slot, String baseId) {
         String path = BuiltInRegistries.ITEM.getKey(player.getItemBySlot(slot).getItem()).getPath();
         return path.equals(baseId) || (path.startsWith(baseId + "_")
-                && path.substring((baseId + "_").length()).matches("[0-9]+star"));
+                && path.substring((baseId + "_").length()).matches("(?:[0-9]+star|3star_void)"));
     }
 
     private static Stats getStats(ItemStack stack) {
