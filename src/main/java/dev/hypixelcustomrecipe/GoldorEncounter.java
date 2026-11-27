@@ -51,6 +51,7 @@ public final class GoldorEncounter {
     private static int attackTimer;
     private static float lastHealth;
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
+    private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final List<PendingSword> PENDING = new ArrayList<>();
     private static final List<FlyingSword> FLYING = new ArrayList<>();
     private static final List<ActiveSword> ACTIVE = new ArrayList<>();
@@ -69,6 +70,13 @@ public final class GoldorEncounter {
             return true;
         });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
+                DEAD_PARTICIPANTS.add(player.getUUID());
+                if (encounterLevel != null && allFightersDead(player.level().getServer())) {
+                    abortBecauseAllFightersDied();
+                    return;
+                }
+            }
             if (goldor != null && entity == goldor) {
                 if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                     abortAfterBossRemoval();
@@ -116,6 +124,7 @@ public final class GoldorEncounter {
         lastHealth = (float) ENTITY_HEALTH;
         clearSwords();
         PARTICIPANTS.clear();
+        DEAD_PARTICIPANTS.clear();
         BAR.setName(Component.literal("Goldor: 25,000,000 / 25,000,000 HP"));
         BAR.setProgress(1.0F);
         BAR.addPlayer(player);
@@ -304,7 +313,7 @@ public final class GoldorEncounter {
         if (PARTICIPANTS.isEmpty()) return false;
         for (UUID id : PARTICIPANTS) {
             ServerPlayer fighter = server.getPlayerList().getPlayer(id);
-            if (fighter != null && fighter.isAlive()) return false;
+            if (!DEAD_PARTICIPANTS.contains(id) && fighter != null && fighter.isAlive()) return false;
         }
         return true;
     }
