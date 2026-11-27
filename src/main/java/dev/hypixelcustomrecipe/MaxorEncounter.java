@@ -15,7 +15,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.item.ItemStack;
@@ -110,7 +110,7 @@ public final class MaxorEncounter {
     }
 
     private static void start(ServerPlayer starter, ServerLevel level) {
-        WitherSkeleton boss = EntityType.WITHER_SKELETON.create(level, EntitySpawnReason.MOB_SUMMONED);
+        WitherSkeleton boss = EntityTypes.WITHER_SKELETON.create(level, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) {
             starter.sendSystemMessage(Component.literal("Maxor could not be summoned here.")
                     .withStyle(style -> style.withColor(0xFF5555)));
