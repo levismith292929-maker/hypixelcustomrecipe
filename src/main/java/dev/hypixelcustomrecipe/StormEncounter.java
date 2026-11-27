@@ -258,7 +258,7 @@ public final class StormEncounter {
         for (SafeZone zone : SAFE_ZONES) {
             Display.BlockDisplay marker = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
             if (marker != null) {
-                marker.setBlockState(Blocks.LIME_STAINED_GLASS.defaultBlockState());
+                marker.setBlockState(Blocks.EMERALD_BLOCK.defaultBlockState());
                 marker.setTransformation(new com.mojang.math.Transformation(new org.joml.Vector3f(),
                         new org.joml.Quaternionf(), new org.joml.Vector3f(4.0F, 0.08F, 4.0F),
                         new org.joml.Quaternionf()));
