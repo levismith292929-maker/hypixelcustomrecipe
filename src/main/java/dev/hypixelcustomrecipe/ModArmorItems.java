@@ -230,10 +230,13 @@ public final class ModArmorItems {
     private static void registerPiece(ArmorSet set, String slotId, String slotName, ArmorType type,
                                       Item fallback, String profileTexture, Stats baseStats, int dye) {
         String baseId = set.id + "_" + slotId;
-        for (int stars = 0; stars <= 3; stars++) {
-            String itemId = stars == 0 ? baseId : baseId + "_" + stars + "star";
-            String displayName = set.displayName + " " + slotName + (stars == 0 ? "" : " " + "★".repeat(stars));
-            Stats scaled = baseStats.scale(stars);
+        for (int stars = 0; stars <= 4; stars++) {
+            boolean voidUpgraded = stars == 4;
+            String itemId = voidUpgraded ? baseId + "_3star_void"
+                    : (stars == 0 ? baseId : baseId + "_" + stars + "star");
+            String displayName = set.displayName + " " + slotName
+                    + (voidUpgraded ? " ★★★ Void" : (stars == 0 ? "" : " " + "★".repeat(stars)));
+            Stats scaled = voidUpgraded ? baseStats.scale(3).multiply(6) : baseStats.scale(stars);
             List<Component> lore = new ArrayList<>();
             lore.add(ItemFormatting.lore("Health: " + Integer.toString((int) Math.round(scaled.health / 10.0))));
             lore.add(ItemFormatting.lore("Defense: " + scaled.defense));
@@ -363,6 +366,11 @@ public final class ModArmorItems {
     private record Stats(int health, int defense, int strength, int intelligence, int critChance, int critDamage) {
         Stats(int health, int defense, int strength, int intelligence) {
             this(health, defense, strength, intelligence, 0, 0);
+        }
+
+        Stats multiply(int multiplier) {
+            return new Stats(health * multiplier, defense * multiplier, strength * multiplier,
+                    intelligence * multiplier, critChance * multiplier, critDamage * multiplier);
         }
 
         Stats scale(int stars) {
