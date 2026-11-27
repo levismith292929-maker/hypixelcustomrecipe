@@ -14,7 +14,8 @@ public final class BossTestCommand {
     public static void initialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 dispatcher.register(Commands.literal("boss")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source -> source.getEntity() instanceof ServerPlayer player
+                                && source.getServer().getPlayerList().isOp(player.getGameProfile()))
                         .then(Commands.literal("summon")
                                 .then(Commands.literal("maxor").executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
