@@ -112,6 +112,8 @@ public final class SkyblockAbilityHandler {
                 useAotd(serverPlayer);
             } else if (stack.is(DatapackItems.NECRONS_SCYTHE)) {
                 useNecronsScythe(serverPlayer);
+            } else if (stack.is(DatapackItems.SOUL_BLADE)) {
+                useSoulBlade(serverPlayer);
             } else if (stack.is(DatapackItems.ZOMBIE_SWORD)) {
                 useZombieSword(serverPlayer);
             } else if (stack.is(DatapackItems.ORE_TRACKER)) {
@@ -302,7 +304,17 @@ public final class SkyblockAbilityHandler {
 
     /** Necron's Scythe: seven close-range hit checks and a five-tick slash visual. */
     private static void useNecronsScythe(ServerPlayer player) {
-        if (!beginAbility(player, "necrons_scythe", 1, 1)) return;
+        useScytheAbility(player, false);
+    }
+
+    /** Soul Blade reuses Necron's Scythe's slash, target scan, cost, and cooldown. */
+    private static void useSoulBlade(ServerPlayer player) {
+        useScytheAbility(player, true);
+    }
+
+    private static void useScytheAbility(ServerPlayer player, boolean soulBlade) {
+        String abilityId = soulBlade ? "soul_blade" : "necrons_scythe";
+        if (!beginAbility(player, abilityId, 1, 1)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
@@ -317,13 +329,14 @@ public final class SkyblockAbilityHandler {
                     entity -> isValidScytheTarget(entity, player)
                             && entity.distanceToSqr(center) <= 2.25)) {
                 if (hitTargets.add(target.getUUID())) {
-                    // Deal 2.5% of the target's maximum Health. Players use
-                    // the mod's custom Health pool rather than vanilla's reserve.
                     double maximumHealth = target instanceof ServerPlayer targetPlayer
                             ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
                             : target.getMaxHealth();
-                    float damage = (float) (maximumHealth * 0.025D);
-                    target.hurtServer(level, source, damage);
+                    if (soulBlade) {
+                        applyScytheTrueDamage(level, target, source, (float) (maximumHealth * 0.05D));
+                    } else {
+                        target.hurtServer(level, source, (float) (maximumHealth * 0.025D));
+                    }
                 }
             }
         }
@@ -333,6 +346,26 @@ public final class SkyblockAbilityHandler {
         if (right.lengthSqr() < 1.0E-6) right = new Vec3(1.0, 0.0, 0.0);
         ACTIVE_SLASHES.put(player.getUUID(), new SlashState(slashCenter, right.normalize()));
         playSound(player, net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 0.8F);
+    }
+
+    /** Bypasses Defense and armor, including the custom player Health pool. */
+    private static void applyScytheTrueDamage(ServerLevel level, LivingEntity target,
+                                               DamageSource source, float damage) {
+        if (damage <= 0.0F || target.isInvulnerableTo(level, source)) return;
+        if (target instanceof ServerPlayer defender) {
+            SkyblockPlayerState state = SkyblockPlayerState.get(defender);
+            state.markCombat();
+            boolean defeated = state.applyTrueDamage(damage);
+            DamageNumberHandler.show(level, defender, damage, false);
+            if (defeated) {
+                defender.setHealth(0.0F);
+                defender.die(source);
+            }
+            return;
+        }
+        target.setHealth(Math.max(0.0F, target.getHealth() - damage));
+        DamageNumberHandler.show(level, target, damage, false);
+        if (target.getHealth() <= 0.0F) target.die(source);
     }
 
     private static void tickScytheSlash(ServerPlayer player, SlashState slash) {
