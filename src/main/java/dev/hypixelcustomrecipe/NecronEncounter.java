@@ -1,8 +1,11 @@
 package dev.hypixelcustomrecipe;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import com.mojang.math.Transformation;
+import dev.hypixelcustomrecipe.entity.voidridden.VoidriddenMobs;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -13,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -20,44 +24,57 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
-import com.mojang.math.Transformation;
-import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.monster.Guardian;
+import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+
 import java.util.*;
 
 public final class NecronEncounter {
-    private static final double MAX_HP = 55_000_000.0D;
-    private static final double ENTITY_HP = 1024.0D;
+    private static final double MAX_HP = 500_000_000.0D;
+    private static final double ENTITY_HP = 1_024.0D;
     private static final double HP_PER_ENTITY_HP = MAX_HP / ENTITY_HP;
     private static final int HALF_ARENA = 50;
-    private static final int ARENA_HEIGHT = 20;
-    private static final int MINION_INTERVAL = 60;
-    private static final int LIGHTNING_INTERVAL = 180;
-    private static final int SWORD_INTERVAL = 240;
-    private static final int LASER_INTERVAL = 1200;
+    private static final int WALL_HEIGHT = 12;
     private static final int LASER_DURATION = 240;
+    private static final int TNT_COUNT = 50;
+    private static final int DANGER_WARNING_TICKS = 100;
+    private static final int DANGER_LIFETIME_TICKS = 1_300;
+
     private static WitherBoss necron;
     private static ServerLevel level;
     private static BlockPos center;
     private static boolean testMode;
     private static boolean laserActive;
-    private static float lastHealth;
-    private static int minionTimer, lightningTimer, swordTimer, laserTimer, laserTicks, openingNukeTicks;
+    private static int laserTicks;
     private static double laserAngle;
-    private static final Map<UUID, Double> damage = new HashMap<>();
-    private static final Set<UUID> participants = new HashSet<>();
-    private static final Map<UUID, Integer> radiationCooldown = new HashMap<>();
-    private static final List<UUID> minions = new ArrayList<>();
-    private static final List<Blade> blades = new ArrayList<>();
-    private static final List<Radiation> radiation = new ArrayList<>();
+    private static Guardian laserGuardian;
+    private static ArmorStand laserTarget;
+    private static int attack1Timer, attack2Timer, attack3Timer, attack4Timer;
+    private static int attack5Timer, attack6Timer, attack7Timer;
+    private static int attack1Ticks, attack4Ticks, attack6Ticks, attack7Ticks;
+    private static double safeX, safeZ, safeRadius;
+    private static int dangerMinX, dangerMaxX, dangerMinZ, dangerMaxZ;
+    private static int flameSide, flameGap;
+    private static double flameOffset;
+    private static int skullFireTicks;
+    private static float lastHealth;
+
+    private static final Map<BlockPos, BlockState> ORIGINAL_ARENA = new LinkedHashMap<>();
+    private static final Set<UUID> PARTICIPANTS = new HashSet<>();
+    private static final Set<UUID> MINIONS = new HashSet<>();
+    private static final Set<UUID> PROJECTILES = new HashSet<>();
+    private static final Set<UUID> FLAME_HIT_PLAYERS = new HashSet<>();
+    private static final List<TntBomb> BOMBS = new ArrayList<>();
     private static final ServerBossEvent BAR = new ServerBossEvent(UUID.randomUUID(),
             Component.literal("Necron"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
 
@@ -70,13 +87,15 @@ public final class NecronEncounter {
             return true;
         });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-            if (necron != null && entity.getUUID().equals(necron.getUUID())) finish();
+            if (necron != null && entity == necron) finish(true);
         });
         ServerTickEvents.END_SERVER_TICK.register(NecronEncounter::tick);
     }
 
     public static boolean isActive() { return necron != null && necron.isAlive(); }
     public static boolean isNecron(LivingEntity entity) { return necron != null && entity == necron; }
+    public static double logicalMaximumHealth() { return MAX_HP; }
+    public static double toEntityDamage(double logicalDamage) { return logicalDamage / HP_PER_ENTITY_HP; }
     public static boolean isLaserActive() { return isActive() && laserActive; }
 
     public static boolean canPlaceBlock(ServerPlayer player, BlockPos pos) {
@@ -85,363 +104,659 @@ public final class NecronEncounter {
     }
 
     private static boolean insideArena(BlockPos pos) {
-        return pos.getX() >= center.getX() - HALF_ARENA && pos.getX() < center.getX() + HALF_ARENA
-                && pos.getZ() >= center.getZ() - HALF_ARENA && pos.getZ() < center.getZ() + HALF_ARENA
-                && pos.getY() > center.getY() && pos.getY() <= center.getY() + ARENA_HEIGHT;
+        return pos.getX() >= center.getX() - HALF_ARENA
+                && pos.getX() < center.getX() + HALF_ARENA
+                && pos.getZ() >= center.getZ() - HALF_ARENA
+                && pos.getZ() < center.getZ() + HALF_ARENA
+                && pos.getY() > center.getY()
+                && pos.getY() <= center.getY() + WALL_HEIGHT;
     }
 
     public static boolean summonForTesting(ServerPlayer player) {
-        if (isActive() || MaxorEncounter.isActive() || StormEncounter.isActive() || GoldorEncounter.isActive()) return false;
+        if (isActive() || MaxorEncounter.isActive() || StormEncounter.isActive()
+                || GoldorEncounter.isActive()) return false;
         return start(player, (ServerLevel) player.level(), true);
     }
 
     private static boolean start(ServerPlayer starter, ServerLevel world, boolean testing) {
-        WitherBoss boss = EntityTypes.WITHER.create(world, EntitySpawnReason.MOB_SUMMONED);
-        if (boss == null) return false;
-        center = starter.blockPosition();
+        center = starter.blockPosition().immutable();
         level = world;
-        clearArena();
-        boss.setPos(center.getX() + 0.5D, center.getY() + 4.0D, center.getZ() + 0.5D);
+        buildArena();
+
+        WitherBoss boss = EntityTypes.WITHER.create(world, EntitySpawnReason.MOB_SUMMONED);
+        if (boss == null) {
+            restoreArena();
+            clearState();
+            return false;
+        }
+        boss.setPos(center.getX() + 0.5D, center.getY() + 5.0D, center.getZ() + 0.5D);
         boss.setCustomName(Component.literal("Necron").withStyle(s -> s.withColor(0xAA0000).withBold(true)));
         boss.setCustomNameVisible(true);
         boss.setPersistenceRequired();
-        boss.getAttribute(Attributes.MAX_HEALTH).setBaseValue(ENTITY_HP);
+        boss.setNoAi(true);
+        boss.setNoGravity(true);
+        var maxHealth = boss.getAttribute(Attributes.MAX_HEALTH);
+        if (maxHealth != null) maxHealth.setBaseValue(ENTITY_HP);
         boss.setHealth((float) ENTITY_HP);
-        boss.setTarget(starter);
-        if (!world.addFreshEntity(boss)) { clear(); return false; }
+        if (!world.addFreshEntity(boss)) {
+            restoreArena();
+            clearState();
+            return false;
+        }
+
         necron = boss;
         testMode = testing;
         lastHealth = (float) ENTITY_HP;
-        minionTimer = MINION_INTERVAL;
-        lightningTimer = LIGHTNING_INTERVAL;
-        swordTimer = SWORD_INTERVAL;
-        laserTimer = LASER_INTERVAL;
-        laserTicks = 0;
-        openingNukeTicks = 100;
+        PARTICIPANTS.clear();
+        MINIONS.clear();
+        PROJECTILES.clear();
+        FLAME_HIT_PLAYERS.clear();
+        BOMBS.clear();
+        attack1Timer = random(600, 900);
+        attack2Timer = random(400, 700);
+        attack3Timer = random(400, 800);
+        attack4Timer = random(800, 1_000);
+        attack5Timer = random(400, 800);
+        attack6Timer = 1_200;
+        attack7Timer = random(200, 600);
         laserActive = false;
-        laserAngle = 0;
-        damage.clear(); participants.clear(); radiationCooldown.clear(); minions.clear(); blades.clear(); radiation.clear();
+        laserTicks = 0;
+        attack1Ticks = attack4Ticks = attack6Ticks = attack7Ticks = 0;
+        laserAngle = 0.0D;
+        BAR.removeAllPlayers();
         BAR.setProgress(1.0F);
-        BAR.setName(Component.literal("Necron: 55,000,000 / 55,000,000 HP"));
+        BAR.setName(Component.literal("Necron: 500,000,000 / 500,000,000 HP"));
         BAR.addPlayer(starter);
-        world.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 0.5F);
-        starter.sendSystemMessage(Component.literal(testing ? "NECRON TEST SUMMONED!" : "NECRON HAS AWAKENED!")
+
+        starter.teleportTo(center.getX() + 0.5D, center.getY() + 1.0D, center.getZ() + 0.5D);
+        starter.sendSystemMessage(Component.literal(testing
+                ? "NECRON TEST SUMMONED — 500,000,000 HP!"
+                : "NECRON HAS AWAKENED — 500,000,000 HP!")
                 .withStyle(s -> s.withColor(0xAA0000).withBold(true)));
-        starter.sendSystemMessage(Component.literal("Elytras are disabled during this encounter.")
+        starter.sendSystemMessage(Component.literal(
+                "The 100x100 bedrock arena is sealed. No building is allowed during the fight.")
                 .withStyle(s -> s.withColor(0xFF5555)));
-        // The laser starts immediately. The opening nuke takes five seconds to fall.
-        starter.sendSystemMessage(Component.literal("INCOMING NUKE! Impact in 5 seconds — RUN!")
-                .withStyle(s -> s.withColor(0xFF5555).withBold(true)));
-        beginLaser();
+        world.playSound(null, center, SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 4.0F, 0.5F);
         return true;
     }
 
-    private static void tickOpeningNuke() {
-        int elapsed = 100 - openingNukeTicks;
-        double progress = elapsed / 100.0D;
-        double x = center.getX() + 0.5D;
-        double z = center.getZ() + 0.5D;
-        double y = center.getY() + 35.0D - progress * 34.0D;
-        // Visible falling fireball trail over the full five-second countdown.
-        level.sendParticles(ParticleTypes.FLAME, x, y, z, 18, 0.45D, 0.7D, 0.45D, 0.025D);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y - 1.0D, z, 10, 0.55D, 0.9D, 0.55D, 0.01D);
-        level.sendParticles(ParticleTypes.END_ROD, x, y, z, 5, 0.2D, 0.3D, 0.2D, 0.0D);
-        if (openingNukeTicks % 20 == 0 && openingNukeTicks > 0) {
-            int seconds = openingNukeTicks / 20;
-            level.playSound(null, center, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.HOSTILE,
-                    2.0F, 0.5F + (5 - seconds) * 0.2F);
-            level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                    "NUKE IMPACT IN " + seconds + "...")
-                    .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
-        }
-        openingNukeTicks--;
-        if (openingNukeTicks <= 0) detonateOpeningNuke();
+    private static int random(int min, int max) {
+        return min + level.getRandom().nextInt(max - min + 1);
     }
 
-    private static void detonateOpeningNuke() {
-        openingNukeTicks = 0;
-        // Start the normal attack cadence after the opening sequence, not during it.
-        minionTimer = MINION_INTERVAL;
-        lightningTimer = LIGHTNING_INTERVAL;
-        swordTimer = SWORD_INTERVAL;
-        level.playSound(null, center, SoundEvents.GENERIC_EXPLODE.value(),
-                SoundSource.HOSTILE, 8.0F, 0.55F);
-        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
-                center.getX() + 0.5D, center.getY() + 2.0D, center.getZ() + 0.5D,
-                1, 0.0D, 0.0D, 0.0D, 0.0D);
-        level.sendParticles(ParticleTypes.FLAME,
-                center.getX() + 0.5D, center.getY() + 2.0D, center.getZ() + 0.5D,
-                180, 5.0D, 3.0D, 5.0D, 0.08D);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE,
-                center.getX() + 0.5D, center.getY() + 2.0D, center.getZ() + 0.5D,
-                100, 4.0D, 2.0D, 4.0D, 0.025D);
-        AABB blast = new AABB(center).inflate(10.0D);
-        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, blast)) {
-            if (!player.isAlive()) continue;
-            player.sendSystemMessage(Component.literal(
-                    "NECRON'S OPENING NUKE HAS ERASED YOUR INVENTORY AND PROGRESSION!")
-                    .withStyle(s -> s.withColor(0xAA0000).withBold(true)));
-            SkyblockPlayerState.get(player).applyNecronNuke(player);
-        }
-        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                "NECRON HAS DETONATED HIS OPENING NUKE! The laser is active.")
-                .withStyle(s -> s.withColor(0xAA0000).withBold(true)), false);
-    }
-
-    private static void clearArena() {
-        // Preserve the floor; clear a 100x100x20 volume above it for the encounter.
-        for (int x = -HALF_ARENA; x < HALF_ARENA; x++) {
-            for (int z = -HALF_ARENA; z < HALF_ARENA; z++) {
-                for (int y = 1; y <= ARENA_HEIGHT; y++) {
-                    BlockPos p = center.offset(x, y, z);
-                    if (!level.getBlockState(p).isAir()) level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+    private static void buildArena() {
+        ORIGINAL_ARENA.clear();
+        int minX = center.getX() - HALF_ARENA;
+        int maxX = center.getX() + HALF_ARENA - 1;
+        int minZ = center.getZ() - HALF_ARENA;
+        int maxZ = center.getZ() + HALF_ARENA - 1;
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                saveAndPlaceBedrock(new BlockPos(x, center.getY(), z));
+                if (x == minX || x == maxX || z == minZ || z == maxZ) {
+                    for (int y = 1; y <= WALL_HEIGHT; y++) {
+                        saveAndPlaceBedrock(new BlockPos(x, center.getY() + y, z));
+                    }
                 }
             }
         }
+    }
+
+    private static void saveAndPlaceBedrock(BlockPos pos) {
+        BlockPos immutable = pos.immutable();
+        ORIGINAL_ARENA.putIfAbsent(immutable, level.getBlockState(immutable));
+        level.setBlock(immutable, Blocks.BEDROCK.defaultBlockState(), 3);
+    }
+
+    private static void restoreArena() {
+        if (level == null) return;
+        for (Map.Entry<BlockPos, BlockState> entry : ORIGINAL_ARENA.entrySet()) {
+            level.setBlock(entry.getKey(), entry.getValue(), 3);
+        }
+        ORIGINAL_ARENA.clear();
     }
 
     private static void tick(MinecraftServer server) {
         if (necron == null || level == null || !necron.isAlive() || necron.isRemoved()) return;
         if (allFightersDead(server)) {
-            abortBecauseAllFightersDied();
+            finish(false);
             return;
         }
-        if (openingNukeTicks > 0) tickOpeningNuke();
+
         float hp = necron.getHealth();
-        if (hp > lastHealth) necron.setHealth(lastHealth); else lastHealth = hp;
+        if (hp > lastHealth) necron.setHealth(lastHealth);
+        else lastHealth = hp;
+
         ServerPlayer target = nearestPlayer();
-        // Never let the Wither AI acquire hostile mobs or other non-player targets.
-        necron.setTarget(target);
-        if (target != null) {
-            if (laserActive) {
-                necron.getNavigation().stop();
-                necron.setDeltaMovement(Vec3.ZERO);
-                necron.setPos(center.getX() + 0.5D, center.getY() + 4.0D, center.getZ() + 0.5D);
-            } else {
-                // Necron's movement leaves permanent radiation marks behind.
-                if (necron.tickCount % 8 == 0) addRadiation(necron.position());
-            }
-        }
-        // Keep every Necron minion locked to a player, even if its vanilla AI
-        // tries to switch to another mob after spawning.
-        for (UUID id : minions) {
-            Entity minion = level.getEntity(id);
-            if (minion instanceof WitherSkeleton skeleton) skeleton.setTarget(target);
-        }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (player.level() != level) { BAR.removePlayer(player); continue; }
-            if (player.distanceToSqr(Vec3.atCenterOf(center)) <= 110.0D * 110.0D) {
-                BAR.addPlayer(player);
-            } else BAR.removePlayer(player);
+            if (player.level() != level) {
+                BAR.removePlayer(player);
+                continue;
+            }
+            if (player.distanceToSqr(Vec3.atCenterOf(center)) <= 110.0D * 110.0D) BAR.addPlayer(player);
+            else BAR.removePlayer(player);
             if (player.isFallFlying()) player.stopFallFlying();
         }
-        radiationCooldown.replaceAll((id, ticks) -> ticks - 1);
-        radiationCooldown.values().removeIf(ticks -> ticks <= 0);
-        applyRadiation();
-        tickBlades();
-        minions.removeIf(id -> { Entity e=level.getEntity(id); return e==null || !e.isAlive(); });
-        // The opening nuke is the intro. Regular attacks begin only after it detonates.
-        if (openingNukeTicks <= 0) {
-            if (--minionTimer <= 0) { minionTimer=MINION_INTERVAL; spawnMinions(); }
-            if (--lightningTimer <= 0) { lightningTimer=LIGHTNING_INTERVAL; lightningBarrage(); }
-            if (--swordTimer <= 0) { swordTimer=SWORD_INTERVAL; launchSwords(); }
+
+        MINIONS.removeIf(id -> {
+            Entity entity = level.getEntity(id);
+            if (entity == null || !entity.isAlive()) return true;
+            if (entity instanceof net.minecraft.world.entity.Mob mob && target != null) mob.setTarget(target);
+            return false;
+        });
+        PROJECTILES.removeIf(id -> {
+            Entity entity = level.getEntity(id);
+            return entity == null || !entity.isAlive();
+        });
+
+        if (laserActive) {
+            tickGuardianLaser();
+        } else {
+            tickOtherAttacks(target);
         }
-        if (laserActive) tickLaser();
-        else if (--laserTimer <= 0) beginLaser();
-        float progress=Math.max(0.0F,Math.min(1.0F,necron.getHealth()/(float)ENTITY_HP));
+
+        float progress = Math.max(0.0F, Math.min(1.0F, necron.getHealth() / (float) ENTITY_HP));
         BAR.setProgress(progress);
-        long shown=Math.max(0L,Math.round(progress*MAX_HP));
-        BAR.setName(Component.literal("Necron: "+String.format(Locale.ROOT,"%,d",shown)+" / 55,000,000 HP"));
+        long shown = Math.max(0L, Math.round(progress * MAX_HP));
+        BAR.setName(Component.literal("Necron: " + String.format(Locale.ROOT, "%,d", shown)
+                + " / 500,000,000 HP"));
     }
 
     private static ServerPlayer nearestPlayer() {
-        ServerPlayer nearest=null; double best=120.0D*120.0D;
-        for(ServerPlayer p:level.getServer().getPlayerList().getPlayers()){
-            if(p.level()!=level || !p.isAlive()) continue;
-            double d=p.distanceToSqr(necron); if(d<best){best=d;nearest=p;}
+        ServerPlayer nearest = null;
+        double best = 100.0D * 100.0D;
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
+            if (player.level() != level || !player.isAlive() || !insideArena(player.blockPosition())) continue;
+            double distance = player.distanceToSqr(Vec3.atCenterOf(center));
+            if (distance < best) {
+                best = distance;
+                nearest = player;
+            }
         }
         return nearest;
     }
 
-    private static void spawnMinions() {
-        for(int i=0;i<12 && minions.size()<72;i++){
-            WitherSkeleton mob=EntityTypes.WITHER_SKELETON.create(level,EntitySpawnReason.MOB_SUMMONED);
-            if(mob==null) continue;
-            double a=level.getRandom().nextDouble()*Math.PI*2, r=4+level.getRandom().nextDouble()*8;
-            mob.setPos(necron.getX()+Math.cos(a)*r,center.getY()+1,necron.getZ()+Math.sin(a)*r);
-            mob.setPersistenceRequired();
-            ServerPlayer p=nearestPlayer(); if(p!=null) mob.setTarget(p);
-            if(level.addFreshEntity(mob)) minions.add(mob.getUUID());
+    private static void tickOtherAttacks(ServerPlayer target) {
+        tickAttack1();
+        tickAttack2();
+        tickAttack4();
+        tickAttack6();
+        tickAttack7(target);
+
+        if (attack3Timer > 0) attack3Timer--;
+        if (attack3Timer <= 0 && attack4Ticks == 0) {
+            beginGuardianLaser();
+            return;
         }
-    }
 
-    private static void lightningBarrage() {
-        level.playSound(null,center,SoundEvents.LIGHTNING_BOLT_THUNDER,SoundSource.HOSTILE,4.0F,0.65F);
-        for(ServerPlayer p:level.getServer().getPlayerList().getPlayers()){
-            if(p.level()!=level || !p.isAlive() || !insideArena(p.blockPosition())) continue;
-            int y=level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,p.blockPosition().getX(),p.blockPosition().getZ());
-            var bolt=EntityTypes.LIGHTNING_BOLT.create(level,EntitySpawnReason.TRIGGERED);
-            if(bolt!=null){bolt.setVisualOnly(true);bolt.setPos(p.getX(),Math.max(y,center.getY()),p.getZ());level.addFreshEntity(bolt);}
-            SkyblockPlayerState state=SkyblockPlayerState.get(p);
-            float amount=(float)(state.maximumHealth()*0.15D);
-            if(state.applyTrueDamage(amount)){p.setHealth(0);p.die(level.damageSources().lightningBolt());}
-            DamageNumberHandler.show(level,p,amount,false);
+        if (attack1Ticks == 0 && --attack1Timer <= 0
+                && attack4Ticks == 0 && attack6Ticks == 0) beginAttack1();
+        if (BOMBS.isEmpty() && --attack2Timer <= 0
+                && attack6Ticks == 0) beginAttack2();
+        if (attack4Ticks == 0 && --attack4Timer <= 0) beginAttack4();
+        if (attack5Timer > 0) attack5Timer--;
+        if (attack5Timer <= 0) {
+            spawnVoidriddenWave(target);
+            attack5Timer = random(400, 800);
         }
+        if (attack6Ticks == 0 && --attack6Timer <= 0) beginAttack6();
+        if (attack7Ticks == 0 && --attack7Timer <= 0) beginAttack7();
     }
 
-    private static void launchSwords() {
-        for(ServerPlayer p:level.getServer().getPlayerList().getPlayers()){
-            if(p.level()!=level || !p.isAlive() || !insideArena(p.blockPosition())) continue;
-            for(int i=0;i<6;i++){
-                double a=level.getRandom().nextDouble()*Math.PI*2;
-                double r=level.getRandom().nextDouble()*4.0D;
-                BlockPos pos=new BlockPos((int)Math.floor(p.getX()+Math.cos(a)*r),
-                        Math.max(center.getY()+1,p.blockPosition().getY()),(int)Math.floor(p.getZ()+Math.sin(a)*r));
-                blades.add(new Blade(pos,spawnBlade(pos),0));
-            }
-        }
-    }
-
-    private static Display.ItemDisplay spawnBlade(BlockPos pos) {
-        Display.ItemDisplay d=EntityTypes.ITEM_DISPLAY.create(level,EntitySpawnReason.COMMAND);
-        if(d==null)return null;
-        d.setItemStack(new ItemStack(Items.NETHERITE_SWORD)); d.setItemTransform(ItemDisplayContext.FIXED);
-        d.setTransformation(new Transformation(new Vector3f(),new Quaternionf(),new Vector3f(4,4,4),new Quaternionf()));
-        d.setPos(necron.getX(),necron.getY()+2,necron.getZ());
-        Vec3 end=Vec3.atCenterOf(pos); Vec3 dir=end.subtract(d.position()).normalize();
-        Quaternionf q=new Quaternionf().rotationTo(new Vector3f(0,1,0),new Vector3f((float)dir.x,(float)dir.y,(float)dir.z));
-        d.setTransformation(new Transformation(new Vector3f(),q,new Vector3f(4,4,4),new Quaternionf()));
-        level.addFreshEntity(d); return d;
-    }
-
-    private static void tickBlades() {
-        Iterator<Blade> it=blades.iterator();
-        while(it.hasNext()){
-            Blade b=it.next();
-            if(b.display==null){it.remove();continue;}
-            if(b.age<4){
-                Vec3 start=necron.position().add(0,2,0), end=Vec3.atCenterOf(b.pos);
-                double t=(b.age+1)/4.0D; Vec3 at=start.lerp(end,t);
-                b.display.setPos(at.x,at.y,at.z); b.age++;
-            }else if(b.age<604){
-                AABB box=new AABB(b.pos).inflate(2.0D);
-                for(ServerPlayer p:level.getEntitiesOfClass(ServerPlayer.class,box)){
-                    if(p.isAlive()){p.setHealth(0);p.die(level.damageSources().generic());}
-                }
-                b.age++;
-            }else{b.display.discard();it.remove();}
-        }
-    }
-
-    private static void beginLaser() {
-        laserActive=true; laserTicks=LASER_DURATION; laserAngle=0;
-        necron.getNavigation().stop(); necron.setDeltaMovement(Vec3.ZERO);
-        necron.setPos(center.getX()+0.5D,center.getY()+4.0D,center.getZ()+0.5D);
+    // Attack 1 — a smooth end-rod ring closes toward a five-block safe circle at 5 blocks/second.
+    private static void beginAttack1() {
+        safeX = center.getX() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+        safeZ = center.getZ() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+        safeRadius = Math.sqrt(2.0D) * HALF_ARENA + 2.0D;
+        attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                "NECRON'S LASER! Build at least 4 blocks high! Building is now enabled.")
-                .withStyle(s->s.withColor(0xFF5555).withBold(true)),false);
-        level.playSound(null,center,SoundEvents.BEACON_ACTIVATE,SoundSource.HOSTILE,4.0F,0.5F);
+                "NECRON: EVAPORATION! Reach the 5-block safe circle!")
+                .withStyle(s -> s.withColor(0x55FFFF).withBold(true)), false);
+        level.playSound(null, center, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.0F, 1.4F);
     }
 
-    private static void tickLaser() {
-        laserAngle += Math.PI*2.0D/160.0D;
-        double radius=HALF_ARENA-1.0D;
-        double x=center.getX()+0.5D+Math.cos(laserAngle)*radius;
-        double z=center.getZ()+0.5D+Math.sin(laserAngle)*radius;
-        // A bright, beacon-like vertical column sweeps around the arena.
-        for(double y=center.getY()+1;y<=center.getY()+ARENA_HEIGHT;y+=0.45D){
-            level.sendParticles(ParticleTypes.END_ROD,x,y,z,2,0.015D,0.02D,0.015D,0.0D);
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,x,y,z,1,0.02D,0.02D,0.02D,0.0D);
+    private static void tickAttack1() {
+        if (attack1Ticks <= 0) return;
+        double previous = safeRadius;
+        safeRadius = Math.max(2.5D, safeRadius - 0.25D);
+        double y = center.getY() + 1.15D;
+        for (int i = 0; i < 56; i++) {
+            double angle = Math.PI * 2.0D * i / 56.0D;
+            double x = safeX + Math.cos(angle) * safeRadius;
+            double z = safeZ + Math.sin(angle) * safeRadius;
+            level.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0.0D, 0.015D, 0.0D, 0.0D);
         }
-        if(laserTicks%4==0)addRadiation(new Vec3(x,center.getY()+1,z));
-        AABB hit=new AABB(x-0.8D,center.getY()+1,z-0.8D,x+0.8D,center.getY()+ARENA_HEIGHT,z+0.8D);
-        for(ServerPlayer p:level.getEntitiesOfClass(ServerPlayer.class,hit)){
-            if(p.getY() < center.getY()+5.0D){
-                SkyblockPlayerState state=SkyblockPlayerState.get(p);
-                float hurt=(float)(state.maximumHealth()*0.20D);
-                if(state.applyTrueDamage(hurt)){p.setHealth(0);p.die(level.damageSources().magic());}
-                DamageNumberHandler.show(level,p,hurt,false);
+        for (int i = 0; i < 32; i++) {
+            double angle = Math.PI * 2.0D * i / 32.0D;
+            level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                    safeX + Math.cos(angle) * 2.5D, y, safeZ + Math.sin(angle) * 2.5D,
+                    1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+        AABB arena = new AABB(center.getX() - HALF_ARENA, center.getY() + 1,
+                center.getZ() - HALF_ARENA, center.getX() + HALF_ARENA,
+                center.getY() + WALL_HEIGHT, center.getZ() + HALF_ARENA);
+        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, arena)) {
+            double distance = Math.sqrt(player.distanceToSqr(safeX, player.getY(), safeZ));
+            if (distance > 2.5D && distance >= safeRadius - 0.9D && distance <= previous + 0.9D) {
+                kill(player, "Necron's closing wall");
             }
         }
+        attack1Ticks--;
+        if (attack1Ticks <= 0) {
+            attack1Timer = random(600, 900);
+            level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.2F);
+        }
+    }
+
+    // Attack 2 — fifty falling TNT displays; the blast is custom and cannot destroy the arena.
+    private static void beginAttack2() {
+        for (int i = 0; i < TNT_COUNT; i++) {
+            double x = center.getX() - HALF_ARENA + 1.0D + level.getRandom().nextDouble() * 98.0D;
+            double z = center.getZ() - HALF_ARENA + 1.0D + level.getRandom().nextDouble() * 98.0D;
+            double y = center.getY() + 22.0D + level.getRandom().nextDouble() * 5.0D;
+            Display.ItemDisplay display = EntityTypes.ITEM_DISPLAY.create(level, EntitySpawnReason.COMMAND);
+            if (display != null) {
+                display.setItemStack(new ItemStack(Items.TNT));
+                display.setItemTransform(ItemDisplayContext.FIXED);
+                display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
+                        new Vector3f(0.75F), new Quaternionf()));
+                display.setPos(x, y, z);
+                level.addFreshEntity(display);
+            }
+            BOMBS.add(new TntBomb(x, z, y, display, 0));
+        }
+        attack2Timer = random(400, 700);
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON: TNT RAIN! Keep moving!")
+                .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
+        level.playSound(null, center, SoundEvents.TNT_PRIMED, SoundSource.HOSTILE, 3.0F, 0.8F);
+    }
+
+    private static void tickAttack2() {
+        Iterator<TntBomb> iterator = BOMBS.iterator();
+        while (iterator.hasNext()) {
+            TntBomb bomb = iterator.next();
+            bomb.age++;
+            bomb.y = Math.max(center.getY() + 1.0D, bomb.y - 0.45D);
+            if (bomb.display != null && !bomb.display.isRemoved()) {
+                bomb.display.setPos(bomb.x, bomb.y, bomb.z);
+            }
+            if (bomb.y <= center.getY() + 1.0D || bomb.age >= 80) {
+                if (bomb.display != null) bomb.display.discard();
+                detonateBomb(bomb.x, bomb.z);
+                iterator.remove();
+            }
+        }
+    }
+
+    private static void detonateBomb(double x, double z) {
+        double y = center.getY() + 1.1D;
+        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        level.sendParticles(ParticleTypes.FLAME, x, y, z, 32, 1.4D, 0.6D, 1.4D, 0.06D);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 18, 1.0D, 0.5D, 1.0D, 0.025D);
+        level.playSound(null, BlockPos.containing(x, y, z), SoundEvents.GENERIC_EXPLODE.value(),
+                SoundSource.HOSTILE, 2.0F, 0.85F);
+        AABB area = new AABB(x - 5.0D, center.getY(), z - 5.0D,
+                x + 5.0D, center.getY() + WALL_HEIGHT, z + 5.0D);
+        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area)) {
+            double dx = player.getX() - x;
+            double dz = player.getZ() - z;
+            if (dx * dx + dz * dz > 25.0D || !player.isAlive()) continue;
+            SkyblockPlayerState state = SkyblockPlayerState.get(player);
+            state.markCombat();
+            if (state.applyNecronCorruptDamage(1_000.0F)) {
+                player.setHealth(0.0F);
+                player.die(level.damageSources().magic());
+            }
+            DamageNumberHandler.show(level, player, 1_000.0F, false);
+            player.sendSystemMessage(Component.literal(
+                    "CORRUPT DAMAGE! Your healing is capped until you die or Necron is defeated.")
+                    .withStyle(s -> s.withColor(0xAA00AA)));
+        }
+    }
+
+    // Attack 3 — the actual Guardian beam sweeps around the center like a jump rope.
+    private static void beginGuardianLaser() {
+        laserActive = true;
+        laserTicks = LASER_DURATION;
+        laserAngle = 0.0D;
+        if (necron != null) {
+            necron.setPos(center.getX() + 0.5D, center.getY() + 5.0D, center.getZ() + 0.5D);
+            necron.setDeltaMovement(Vec3.ZERO);
+        }
+        laserGuardian = EntityTypes.GUARDIAN.create(level, EntitySpawnReason.MOB_SUMMONED);
+        laserTarget = EntityTypes.ARMOR_STAND.create(level, EntitySpawnReason.COMMAND);
+        if (laserGuardian != null && laserTarget != null) {
+            laserGuardian.setPos(center.getX() + 0.5D, center.getY() + 0.1D, center.getZ() + 0.5D);
+            laserGuardian.setNoGravity(true);
+            laserGuardian.setInvulnerable(true);
+            laserGuardian.setPersistenceRequired();
+            laserTarget.setInvisible(true);
+            laserTarget.setMarker(true);
+            laserTarget.setNoGravity(true);
+            laserTarget.setInvulnerable(true);
+            laserTarget.setPos(center.getX() + 14.5D, center.getY() + 1.6D, center.getZ() + 0.5D);
+            level.addFreshEntity(laserTarget);
+            level.addFreshEntity(laserGuardian);
+            laserGuardian.setTarget(laserTarget);
+        }
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON: GUARDIAN LASER! JUMP OVER THE ROTATING BEAM! Building is disabled.")
+                .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
+        level.playSound(null, center, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 4.0F, 0.55F);
+    }
+
+    private static void tickGuardianLaser() {
+        laserAngle += Math.PI * 2.0D / 160.0D;
+        double radius = 14.5D;
+        double endX = center.getX() + 0.5D + Math.cos(laserAngle) * radius;
+        double endZ = center.getZ() + 0.5D + Math.sin(laserAngle) * radius;
+        double beamY = center.getY() + 1.6D;
+        if (laserTarget != null && !laserTarget.isRemoved()) {
+            laserTarget.setPos(endX, beamY, endZ);
+        }
+        if (laserGuardian != null && !laserGuardian.isRemoved()) {
+            laserGuardian.setPos(center.getX() + 0.5D, center.getY() + 0.1D, center.getZ() + 0.5D);
+            laserGuardian.setTarget(laserTarget);
+        }
+
+        // Damage follows the same radial path as the rendered Guardian beam.
+        Vec3 start = new Vec3(center.getX() + 0.5D, beamY, center.getZ() + 0.5D);
+        Vec3 end = new Vec3(endX, beamY, endZ);
+        AABB area = new AABB(start, end).inflate(1.1D, 1.5D, 1.1D);
+        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area)) {
+            if (player.getY() > beamY + 0.45D) continue;
+            double distance = distanceToSegment(player.position().add(0.0D, 0.9D, 0.0D), start, end);
+            if (distance <= 0.85D) {
+                SkyblockPlayerState state = SkyblockPlayerState.get(player);
+                float damage = (float) (state.maximumHealth() * 0.20D / 10.0D);
+                state.markCombat();
+                if (state.applyTrueDamage(damage)) {
+                    player.setHealth(0.0F);
+                    player.die(level.damageSources().magic());
+                }
+                DamageNumberHandler.show(level, player, damage, false);
+            }
+        }
+
         laserTicks--;
-        if(laserTicks<=0){
-            laserActive=false; laserTimer=LASER_INTERVAL;
+        if (laserTicks <= 0) {
+            laserActive = false;
+            if (laserGuardian != null) laserGuardian.discard();
+            if (laserTarget != null) laserTarget.discard();
+            laserGuardian = null;
+            laserTarget = null;
+            attack3Timer = random(400, 800);
             level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                    "Necron's laser has ended. Building is disabled again.")
-                    .withStyle(s->s.withColor(0xAA00AA)),false);
-            level.playSound(null,center,SoundEvents.BEACON_DEACTIVATE,SoundSource.HOSTILE,3.0F,0.7F);
+                    "Necron's Guardian laser has ended. The other attacks resume.")
+                    .withStyle(s -> s.withColor(0x55FFFF)), false);
+            level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 3.0F, 0.8F);
         }
     }
 
-    private static void addRadiation(Vec3 pos) {
-        if(radiation.size()>12000) radiation.remove(0);
-        radiation.add(new Radiation(pos, new HashSet<>()));
-        level.sendParticles(ParticleTypes.ASH,pos.x,pos.y+0.1D,pos.z,5,0.25D,0.12D,0.25D,0.005D);
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,pos.x,pos.y+0.1D,pos.z,2,0.2D,0.1D,0.2D,0.0D);
+    private static double distanceToSegment(Vec3 point, Vec3 start, Vec3 end) {
+        Vec3 segment = end.subtract(start);
+        double lengthSquared = segment.lengthSqr();
+        if (lengthSquared < 1.0E-8D) return point.distanceTo(start);
+        double t = Math.max(0.0D, Math.min(1.0D, point.subtract(start).dot(segment) / lengthSquared));
+        return point.distanceTo(start.add(segment.scale(t)));
     }
 
-    private static void applyRadiation() {
-        for(Radiation patch:radiation){
-            AABB area=new AABB(patch.pos.x-0.65D,patch.pos.y-0.65D,patch.pos.z-0.65D,
-                    patch.pos.x+0.65D,patch.pos.y+0.65D,patch.pos.z+0.65D);
-            for(ServerPlayer p:level.getEntitiesOfClass(ServerPlayer.class,area)){
-                if(!patch.hit.add(p.getUUID()) || radiationCooldown.containsKey(p.getUUID())) continue;
-                SkyblockPlayerState.get(p).addNecronRadiationStack();
-                radiationCooldown.put(p.getUUID(),40);
-                p.sendSystemMessage(Component.literal("RADIATION! Maximum Health permanently reduced by 5%.")
-                        .withStyle(s->s.withColor(0xAA00AA).withBold(true)));
-                level.sendParticles(ParticleTypes.LARGE_SMOKE,p.getX(),p.getY()+1,p.getZ(),12,0.35D,0.4D,0.35D,0.02D);
+    // Attack 4 — a yellow/orange/red outline warns about a lethal 50x50 square.
+    private static void beginAttack4() {
+        dangerMinX = center.getX() - HALF_ARENA + level.getRandom().nextInt(51);
+        dangerMinZ = center.getZ() - HALF_ARENA + level.getRandom().nextInt(51);
+        dangerMaxX = dangerMinX + 49;
+        dangerMaxZ = dangerMinZ + 49;
+        attack4Ticks = DANGER_LIFETIME_TICKS;
+        attack4Timer = random(800, 1_000);
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON: DANGER ZONE! Leave the outlined area before it turns red!")
+                .withStyle(s -> s.withColor(0xFFFF55).withBold(true)), false);
+    }
+
+    private static void tickAttack4() {
+        if (attack4Ticks <= 0) return;
+        int elapsed = DANGER_LIFETIME_TICKS - attack4Ticks;
+        int color = elapsed < 60 ? 0xFFFF00 : elapsed < DANGER_WARNING_TICKS ? 0xFF8800 : 0xFF0000;
+        DustParticleOptions dust = new DustParticleOptions(color, 1.35F);
+        double y = center.getY() + 1.08D;
+        for (int x = dangerMinX; x <= dangerMaxX; x += 2) {
+            sendDust(dust, x + 0.5D, y, dangerMinZ + 0.5D);
+            sendDust(dust, x + 0.5D, y, dangerMaxZ + 0.5D);
+        }
+        for (int z = dangerMinZ; z <= dangerMaxZ; z += 2) {
+            sendDust(dust, dangerMinX + 0.5D, y, z + 0.5D);
+            sendDust(dust, dangerMaxX + 0.5D, y, z + 0.5D);
+        }
+        if (elapsed >= DANGER_WARNING_TICKS) {
+            AABB zone = new AABB(dangerMinX, center.getY() + 1, dangerMinZ,
+                    dangerMaxX + 1.0D, center.getY() + WALL_HEIGHT, dangerMaxZ + 1.0D);
+            for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, zone)) {
+                if (player.isAlive()) kill(player, "Necron's danger zone");
             }
         }
+        attack4Ticks--;
+        if (attack4Ticks <= 0) {
+            level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
+        }
     }
 
-    public static void recordDirectDamage(LivingEntity target,ServerPlayer attacker,double entityDamage) {
-        if(necron==null || target!=necron || entityDamage<=0)return;
-        damage.merge(attacker.getUUID(),entityDamage*HP_PER_ENTITY_HP,Double::sum);
-        participants.add(attacker.getUUID());
+    private static void sendDust(DustParticleOptions dust, double x, double y, double z) {
+        level.sendParticles(dust, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+    }
+
+    // Attack 5 — summon the existing custom Voidridden mobs.
+    private static void spawnVoidriddenWave(ServerPlayer target) {
+        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_SKELETON, 10, target);
+        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_SPIDER, 8, target);
+        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_ZOMBIE, 5, target);
+        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_ENDERMAN, 2, target);
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON: VOIDRIDDEN WAVE! 25 minions have entered the arena.")
+                .withStyle(s -> s.withColor(0xAA00AA).withBold(true)), false);
+    }
+
+    private static void spawnVoidridden(EntityType<? extends net.minecraft.world.entity.Mob> type,
+                                        int count, ServerPlayer target) {
+        for (int i = 0; i < count; i++) {
+            net.minecraft.world.entity.Mob mob = type.create(level, EntitySpawnReason.MOB_SUMMONED);
+            if (mob == null) continue;
+            double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
+            double radius = 12.0D + level.getRandom().nextDouble() * 28.0D;
+            double x = center.getX() + 0.5D + Math.cos(angle) * radius;
+            double z = center.getZ() + 0.5D + Math.sin(angle) * radius;
+            mob.setPos(x, center.getY() + 1.0D, z);
+            mob.setPersistenceRequired();
+            if (target != null) mob.setTarget(target);
+            if (level.addFreshEntity(mob)) MINIONS.add(mob.getUUID());
+        }
+    }
+
+    // Attack 6 — a moving flame wall with a 3x3 bottom gap; each player can be hit once per wall.
+    private static void beginAttack6() {
+        flameSide = level.getRandom().nextInt(4);
+        flameGap = level.getRandom().nextInt(41) - 20;
+        flameOffset = 0.0D;
+        attack6Ticks = 200;
+        FLAME_HIT_PLAYERS.clear();
+        attack6Timer = 1_200;
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON: FLAME WALL! Find the 3x3 opening at the bottom!")
+                .withStyle(s -> s.withColor(0xFF8800).withBold(true)), false);
+        level.playSound(null, center, SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 3.0F, 0.7F);
+    }
+
+    private static void tickAttack6() {
+        if (attack6Ticks <= 0) return;
+        double plane;
+        boolean verticalX = flameSide < 2;
+        if (flameSide == 0 || flameSide == 2) plane = center.getX() - HALF_ARENA + flameOffset;
+        else if (flameSide == 1) plane = center.getX() + HALF_ARENA - flameOffset;
+        else plane = center.getZ() - HALF_ARENA + flameOffset;
+
+        double yBottom = center.getY() + 1.0D;
+        for (int along = -HALF_ARENA + 1; along < HALF_ARENA - 1; along += 2) {
+            if (Math.abs(along - flameGap) < 2) continue;
+            for (int height = 0; height <= 10; height += 2) {
+                double y = yBottom + height;
+                if (height < 3 && Math.abs(along - flameGap) < 2) continue;
+                double x = verticalX ? plane : center.getX() + along + 0.5D;
+                double z = verticalX ? center.getZ() + along + 0.5D : plane;
+                level.sendParticles(ParticleTypes.FLAME, x, y, z, 2, 0.08D, 0.12D, 0.08D, 0.015D);
+                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 1, 0.04D, 0.08D, 0.04D, 0.0D);
+            }
+        }
+
+        AABB wall = verticalX
+                ? new AABB(plane - 1.0D, center.getY() + 1, center.getZ() - HALF_ARENA,
+                    plane + 1.0D, center.getY() + 12, center.getZ() + HALF_ARENA)
+                : new AABB(center.getX() - HALF_ARENA, center.getY() + 1, plane - 1.0D,
+                    center.getX() + HALF_ARENA, center.getY() + 12, plane + 1.0D);
+        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, wall)) {
+            if (FLAME_HIT_PLAYERS.contains(player.getUUID())) continue;
+            double along = verticalX ? player.getZ() - center.getZ() : player.getX() - center.getX();
+            boolean inGap = Math.abs(along - flameGap) < 1.5D
+                    && player.getY() <= center.getY() + 3.0D;
+            if (!inGap) {
+                FLAME_HIT_PLAYERS.add(player.getUUID());
+                SkyblockPlayerState.get(player).addNecronFlameWallStack();
+                player.sendSystemMessage(Component.literal(
+                        "FLAME WALL HIT! Your maximum Health has been reduced by 10% for this fight.")
+                        .withStyle(s -> s.withColor(0xFF5555).withBold(true)));
+                level.playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
+                        SoundSource.HOSTILE, 1.0F, 0.6F);
+            }
+        }
+
+        flameOffset += 0.5D;
+        attack6Ticks--;
+        if (attack6Ticks <= 0) FLAME_HIT_PLAYERS.clear();
+    }
+
+    // Attack 7 — a ten-second stream of real Wither Skulls aimed at the current player target.
+    private static void beginAttack7() {
+        attack7Ticks = 200;
+        skullFireTicks = 0;
+        attack7Timer = random(200, 600);
+        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
+                "NECRON: WITHER SKULL BARRAGE! Keep moving!")
+                .withStyle(s -> s.withColor(0xAA00AA).withBold(true)), false);
+        level.playSound(null, center, SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 3.0F, 0.65F);
+    }
+
+    private static void tickAttack7(ServerPlayer target) {
+        if (attack7Ticks <= 0) return;
+        if (target != null) {
+            Vec3 start = necron.position().add(0.0D, 1.6D, 0.0D);
+            Vec3 direction = target.getEyePosition().subtract(start).normalize();
+            for (double d = 0.0D; d < 18.0D; d += 1.0D) {
+                Vec3 p = start.add(direction.scale(d));
+                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y, p.z,
+                        1, 0.015D, 0.015D, 0.015D, 0.0D);
+            }
+            if (++skullFireTicks >= 5) {
+                skullFireTicks = 0;
+                WitherSkull skull = EntityTypes.WITHER_SKULL.create(level, EntitySpawnReason.MOB_SUMMONED);
+                if (skull != null) {
+                    skull.setOwner(necron);
+                    skull.setPos(start.x, start.y, start.z);
+                    skull.setDeltaMovement(direction.scale(1.15D));
+                    if (level.addFreshEntity(skull)) PROJECTILES.add(skull.getUUID());
+                }
+            }
+        }
+        attack7Ticks--;
+    }
+
+    private static void kill(ServerPlayer player, String cause) {
+        if (!player.isAlive()) return;
+        SkyblockPlayerState state = SkyblockPlayerState.get(player);
+        state.applyTrueDamage(state.maximumHealth() / 10.0F + 1.0F);
+        player.setHealth(0.0F);
+        player.die(level.damageSources().magic());
+        player.sendSystemMessage(Component.literal("You were killed by " + cause + ".")
+                .withStyle(s -> s.withColor(0xFF5555)));
+    }
+
+    public static void recordDirectDamage(LivingEntity target, ServerPlayer attacker, double entityDamage) {
+        if (necron == null || target != necron || entityDamage <= 0.0D) return;
+        PARTICIPANTS.add(attacker.getUUID());
     }
 
     private static boolean allFightersDead(MinecraftServer server) {
-        if (participants.isEmpty()) return false;
-        for (UUID id : participants) {
+        if (PARTICIPANTS.isEmpty()) return false;
+        for (UUID id : PARTICIPANTS) {
             ServerPlayer fighter = server.getPlayerList().getPlayer(id);
             if (fighter != null && fighter.isAlive()) return false;
         }
         return true;
     }
 
-    private static void abortBecauseAllFightersDied() {
+    private static void finish(boolean defeated) {
         if (level == null) return;
         BAR.removeAllPlayers();
-        for (UUID id : minions) { Entity e = level.getEntity(id); if (e != null) e.discard(); }
-        for (Blade b : blades) if (b.display != null) b.display.discard();
-        if (necron != null) necron.discard();
-        level.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("All players fighting Necron have been defeated. The encounter has ended."), false);
-        clear();
+        for (UUID id : MINIONS) {
+            Entity entity = level.getEntity(id);
+            if (entity != null) entity.discard();
+        }
+        for (UUID id : PROJECTILES) {
+            Entity entity = level.getEntity(id);
+            if (entity != null) entity.discard();
+        }
+        for (TntBomb bomb : BOMBS) {
+            if (bomb.display != null) bomb.display.discard();
+        }
+        if (laserGuardian != null) laserGuardian.discard();
+        if (laserTarget != null) laserTarget.discard();
+        SkyblockPlayerState.clearNecronEncounterEffectsForAllPlayers();
+        if (defeated) {
+            level.getServer().getPlayerList().broadcastSystemMessage(
+                    Component.literal("NECRON HAS BEEN DEFEATED! The arena is disappearing.")
+                            .withStyle(s -> s.withColor(0x55FF55).withBold(true)), false);
+            level.playSound(null, center, SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 4.0F, 0.55F);
+        } else {
+            level.getServer().getPlayerList().broadcastSystemMessage(
+                    Component.literal("All players fighting Necron have been defeated. The encounter has ended.")
+                            .withStyle(s -> s.withColor(0xFF5555)), false);
+        }
+        restoreArena();
+        clearState();
     }
 
-    private static void finish() {
-        if(level==null)return;
-        BAR.removeAllPlayers();
-        for(UUID id:minions){Entity e=level.getEntity(id);if(e!=null)e.discard();}
-        for(Blade b:blades)if(b.display!=null)b.display.discard();
-        level.getServer().getPlayerList().broadcastSystemMessage(Component.literal("Necron has been defeated!"),false);
-        level.playSound(null,center,SoundEvents.WITHER_DEATH,SoundSource.HOSTILE,4.0F,0.5F);
-        clear();
+    private static void clearState() {
+        necron = null;
+        level = null;
+        center = null;
+        testMode = false;
+        laserActive = false;
+        laserTicks = 0;
+        laserGuardian = null;
+        laserTarget = null;
+        attack1Ticks = attack4Ticks = attack6Ticks = attack7Ticks = 0;
+        attack1Timer = attack2Timer = attack3Timer = attack4Timer = 0;
+        attack5Timer = attack6Timer = attack7Timer = 0;
+        PARTICIPANTS.clear();
+        MINIONS.clear();
+        PROJECTILES.clear();
+        FLAME_HIT_PLAYERS.clear();
+        BOMBS.clear();
+        ORIGINAL_ARENA.clear();
     }
 
-    private static void clear() {
-        necron=null;level=null;center=null;testMode=false;laserActive=false;openingNukeTicks=0;
-        damage.clear();participants.clear();radiationCooldown.clear();minions.clear();blades.clear();radiation.clear();
-    }
+    private static final class TntBomb {
+        final double x;
+        final double z;
+        final Display.ItemDisplay display;
+        double y;
+        int age;
 
-    private static final class Blade {
-        final BlockPos pos; final Display.ItemDisplay display; int age;
-        Blade(BlockPos pos,Display.ItemDisplay display,int age){this.pos=pos;this.display=display;this.age=age;}
-    }
-    private static final class Radiation {
-        final Vec3 pos; final Set<UUID> hit;
-        Radiation(Vec3 pos,Set<UUID> hit){this.pos=pos;this.hit=hit;}
+        TntBomb(double x, double z, double y, Display.ItemDisplay display, int age) {
+            this.x = x;
+            this.z = z;
+            this.y = y;
+            this.display = display;
+            this.age = age;
+        }
     }
 }
