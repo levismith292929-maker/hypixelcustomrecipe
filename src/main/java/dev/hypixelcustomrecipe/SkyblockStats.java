@@ -50,12 +50,11 @@ public record SkyblockStats(
     }
 
     /**
-     * Matches the datapack's integer scoreboard calculation:
-     * reductionPercent = min(100, (Defense + 50) / 100).
+     * Defense uses the tuned diminishing-returns curve. At 13,000 Defense,
+     * damage reduction is 30%; additional Defense continues scaling smoothly.
      */
     public double damageReduction() {
-        int reductionPercent = Math.min(100, (defense + 50) / 100);
-        return reductionPercent / 100.0;
+        return defense / (defense + 30333.3333333333D);
     }
 
     public double applyDefense(double incomingDamage) {
