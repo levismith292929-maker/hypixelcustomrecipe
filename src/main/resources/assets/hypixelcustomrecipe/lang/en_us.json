@@ -5,5 +5,11 @@
   "entity.hypixelcustomrecipe.voidridden_spider": "Voidridden Spider",
   "entity.hypixelcustomrecipe.voidridden_creeper": "Voidridden Creeper",
   "entity.hypixelcustomrecipe.voidball": "Voidball",
-  "effect.hypixelcustomrecipe.void": "Void"
+  "effect.hypixelcustomrecipe.void": "Void",
+  "item.hypixel.void_shard": "Void Shard",
+  "item.hypixel.fine_void_shard": "Fine Void Shard",
+  "item.hypixel.pure_void_shard": "Pure Void Shard",
+  "item.hypixel.soul_shard": "Soul Shard",
+  "item.hypixel.soul": "Soul",
+  "item.hypixel.soul_blade": "Soul Blade"
 }
