@@ -304,7 +304,7 @@ public final class StormEncounter {
             float damage = (float) (state.maximumHealth() * 0.10D);
             boolean defeated = state.applyTrueDamage(damage);
             DamageNumberHandler.show(level, player, damage, false);
-            player.sendSystemMessage(Component.literal("Storm's lightning hit you for 10% of your maximum Health!")
+            player.sendSystemMessage(Component.literal("Storm Evaporated you")
                     .withStyle(style -> style.withColor(0x5555FF)));
             if (defeated) {
                 player.setHealth(0.0F);
