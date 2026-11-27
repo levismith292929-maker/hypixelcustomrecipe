@@ -314,7 +314,7 @@ public final class SkyblockAbilityHandler {
 
     private static void useScytheAbility(ServerPlayer player, boolean soulBlade) {
         String abilityId = soulBlade ? "soul_blade" : "necrons_scythe";
-        if (!beginAbility(player, abilityId, 1, 1)) return;
+        if (!beginAbility(player, abilityId, soulBlade ? 100 : 1, 1)) return;
         ServerLevel level = (ServerLevel) player.level();
         Vec3 direction = player.getLookAngle().normalize();
         Vec3 origin = player.getEyePosition().add(0.0, -0.8, 0.0);
