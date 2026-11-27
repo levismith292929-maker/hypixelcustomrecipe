@@ -113,9 +113,6 @@ public final class MaxorEncounter {
                 finishSuccessfully();
                 return;
             }
-            if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
-                abortBecausePlayerDied(player);
-            }
         });
 
         ServerTickEvents.END_SERVER_TICK.register(MaxorEncounter::tick);
@@ -165,7 +162,6 @@ public final class MaxorEncounter {
         LASER_AFFECTED.clear();
         LASER_HIT_COOLDOWNS.clear();
         MINIONS.clear();
-        PARTICIPANTS.add(starter.getUUID());
         BOSS_BAR.setName(Component.literal("Maxor"));
         BOSS_BAR.setProgress(1.0F);
         BOSS_BAR.addPlayer(starter);
@@ -181,6 +177,10 @@ public final class MaxorEncounter {
             return;
         }
         if (!maxor.isAlive() || maxor.isRemoved()) {
+            return;
+        }
+        if (allFightersDead(server)) {
+            abortBecauseAllFightersDied();
             return;
         }
 
@@ -262,7 +262,6 @@ public final class MaxorEncounter {
         if (!LASER_HIT_COOLDOWNS.containsKey(id)) {
             SkyblockPlayerState.get(target).addMaxorLaserStack();
             LASER_AFFECTED.add(id);
-            PARTICIPANTS.add(id);
             LASER_HIT_COOLDOWNS.put(id, 100);
             target.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
                     .withStyle(style -> style.withColor(0xAA00AA)));
@@ -360,10 +359,17 @@ public final class MaxorEncounter {
         clearEncounter();
     }
 
-    private static void abortBecausePlayerDied(ServerPlayer deadPlayer) {
-        if (maxor == null) {
-            return;
+    private static boolean allFightersDead(MinecraftServer server) {
+        if (PARTICIPANTS.isEmpty()) return false;
+        for (UUID id : PARTICIPANTS) {
+            ServerPlayer fighter = server.getPlayerList().getPlayer(id);
+            if (fighter != null && fighter.isAlive()) return false;
         }
+        return true;
+    }
+
+    private static void abortBecauseAllFightersDied() {
+        if (maxor == null) return;
         MinecraftServer server = encounterLevel.getServer();
         restoreLaserHealth(server);
         for (UUID uuid : MINIONS) {
@@ -385,8 +391,7 @@ public final class MaxorEncounter {
                     .withStyle(style -> style.withColor(0xFF5555)));
         }
         server.getPlayerList().broadcastSystemMessage(
-                Component.literal(deadPlayer.getName().getString()
-                        + " died. The Maxor encounter has ended."),
+                Component.literal("All players fighting Maxor have been defeated. The encounter has ended."),
                 false);
         clearEncounter();
     }
@@ -413,7 +418,7 @@ public final class MaxorEncounter {
             return;
         }
         if (GoldorEncounter.isGoldor(target)) {
-            GoldorEncounter.recordDirectDamage(target, entityDamage);
+            GoldorEncounter.recordDirectDamage(target, attacker, entityDamage);
             return;
         }
         StormEncounter.recordDirectDamage(target, attacker, entityDamage);
