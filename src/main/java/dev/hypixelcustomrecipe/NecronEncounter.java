@@ -240,7 +240,7 @@ public final class NecronEncounter {
         d.setPos(necron.getX(),necron.getY()+2,necron.getZ());
         Vec3 end=Vec3.atCenterOf(pos); Vec3 dir=end.subtract(d.position()).normalize();
         Quaternionf q=new Quaternionf().rotationTo(new Vector3f(0,1,0),new Vector3f((float)dir.x,(float)dir.y,(float)dir.z));
-        d.setTransformation(new Display.Transformation(new Vector3f(),q,new Vector3f(4,4,4),new Quaternionf()));
+        d.setTransformation(new Transformation(new Vector3f(),q,new Vector3f(4,4,4),new Quaternionf()));
         level.addFreshEntity(d); return d;
     }
 
