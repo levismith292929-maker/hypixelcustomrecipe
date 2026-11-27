@@ -289,17 +289,17 @@ public final class NecronEncounter {
             return;
         }
 
+        if (attack4Ticks == 0 && attack4Timer <= 0) beginAttack4();
+        if (attack6Ticks == 0 && attack6Timer <= 0) beginAttack6();
         if (attack1Ticks == 0 && --attack1Timer <= 0
                 && attack4Ticks == 0 && attack6Ticks == 0) beginAttack1();
         if (BOMBS.isEmpty() && attack2Timer <= 0
                 && attack6Ticks == 0) beginAttack2();
-        if (attack4Ticks == 0 && attack4Timer <= 0) beginAttack4();
         if (attack5Timer > 0) attack5Timer--;
         if (attack5Timer <= 0) {
             spawnVoidriddenWave(target);
             attack5Timer = random(400, 800);
         }
-        if (attack6Ticks == 0 && attack6Timer <= 0) beginAttack6();
         if (attack7Ticks == 0 && attack7Timer <= 0) beginAttack7();
     }
 
