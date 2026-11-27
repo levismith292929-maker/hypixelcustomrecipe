@@ -80,6 +80,7 @@ public final class SkyblockPlayerState {
     private int astraeaOrbTicks;
     private int currentHealth;
     private int maximumHealth;
+    private int maxorLaserStacks;
     private boolean healthInitialized;
     private int combatTicksRemaining;
     private double healthRegenerationProgress;
@@ -145,6 +146,7 @@ public final class SkyblockPlayerState {
     }
 
     private void resetAfterRespawn(ServerPlayer player) {
+        maxorLaserStacks = 0;
         if (maximumHealth <= 0) {
             maximumHealth = SkyblockStats.BASE.health();
         }
@@ -164,6 +166,8 @@ public final class SkyblockPlayerState {
     public Pet activePet() { return activePet; }
     public int currentHealth() { return currentHealth; }
     public int maximumHealth() { return maximumHealth; }
+    public void addMaxorLaserStack() { maxorLaserStacks++; }
+    public void clearMaxorLaserStacks() { maxorLaserStacks = 0; }
     public int level() { return skyblockLevel; }
     public int levelExperience() { return levelExperience; }
     public int levelExperienceRequired() { return 50; }
@@ -573,7 +577,7 @@ public final class SkyblockPlayerState {
         stats = SkyblockLevelBonuses.apply(AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel);
 
-        int recalculatedMaximum = Math.max(1, stats.health());
+        int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health() * Math.pow(0.98D, maxorLaserStacks)));
         if (!healthInitialized) {
             maximumHealth = recalculatedMaximum;
             currentHealth = maximumHealth;
