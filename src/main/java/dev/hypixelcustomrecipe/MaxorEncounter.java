@@ -217,7 +217,7 @@ public final class MaxorEncounter {
         Vec3 step = delta.scale(1.0D / count);
         Vec3 point = start;
         for (int i = 0; i <= count; i++) {
-            encounterLevel.sendParticles(ParticleTypes.DRAGON_BREATH,
+            encounterLevel.sendParticles(ParticleTypes.WITCH,
                     point.x, point.y, point.z, 2, 0.04D, 0.04D, 0.04D, 0.0D);
             point = point.add(step);
         }
