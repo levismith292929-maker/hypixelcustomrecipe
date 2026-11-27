@@ -73,6 +73,7 @@ public final class StormEncounter {
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
             if (storm != null && entity == storm) {
                 finishSuccessfully();
+            }
         });
 
         ServerTickEvents.END_SERVER_TICK.register(StormEncounter::tick);
