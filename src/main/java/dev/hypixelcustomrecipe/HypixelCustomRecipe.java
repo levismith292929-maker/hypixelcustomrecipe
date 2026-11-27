@@ -38,6 +38,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         VoidriddenEffects.initialize();
         VoidriddenMobs.initialize();
         VoidTrailManager.initialize();
+        MaxorEncounter.initialize();
         LOGGER.info("Registered the migrated SkyBlock item, recipe, stat, and ability systems. Holy Dragon content is excluded.");
     }
 }
