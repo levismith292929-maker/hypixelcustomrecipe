@@ -57,6 +57,7 @@ public final class MaxorEncounter {
     // Vanilla Withers regenerate naturally; remember the last legitimate HP value
     // so Maxor cannot recover health during the encounter.
     private static float lastKnownHealth;
+    private static boolean testMode;
     private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final List<UUID> MINIONS = new ArrayList<>();
@@ -88,7 +89,7 @@ public final class MaxorEncounter {
                         .withStyle(style -> style.withColor(0xFF5555)));
                 return InteractionResult.FAIL;
             }
-            start(serverPlayer, serverLevel);
+            start(serverPlayer, serverLevel, false);
             if (!serverPlayer.getAbilities().instabuild) {
                 held.shrink(1);
             }
@@ -118,12 +119,17 @@ public final class MaxorEncounter {
         ServerTickEvents.END_SERVER_TICK.register(MaxorEncounter::tick);
     }
 
-    private static void start(ServerPlayer starter, ServerLevel level) {
+    public static boolean summonForTesting(ServerPlayer player) {
+        if (maxor != null && maxor.isAlive()) return false;
+        return start(player, (ServerLevel) player.level(), true);
+    }
+
+    private static boolean start(ServerPlayer starter, ServerLevel level, boolean testing) {
         WitherBoss boss = EntityTypes.WITHER.create(level, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) {
             starter.sendSystemMessage(Component.literal("Maxor could not be summoned here.")
                     .withStyle(style -> style.withColor(0xFF5555)));
-            return;
+            return false;
         }
 
         BlockPos spawnPos = starter.blockPosition().relative(starter.getDirection(), 5);
@@ -142,10 +148,11 @@ public final class MaxorEncounter {
         if (!level.addFreshEntity(boss)) {
             starter.sendSystemMessage(Component.literal("Maxor could not be spawned here.")
                     .withStyle(style -> style.withColor(0xFF5555)));
-            return;
+            return false;
         }
 
         maxor = boss;
+        testMode = testing;
         encounterLevel = level;
         altarOwner = starter.getUUID();
         minionSpawnTimer = MINION_INTERVAL_TICKS;
@@ -162,8 +169,9 @@ public final class MaxorEncounter {
         BOSS_BAR.addPlayer(starter);
         level.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN,
                 SoundSource.HOSTILE, 2.0F, 0.7F);
-        starter.sendSystemMessage(Component.literal("MAXOR HAS AWAKENED!")
+        starter.sendSystemMessage(Component.literal(testing ? "MAXOR TEST SUMMONED!" : "MAXOR HAS AWAKENED!")
                 .withStyle(style -> style.withColor(0xAA00AA).withBold(true)));
+        return true;
     }
 
     private static void tick(MinecraftServer server) {
@@ -314,17 +322,16 @@ public final class MaxorEncounter {
         MinecraftServer server = encounterLevel.getServer();
         restoreLaserHealth(server);
         int rewarded = 0;
-        for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
-            if (entry.getValue() < REWARD_THRESHOLD) {
-                continue;
-            }
-            ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-            if (player != null) {
-                // 50 SkyBlock XP per level: 5,000 XP grants exactly 100 levels.
-                SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
-                player.sendSystemMessage(Component.literal("Maxor defeated! +100 Player Levels")
-                        .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
-                rewarded++;
+        if (!testMode) {
+            for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
+                if (entry.getValue() < REWARD_THRESHOLD) continue;
+                ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+                if (player != null) {
+                    SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
+                    player.sendSystemMessage(Component.literal("Maxor defeated! +100 Player Levels")
+                            .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
+                    rewarded++;
+                }
             }
         }
         for (UUID uuid : MINIONS) {
@@ -341,8 +348,13 @@ public final class MaxorEncounter {
                 false);
         // Preserve the encounter location, owner, and participants for Storm's
         // five-minute intermission before clearing Maxor's phase state.
-        StormEncounter.beginBreak(encounterLevel, maxor.blockPosition(), altarOwner,
-                Set.copyOf(PARTICIPANTS));
+        if (testMode) {
+            encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                    Component.literal("Maxor test encounter completed. No progression or rewards were triggered."), false);
+        } else {
+            StormEncounter.beginBreak(encounterLevel, maxor.blockPosition(), altarOwner,
+                    Set.copyOf(PARTICIPANTS));
+        }
         clearEncounter();
     }
 
@@ -361,7 +373,7 @@ public final class MaxorEncounter {
         maxor.discard();
         BOSS_BAR.removeAllPlayers();
 
-        ServerPlayer owner = server.getPlayerList().getPlayer(altarOwner);
+        ServerPlayer owner = testMode ? null : server.getPlayerList().getPlayer(altarOwner);
         if (owner != null) {
             ItemStack altar = new ItemStack(ModItems.WITHER_ALTAR);
             if (!owner.getInventory().add(altar)) {
@@ -404,6 +416,7 @@ public final class MaxorEncounter {
 
     private static void clearEncounter() {
         maxor = null;
+        testMode = false;
         lastKnownHealth = 0.0F;
         encounterLevel = null;
         altarOwner = null;
