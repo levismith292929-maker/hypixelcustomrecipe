@@ -156,13 +156,13 @@ public final class NecronEncounter {
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
         BOMBS.clear();
-        attack1Timer = random(600, 900);
-        attack2Timer = random(400, 700);
-        attack3Timer = random(400, 800);
-        attack4Timer = random(800, 1_000);
-        attack5Timer = random(400, 800);
-        attack6Timer = 1_200;
-        attack7Timer = random(200, 600);
+        attack1Timer = random(300, 450);
+        attack2Timer = random(200, 350);
+        attack3Timer = random(200, 400);
+        attack4Timer = random(400, 500);
+        attack5Timer = random(200, 400);
+        attack6Timer = 600;
+        attack7Timer = random(100, 160);
         laserActive = false;
         laserTicks = 0;
         attack1Ticks = attack4Ticks = attack6Ticks = attack7Ticks = 0;
@@ -263,7 +263,7 @@ public final class NecronEncounter {
         });
 
         if (laserActive) {
-            tickGuardianLaser();
+            tickLaser();
         } else {
             tickOtherAttacks(target);
         }
@@ -298,7 +298,7 @@ public final class NecronEncounter {
 
         if (attack3Timer > 0) attack3Timer--;
         if (attack3Timer <= 0 && attack4Ticks == 0) {
-            beginGuardianLaser();
+            beginLaser();
             return;
         }
 
@@ -311,7 +311,7 @@ public final class NecronEncounter {
         if (attack5Timer > 0) attack5Timer--;
         if (attack5Timer <= 0) {
             spawnVoidriddenWave(target);
-            attack5Timer = random(400, 800);
+            attack5Timer = random(200, 400);
         }
         if (attack7Ticks == 0 && attack7Timer <= 0) beginAttack7();
     }
@@ -326,7 +326,7 @@ public final class NecronEncounter {
                 Math.abs(safeZ - (center.getZ() + HALF_ARENA)));
         safeRadius = Math.sqrt(farX * farX + farZ * farZ) + 2.0D;
         attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
-        attack1Timer = random(600, 900);
+        attack1Timer = random(300, 450);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: EVAPORATION! Reach the 5-block safe circle!")
                 .withStyle(s -> s.withColor(0x55FFFF).withBold(true)), false);
@@ -385,7 +385,7 @@ public final class NecronEncounter {
             }
             BOMBS.add(new TntBomb(x, z, y, display, 0));
         }
-        attack2Timer = random(400, 700);
+        attack2Timer = random(200, 350);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: TNT RAIN! Keep moving!")
                 .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
@@ -448,11 +448,11 @@ public final class NecronEncounter {
         }
     }
 
-    // Attack 3 — the actual Guardian beam sweeps around the center like a jump rope.
-    private static void beginGuardianLaser() {
+    // Attack 3 — Laser: uses the actual Guardian beam and sweeps around the center like a jump rope.
+    private static void beginLaser() {
         laserActive = true;
         laserTicks = LASER_DURATION;
-        attack3Timer = random(400, 800);
+        attack3Timer = random(200, 400);
         laserAngle = 0.0D;
         if (necron != null) {
             necron.setPos(center.getX() + 0.5D, center.getY() + 5.0D, center.getZ() + 0.5D);
@@ -474,12 +474,12 @@ public final class NecronEncounter {
             laserGuardian.setTarget(laserTarget);
         }
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                "NECRON: GUARDIAN LASER! JUMP OVER THE ROTATING BEAM! Building is disabled.")
+                "NECRON: LASER! JUMP OVER THE ROTATING BEAM! Building is disabled.")
                 .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
         level.playSound(null, center, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 4.0F, 0.55F);
     }
 
-    private static void tickGuardianLaser() {
+    private static void tickLaser() {
         if (attack3Timer > 0) attack3Timer--;
         laserAngle += Math.PI * 2.0D / 160.0D;
         double radius = 48.0D;
@@ -521,7 +521,7 @@ public final class NecronEncounter {
             laserGuardian = null;
             laserTarget = null;
             level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                    "Necron's Guardian laser has ended. The other attacks resume.")
+                    "Necron's laser has ended. The other attacks resume.")
                     .withStyle(s -> s.withColor(0x55FFFF)), false);
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 3.0F, 0.8F);
         }
@@ -570,7 +570,7 @@ public final class NecronEncounter {
         }
         attack4Ticks--;
         if (attack4Ticks <= 0) {
-            attack4Timer = random(800, 1_000);
+            attack4Timer = random(400, 500);
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
         }
     }
@@ -613,7 +613,7 @@ public final class NecronEncounter {
         flameOffset = 0.0D;
         attack6Ticks = 200;
         FLAME_HIT_PLAYERS.clear();
-        attack6Timer = 1_200;
+        attack6Timer = 600;
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: FLAME WALL! Find the 3x3 opening at the bottom!")
                 .withStyle(s -> s.withColor(0xFF8800).withBold(true)), false);
@@ -672,7 +672,7 @@ public final class NecronEncounter {
     private static void beginAttack7() {
         attack7Ticks = 200;
         skullFireTicks = 0;
-        attack7Timer = random(200, 600);
+        attack7Timer = random(100, 160);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: WITHER SKULL BARRAGE! Keep moving!")
                 .withStyle(s -> s.withColor(0xAA00AA).withBold(true)), false);
