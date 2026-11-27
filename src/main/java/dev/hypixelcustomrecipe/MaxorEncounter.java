@@ -406,7 +406,7 @@ public final class MaxorEncounter {
             recordDamage(attacker, entityDamage);
             return;
         }
-        StormEncounter.recordDirectDamage(target, attacker, entityDamage);
+        if (GoldorEncounter.isGoldor(target)) {\n            GoldorEncounter.recordDirectDamage(target, entityDamage);\n            return;\n        }\n        StormEncounter.recordDirectDamage(target, attacker, entityDamage);
     }
 
     private static void recordDamage(ServerPlayer player, double entityDamage) {
