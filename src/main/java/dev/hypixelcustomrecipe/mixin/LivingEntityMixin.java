@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
@@ -45,6 +46,27 @@ public abstract class LivingEntityMixin {
 
     @Unique
     private float hypixelcustomrecipe$damageNumberAmount;
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void hypixelcustomrecipe$voidriddenEscapeBoats(CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        if (!(entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenZombie
+                || entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSkeleton
+                || entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEnderman
+                || entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSpider
+                || entity instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenCreeper)) {
+            return;
+        }
+
+        net.minecraft.world.entity.Entity vehicle = entity.getVehicle();
+        if (vehicle == null) return;
+        String vehicleId = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+                .getKey(vehicle.getType()).getPath();
+        if (vehicleId.endsWith("_boat") || vehicleId.endsWith("_chest_boat")
+                || vehicleId.endsWith("_raft")) {
+            entity.stopRiding();
+        }
+    }
 
     @Inject(method = "getMaxHealth", at = @At("RETURN"), cancellable = true)
     private void hypixelcustomrecipe$useVoidriddenMaxHealth(
