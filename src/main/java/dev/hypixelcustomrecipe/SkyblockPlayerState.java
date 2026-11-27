@@ -82,6 +82,8 @@ public final class SkyblockPlayerState {
     private int maximumHealth;
     private int maxorLaserStacks;
     private int necronRadiationStacks;
+    private int necronCorruptDamage;
+    private int necronFlameWallStacks;
     private boolean healthInitialized;
     private int combatTicksRemaining;
     private double healthRegenerationProgress;
@@ -148,6 +150,8 @@ public final class SkyblockPlayerState {
 
     private void resetAfterRespawn(ServerPlayer player) {
         maxorLaserStacks = 0;
+        necronCorruptDamage = 0;
+        necronFlameWallStacks = 0;
         if (maximumHealth <= 0) {
             maximumHealth = SkyblockStats.BASE.health();
         }
@@ -171,6 +175,26 @@ public final class SkyblockPlayerState {
     public void clearMaxorLaserStacks() { maxorLaserStacks = 0; }
     /** Radiation permanently reduces maximum Health by 5% per exposure. */
     public void addNecronRadiationStack() { necronRadiationStacks++; }
+    /** Corrupt damage permanently lowers the encounter's healing ceiling until reset. */
+    public boolean applyNecronCorruptDamage(float damage) {
+        int effective = (int) Math.round(Math.max(0.0F, damage) * 10.0D);
+        if (effective > 0) {
+            necronCorruptDamage = (int) Math.min(Integer.MAX_VALUE,
+                    (long) necronCorruptDamage + effective);
+            currentHealth = Math.max(0, currentHealth - effective);
+        }
+        return currentHealth <= 0;
+    }
+    /** One flame-wall hit permanently lowers maximum Health by ten percent for this fight. */
+    public void addNecronFlameWallStack() { necronFlameWallStacks++; }
+    public int necronHealingCap() { return Math.max(0, maximumHealth - necronCorruptDamage); }
+    public void clearNecronEncounterEffects() {
+        necronCorruptDamage = 0;
+        necronFlameWallStacks = 0;
+    }
+    public static void clearNecronEncounterEffectsForAllPlayers() {
+        for (SkyblockPlayerState state : PLAYERS.values()) state.clearNecronEncounterEffects();
+    }
     public static void clearMaxorLaserStacksFor(UUID playerId) {
         SkyblockPlayerState state = PLAYERS.get(playerId);
         if (state != null) state.clearMaxorLaserStacks();
@@ -319,7 +343,7 @@ public final class SkyblockPlayerState {
         // callbacks may restore Health; regeneration and healing cannot revive
         // a player while the server is processing death.
         if (amount > 0 && currentHealth > 0) {
-            currentHealth = Math.min(maximumHealth, currentHealth + amount);
+            currentHealth = Math.min(necronHealingCap(), currentHealth + amount);
         }
     }
 
@@ -549,7 +573,7 @@ public final class SkyblockPlayerState {
             return;
         }
 
-        if (currentHealth >= maximumHealth) {
+        if (currentHealth >= necronHealingCap()) {
             healthRegenerationProgress = 0.0;
             return;
         }
@@ -608,7 +632,8 @@ public final class SkyblockPlayerState {
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel);
 
         int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health()
-                * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.95D, necronRadiationStacks)));
+                * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.95D, necronRadiationStacks)
+                * Math.pow(0.90D, necronFlameWallStacks)));
         if (!healthInitialized) {
             maximumHealth = recalculatedMaximum;
             currentHealth = maximumHealth;
@@ -621,7 +646,7 @@ public final class SkyblockPlayerState {
         } else {
             int healthDifference = recalculatedMaximum - maximumHealth;
             maximumHealth = recalculatedMaximum;
-            currentHealth = Math.max(1, Math.min(maximumHealth, currentHealth + healthDifference));
+            currentHealth = Math.max(1, Math.min(necronHealingCap(), currentHealth + healthDifference));
         }
 
         // The custom Health pool is authoritative. Keep vanilla health as a
