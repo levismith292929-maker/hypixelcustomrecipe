@@ -161,7 +161,6 @@ public final class StormEncounter {
         updateBossBarPlayers(server);
 
         if (warningTimer >= 0) {
-            renderSafeZones();
             warningTimer--;
             if (warningTimer < 0) {
                 // Spawn every strike in the same server tick so the whole arena is hit at once.
