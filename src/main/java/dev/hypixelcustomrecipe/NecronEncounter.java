@@ -402,6 +402,18 @@ public final class NecronEncounter {
             if (bomb.display != null && !bomb.display.isRemoved()) {
                 bomb.display.setPos(bomb.x, bomb.y, bomb.z);
             }
+
+            // Clearly outline the full 10-block-diameter blast footprint while
+            // the TNT is falling, so players can see exactly where it will hit.
+            double markerY = center.getY() + 1.08D;
+            for (int point = 0; point < 40; point++) {
+                double angle = Math.PI * 2.0D * point / 40.0D;
+                double markerX = bomb.x + Math.cos(angle) * 5.0D;
+                double markerZ = bomb.z + Math.sin(angle) * 5.0D;
+                level.sendParticles(ParticleTypes.END_ROD, markerX, markerY, markerZ,
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
+            }
+
             if (bomb.y <= center.getY() + 1.0D || bomb.age >= 80) {
                 if (bomb.display != null) bomb.display.discard();
                 detonateBomb(bomb.x, bomb.z);
