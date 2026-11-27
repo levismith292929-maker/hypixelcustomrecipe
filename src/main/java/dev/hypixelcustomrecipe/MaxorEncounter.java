@@ -71,6 +71,8 @@ public final class MaxorEncounter {
     private MaxorEncounter() {
     }
 
+    public static boolean isActive() { return maxor != null && maxor.isAlive(); }
+
     public static void initialize() {
         UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
             ItemStack held = player.getItemInHand(hand);
