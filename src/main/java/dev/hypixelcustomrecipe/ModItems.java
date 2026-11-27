@@ -81,6 +81,7 @@ public final class ModItems {
     );
 
     public static final Item NECRON_CORE = registerNecronCore();
+    public static final Item WITHER_ALTAR = register("wither_altar", "Wither Altar", Items.WITHER_SKELETON_SKULL, 1);
 
     // Star-upgrade materials. Each shard is used for its matching anvil upgrade.
     public static final Item STAR_SHARD_1 = registerTexturedHeadFromValue(
