@@ -61,19 +61,19 @@ public final class ModItems {
     );
 
     public static final Item VOID_FRAGMENT = registerVoidMaterialHead(
-            "void_fragment", "Void Block",
+            "void_fragment", "Void Fragment",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzlmY2Y2M2I4OGQwY2FkMDgyZGMyMzgzM2FjMjFiN2IwYWZkNGM3ZWExNDcxMWVlYmRlZDYwNTczNDBkODM5NCJ9fX0=", 119280
     );
     public static final Item VOID_SHARD = registerVoidMaterialHead(
-            "void_shard", "Void Orb",
+            "void_shard", "Void Shard",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIwMWFlMWE4YTA0ZGY1MjY1NmY1ZTQ4MTNlMWZiY2Y5Nzg3N2RiYmZiYzQyNjhkMDQzMTZkNmY5Zjc1MyJ9fX0=", 14324
     );
     public static final Item FINE_VOID_SHARD = registerVoidMaterialHead(
-            "fine_void_shard", "Void Knight",
+            "fine_void_shard", "Refined Void Shard",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTFhM2Y4ZjFiZjk1MDFlOGY4ZDRiYmMzMTJhNjEzNGVjMjEwOWZmMTkxZWJhOTRiMDYwNzhkMjNhYzYyZDg5NCJ9fX0=", 79604
     );
     public static final Item PURE_VOID_SHARD = registerVoidMaterialHead(
-            "pure_void_shard", "Void Orb",
+            "pure_void_shard", "Pure Void Shard",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjcyYWM2YTM0YWU1NWRhNjk2MGI4ZWRmZDAzYmJiNTliOTY5ZTkxZjVmMWJlOTRmMDVlZTFlZDU5YjEwZjBlOSJ9fX0=", 98860
     );
     public static final Item SOUL_SHARD = registerTexturedHeadFromValue(
@@ -149,7 +149,8 @@ public final class ModItems {
     }
 
     private static Item registerVoidMaterialHead(String path, String displayName, String textureValue, int customHeadId) {
-        return registerTexturedHeadFromValue(path, displayName, textureValue, 64, "Custom Head ID: " + customHeadId);
+        // Keep the custom head ID internal; it is not player-facing item lore.
+        return registerTexturedHeadFromValue(path, displayName, textureValue, 64);
     }
 
     private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue, int maxStackSize) {
