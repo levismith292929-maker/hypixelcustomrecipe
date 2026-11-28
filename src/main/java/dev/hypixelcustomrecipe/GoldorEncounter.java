@@ -170,6 +170,7 @@ public final class GoldorEncounter {
         if (encounterLevel == null) return;
         MinecraftServer server = encounterLevel.getServer();
         if (goldor != null) goldor.discard();
+        clearSwords();
         ServerPlayer owner = altarOwner == null ? null : server.getPlayerList().getPlayer(altarOwner);
         if (owner != null) {
             ItemStack altar = new ItemStack(ModItems.WITHER_ALTAR);
