@@ -39,8 +39,8 @@ import java.util.UUID;
  * Damage contribution is recorded before vanilla mitigation is applied.
  */
 public final class MaxorEncounter {
-    private static final double MAXOR_HEALTH = 2_000_000.0D;
-    // Vanilla's max-health attribute is capped, so map 1,024 entity HP to 2,000,000 boss HP.
+    private static final double MAXOR_HEALTH = 25_000_000.0D;
+    // Vanilla's max-health attribute is capped, so map 1,024 entity HP to 25,000,000 boss HP.
     private static final double ENTITY_HEALTH = 1_024.0D;
     private static final double BOSS_HP_PER_ENTITY_HP = MAXOR_HEALTH / ENTITY_HEALTH;
     private static final double REWARD_THRESHOLD = MAXOR_HEALTH * 0.20D;
@@ -178,7 +178,7 @@ public final class MaxorEncounter {
         LASER_AFFECTED.clear();
         LASER_HIT_COOLDOWNS.clear();
         MINIONS.clear();
-        BOSS_BAR.setName(Component.literal("Maxor"));
+        BOSS_BAR.setName(Component.literal("Maxor: 25,000,000 / 25,000,000 HP"));
         BOSS_BAR.setProgress(1.0F);
         BOSS_BAR.addPlayer(starter);
         level.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN,
