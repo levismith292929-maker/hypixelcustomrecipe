@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -383,7 +384,9 @@ public final class StormEncounter {
                 ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
                 if (player == null) continue;
                 SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
-                player.sendSystemMessage(Component.literal("Storm defeated! +100 Player Levels")
+                ItemStack adminRing = new ItemStack(DatapackItems.ADMIN_RING);
+                if (!player.getInventory().add(adminRing)) player.drop(adminRing, false);
+                player.sendSystemMessage(Component.literal("Storm defeated! +100 Player Levels + Admin Ring")
                         .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
                 rewarded++;
             }
