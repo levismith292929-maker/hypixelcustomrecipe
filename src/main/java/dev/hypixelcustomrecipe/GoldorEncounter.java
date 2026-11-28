@@ -403,7 +403,9 @@ public final class GoldorEncounter {
                 ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
                 if (player == null) continue;
                 SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
-                player.sendSystemMessage(Component.literal("Goldor defeated! +100 Player Levels")
+                ItemStack goldorPet = new ItemStack(DatapackItems.GOLDOR_PET);
+                if (!player.getInventory().add(goldorPet)) player.drop(goldorPet, false);
+                player.sendSystemMessage(Component.literal("Goldor defeated! +100 Player Levels + Goldor Pet")
                         .withStyle(s -> s.withColor(0x55FF55).withBold(true)));
                 rewarded++;
             }
