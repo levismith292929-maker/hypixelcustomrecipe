@@ -113,6 +113,7 @@ public abstract class LivingEntityMixin {
                                             ModArmorItems.getSkyblockStats(attacker), attacker.getMainHandItem())))),
                     attackerState.level());
             attackStats = VengenceHandler.applyActiveBuff(attacker, attackStats);
+            attackStats = attackerState.applyPetStatBonuses(attackStats);
             VanillaWeaponStats.WeaponStats weapon = VanillaWeaponStats.get(attacker.getMainHandItem());
             if (attackStats.weaponDamage() > 0.0) {
                 float attackScale = attacker.getAttackStrengthScale(0.5F);
