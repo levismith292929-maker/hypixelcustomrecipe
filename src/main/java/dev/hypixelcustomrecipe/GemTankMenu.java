@@ -1,6 +1,9 @@
 package dev.hypixelcustomrecipe;
 
 import com.google.gson.JsonParser;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.NonNullList;
@@ -23,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class GemTankMenu {
     private static final int SIZE = 8;
     private static final Map<UUID, NonNullList<ItemStack>> CONTENTS = new ConcurrentHashMap<>();
-    private static final Codec<List<ItemStack>> STACK_LIST = ItemStack.CODEC.listOf();
+    private static final Codec<Map<String, ItemStack>> STACK_MAP = Codec.unboundedMap(Codec.STRING, ItemStack.CODEC);
 
     private GemTankMenu() {}
 
@@ -152,9 +155,17 @@ public final class GemTankMenu {
 
     public static void save(ServerPlayer player, ValueOutput output) {
         try {
-            String json = STACK_LIST.encodeStart(
+            // Empty ItemStack entries encode as minecraft:air with count 0, which
+            // the 26.2 item codec rejects. Store only occupied slots, keyed by index.
+            Map<String, ItemStack> occupied = new java.util.TreeMap<>();
+            NonNullList<ItemStack> items = contents(player);
+            for (int i = 0; i < SIZE; i++) {
+                ItemStack stack = items.get(i);
+                if (!stack.isEmpty()) occupied.put(Integer.toString(i), stack.copy());
+            }
+            String json = STACK_MAP.encodeStart(
                     player.registryAccess().createSerializationContext(JsonOps.INSTANCE),
-                    List.copyOf(contents(player))).getOrThrow().toString();
+                    occupied).getOrThrow().toString();
             output.putString("hypixel_gem_tank", json);
         } catch (Exception exception) {
             HypixelCustomRecipe.LOGGER.error("Could not save Gem Tank for {}", player.getGameProfile().name(), exception);
@@ -162,20 +173,49 @@ public final class GemTankMenu {
     }
 
     public static void load(ServerPlayer player, ValueInput input) {
-        NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
         String json = input.getStringOr("hypixel_gem_tank", "");
+        NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
         if (!json.isEmpty()) {
             try {
-                List<ItemStack> decoded = STACK_LIST.parse(
-                        player.registryAccess().createSerializationContext(JsonOps.INSTANCE),
-                        JsonParser.parseString(json)).getOrThrow();
-                boolean[] usedTypes = new boolean[SIZE];
-                for (int i = 0; i < Math.min(SIZE, decoded.size()); i++) {
-                    ItemStack stack = decoded.get(i);
-                    int type = gemstoneType(stack);
-                    if (type >= 0 && !usedTypes[type]) {
-                        items.set(i, stack.copyWithCount(1));
-                        usedTypes[type] = true;
+                JsonElement root = JsonParser.parseString(json);
+                var ops = player.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+                java.util.Set<net.minecraft.world.item.Item> seenItems = new java.util.HashSet<>();
+                boolean[] usedGemTypes = new boolean[SIZE];
+
+                // New format: sparse object, so empty slots are never serialized.
+                if (root.isJsonObject()) {
+                    Map<String, ItemStack> decoded = STACK_MAP.parse(ops, root).getOrThrow();
+                    for (Map.Entry<String, ItemStack> entry : decoded.entrySet()) {
+                        int slot;
+                        try { slot = Integer.parseInt(entry.getKey()); }
+                        catch (NumberFormatException ignored) { continue; }
+                        if (slot < 0 || slot >= SIZE) continue;
+                        ItemStack stack = entry.getValue();
+                        if (stack.isEmpty()) continue;
+                        boolean allowed = gemstoneType(stack) >= 0 && !usedGemTypes[gemstoneType(stack)];
+                        if (allowed) {
+                            items.set(slot, stack.copyWithCount(1));
+                            usedGemTypes[gemstoneType(stack)] = true;
+                        }
+                    }
+                } else if (root.isJsonArray()) {
+                    // Backward compatibility: read the old positional array one slot
+                    // at a time. A malformed/empty entry no longer discards the other slots.
+                    JsonArray legacy = root.getAsJsonArray();
+                    for (int i = 0; i < Math.min(SIZE, legacy.size()); i++) {
+                        JsonElement element = legacy.get(i);
+                        if (element == null || element.isJsonNull()) continue;
+                        ItemStack stack = ItemStack.CODEC.parse(ops, element)
+                                .resultOrPartial(message -> HypixelCustomRecipe.LOGGER.warn(
+                                        "Skipping invalid legacy Gem Tank slot {} for {}: {}", i,
+                                        player.getGameProfile().name(), message))
+                                .orElse(ItemStack.EMPTY);
+                        if (stack.isEmpty()) continue;
+                        boolean allowed = gemstoneType(stack) >= 0 && !usedGemTypes[gemstoneType(stack)];
+                        if (allowed) {
+                            items.set(i, stack.copyWithCount(1));
+                            usedGemTypes[gemstoneType(stack)] = true;
+                        }
                     }
                 }
             } catch (Exception exception) {
