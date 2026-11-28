@@ -76,6 +76,7 @@ public final class MaxorEncounter {
     }
 
     public static boolean isActive() { return maxor != null && maxor.isAlive(); }
+    public static boolean isMaxor(LivingEntity entity) { return maxor != null && entity == maxor; }
 
     public static void initialize() {
         UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
