@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -39,6 +41,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class GoldorEncounter {
     private static final double MAX_HEALTH = 250_000_000.0D;
     private static final double ENTITY_HEALTH = 1_024.0D;
+    private static final double REWARD_THRESHOLD = MAX_HEALTH * 0.20D;
+    private static final int BREAK_TICKS = 2 * 60 * 20;
     private static final int WARNING_TICKS = 40;
     private static final int SWORD_LIFETIME = 600;
     private static final int FLIGHT_TICKS = 4;
@@ -49,6 +53,11 @@ public final class GoldorEncounter {
     private static ServerLevel encounterLevel;
     private static int attackTimer;
     private static float lastHealth;
+    private static BlockPos trialCenter;
+    private static UUID altarOwner;
+    private static int breakTimer;
+    private static boolean normalTrial;
+    private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final List<PendingSword> PENDING = new ArrayList<>();
@@ -95,10 +104,82 @@ public final class GoldorEncounter {
                                           ServerPlayer attacker, double entityDamage) {
         if (goldor == null || target != goldor || entityDamage <= 0.0D) return;
         PARTICIPANTS.add(attacker.getUUID());
+        if (normalTrial) PLAYER_DAMAGE.merge(attacker.getUUID(), entityDamage * MAX_HEALTH / ENTITY_HEALTH, Double::sum);
         float next = (float) Math.max(0.0D, goldor.getHealth() - entityDamage);
         goldor.setHealth(next);
         lastHealth = next;
         if (next <= 0.0F) goldor.die(encounterLevel.damageSources().generic());
+    }
+
+    /** Starts the two-minute intermission before the Normal Trial Goldor phase. */
+    public static void beginBreak(ServerLevel level, BlockPos center, UUID owner, Set<UUID> participants) {
+        if (goldor != null || encounterLevel != null) return;
+        encounterLevel = level;
+        trialCenter = center.immutable();
+        altarOwner = owner;
+        normalTrial = true;
+        breakTimer = BREAK_TICKS;
+        PARTICIPANTS.clear();
+        PARTICIPANTS.addAll(participants);
+        DEAD_PARTICIPANTS.clear();
+        PLAYER_DAMAGE.clear();
+        clearSwords();
+        BAR.removeAllPlayers();
+        BAR.setName(Component.literal("Goldor begins in 2:00"));
+        BAR.setProgress(1.0F);
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers())
+            if (PARTICIPANTS.contains(player.getUUID())) BAR.addPlayer(player);
+    }
+
+    private static boolean summonTrialGoldor() {
+        WitherBoss boss = EntityTypes.WITHER.create(encounterLevel, EntitySpawnReason.MOB_SUMMONED);
+        if (boss == null) { abortTrial("Goldor could not be summoned."); return false; }
+        boss.setPos(trialCenter.getX() + 0.5D, trialCenter.getY(), trialCenter.getZ() + 0.5D);
+        boss.setCustomName(Component.literal("Goldor").withStyle(s -> s.withColor(0xFFAA00).withBold(true)));
+        boss.setCustomNameVisible(true);
+        boss.setPersistenceRequired();
+        var health = boss.getAttribute(Attributes.MAX_HEALTH);
+        if (health != null) health.setBaseValue(ENTITY_HEALTH);
+        boss.setHealth((float) ENTITY_HEALTH);
+        ServerPlayer target = nearestTrialPlayer();
+        if (target != null) boss.setTarget(target);
+        if (!encounterLevel.addFreshEntity(boss)) { abortTrial("Goldor could not be spawned."); return false; }
+        goldor = boss;
+        attackTimer = 60;
+        lastHealth = (float) ENTITY_HEALTH;
+        BAR.setName(Component.literal("Goldor: 250,000,000 / 250,000,000 HP"));
+        BAR.setProgress(1.0F);
+        encounterLevel.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 2.0F, 0.55F);
+        encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("GOLDOR HAS AWAKENED!").withStyle(s -> s.withColor(0xFFAA00).withBold(true)), false);
+        return true;
+    }
+
+    private static ServerPlayer nearestTrialPlayer() {
+        ServerPlayer nearest = null;
+        double best = Double.MAX_VALUE;
+        for (ServerPlayer player : encounterLevel.getServer().getPlayerList().getPlayers()) {
+            if (player.level() != encounterLevel || !player.isAlive()) continue;
+            double distance = player.distanceToSqr(Vec3.atCenterOf(trialCenter));
+            if (distance < best) { best = distance; nearest = player; }
+        }
+        return nearest;
+    }
+
+    private static void abortTrial(String message) {
+        if (encounterLevel == null) return;
+        MinecraftServer server = encounterLevel.getServer();
+        if (goldor != null) goldor.discard();
+        ServerPlayer owner = altarOwner == null ? null : server.getPlayerList().getPlayer(altarOwner);
+        if (owner != null) {
+            ItemStack altar = new ItemStack(ModItems.WITHER_ALTAR);
+            if (!owner.getInventory().add(altar)) owner.drop(altar, false);
+            owner.sendSystemMessage(Component.literal("The encounter failed. Your Wither Altar has been returned.")
+                    .withStyle(s -> s.withColor(0xFF5555)));
+        }
+        server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
+        BAR.removeAllPlayers();
+        clear();
     }
 
     public static boolean summonForTesting(ServerPlayer player) {
@@ -134,7 +215,19 @@ public final class GoldorEncounter {
     }
 
     private static void tick(MinecraftServer server) {
-        if (goldor == null || encounterLevel == null || !goldor.isAlive() || goldor.isRemoved()) return;
+        if (encounterLevel == null) return;
+        if (goldor == null) {
+            if (!normalTrial) return;
+            if (allFightersDead(server)) { abortTrial("All players fighting Goldor have been defeated. The encounter has ended."); return; }
+            if (--breakTimer <= 0) summonTrialGoldor();
+            else {
+                int seconds = (breakTimer + 19) / 20;
+                BAR.setName(Component.literal(String.format(java.util.Locale.ROOT, "Goldor begins in %d:%02d", seconds / 60, seconds % 60)));
+                BAR.setProgress(breakTimer / (float) BREAK_TICKS);
+            }
+            return;
+        }
+        if (!goldor.isAlive() || goldor.isRemoved()) return;
         if (allFightersDead(server)) {
             abortBecauseAllFightersDied();
             return;
@@ -301,10 +394,25 @@ public final class GoldorEncounter {
 
     private static void finish() {
         if (encounterLevel == null) return;
+        MinecraftServer server = encounterLevel.getServer();
+        int rewarded = 0;
+        if (normalTrial) {
+            for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
+                if (entry.getValue() < REWARD_THRESHOLD) continue;
+                ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+                if (player == null) continue;
+                SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
+                player.sendSystemMessage(Component.literal("Goldor defeated! +100 Player Levels")
+                        .withStyle(s -> s.withColor(0x55FF55).withBold(true)));
+                rewarded++;
+            }
+        }
         BAR.removeAllPlayers();
         clearSwords();
-        encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("Goldor has been defeated!"), false);
+        server.getPlayerList().broadcastSystemMessage(Component.literal(normalTrial
+                ? "Goldor has been defeated! " + rewarded + " player(s) earned +100 Player Levels. Necron begins in 2 minutes!"
+                : "Goldor has been defeated!"), false);
+        if (normalTrial) NecronEncounter.beginBreak(encounterLevel, trialCenter, altarOwner, Set.copyOf(PARTICIPANTS));
         clear();
     }
 
@@ -350,6 +458,12 @@ public final class GoldorEncounter {
     private static void clear() {
         goldor = null;
         encounterLevel = null;
+        trialCenter = null;
+        altarOwner = null;
+        breakTimer = 0;
+        normalTrial = false;
+        PLAYER_DAMAGE.clear();
+        DEAD_PARTICIPANTS.clear();
         attackTimer = 0;
         lastHealth = 0.0F;
         PENDING.clear();
