@@ -101,8 +101,9 @@ public final class VoidriddenMobs {
                                 entity.getZ(), new ItemStack(ModItems.VOID_FRAGMENT));
                         level.addFreshEntity(fragment);
                     }
-                    // Soul Shards have a 10% chance to drop from any Voidridden mob.
-                    if (level.getRandom().nextFloat() < 0.10F) {
+                    // Soul Shards have a 25% chance from Voidridden Endermen and 10% from other variants.
+                    float soulShardChance = type == VOIDRIDDEN_ENDERMAN ? 0.25F : 0.10F;
+                    if (level.getRandom().nextFloat() < soulShardChance) {
                         ItemEntity soulShard = new ItemEntity(level, entity.getX(), entity.getY() + 0.5,
                                 entity.getZ(), new ItemStack(ModItems.SOUL_SHARD));
                         level.addFreshEntity(soulShard);
