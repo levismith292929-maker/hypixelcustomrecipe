@@ -274,9 +274,9 @@ public final class StormEncounter {
                         new org.joml.Quaternionf(), new org.joml.Vector3f(4.0F, 0.08F, 4.0F),
                         new org.joml.Quaternionf()));
                 marker.setNoGravity(true);
-                // Block displays are centered on their entity position. Keep the
-                // visible 4x4 marker centered on the exact collision-safe coordinates.
-                marker.setPos(zone.x, arenaCenter.getY() + 1.08D, zone.z);
+                // Restore the previous particle safe-zone marker placement.
+                marker.setPos(zone.x - SAFE_ZONE_RADIUS, arenaCenter.getY() + 1.08D,
+                        zone.z - SAFE_ZONE_RADIUS);
                 if (level.addFreshEntity(marker)) SAFE_ZONE_DISPLAYS.add(marker);
             }
         }
