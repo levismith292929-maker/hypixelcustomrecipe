@@ -958,7 +958,9 @@ public final class NecronEncounter {
                     ServerPlayer player = level.getServer().getPlayerList().getPlayer(entry.getKey());
                     if (player == null) continue;
                     SkyblockPlayerState.get(player).addLevelExperience(player, 25_000);
-                    player.sendSystemMessage(Component.literal("Necron defeated! +500 Player Levels")
+                    ItemStack adminDrill = new ItemStack(DatapackItems.ADMIN_DRILL);
+                    if (!player.getInventory().add(adminDrill)) player.drop(adminDrill, false);
+                    player.sendSystemMessage(Component.literal("Necron defeated! +500 Player Levels + Admin Drill")
                             .withStyle(s -> s.withColor(0x55FF55).withBold(true)));
                     rewarded++;
                 }
