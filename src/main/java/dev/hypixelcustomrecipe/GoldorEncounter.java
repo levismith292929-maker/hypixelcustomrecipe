@@ -66,6 +66,10 @@ public final class GoldorEncounter {
     private static final List<PendingSword> PENDING = new ArrayList<>();
     private static final List<FlyingSword> FLYING = new ArrayList<>();
     private static final List<ActiveSword> ACTIVE = new ArrayList<>();
+    // Defer encounter teardown until the next server tick. AFTER_DEATH can run
+    // inside an attack loop, so clearing state there invalidates that active tick.
+    private static String pendingAbortMessage;
+    private static boolean pendingSuccessfulFinish;
     private static final ServerBossEvent BAR = new ServerBossEvent(
             UUID.randomUUID(), Component.literal("Goldor"),
             BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
@@ -84,15 +88,15 @@ public final class GoldorEncounter {
             if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
                 DEAD_PARTICIPANTS.add(player.getUUID());
                 if (encounterLevel != null && allFightersDead(player.level().getServer())) {
-                    abortBecauseAllFightersDied();
+                    pendingAbortMessage = "All players fighting Goldor have been defeated. The encounter has ended.";
                     return;
                 }
             }
             if (goldor != null && entity == goldor) {
                 if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-                    abortAfterBossRemoval();
+                    pendingAbortMessage = "Goldor was removed. The encounter has been reset.";
                 } else {
-                    finish();
+                    pendingSuccessfulFinish = true;
                 }
             }
         });
@@ -224,9 +228,30 @@ public final class GoldorEncounter {
 
     private static void tick(MinecraftServer server) {
         if (encounterLevel == null) return;
+        if (pendingAbortMessage != null) {
+            String message = pendingAbortMessage;
+            pendingAbortMessage = null;
+            if (normalTrial) abortTrial(message);
+            else {
+                BAR.removeAllPlayers();
+                clearSwords();
+                server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
+                BossArena.restore();
+                clear();
+            }
+            return;
+        }
+        if (pendingSuccessfulFinish) {
+            pendingSuccessfulFinish = false;
+            finish();
+            return;
+        }
         if (goldor == null) {
             if (!normalTrial) return;
-            if (allFightersDead(server)) { abortTrial("All players fighting Goldor have been defeated. The encounter has ended."); return; }
+            if (allFightersDead(server)) {
+                pendingAbortMessage = "All players fighting Goldor have been defeated. The encounter has ended.";
+                return;
+            }
             if (--breakTimer <= 0) summonTrialGoldor();
             else {
                 int seconds = (breakTimer + 19) / 20;
@@ -237,7 +262,7 @@ public final class GoldorEncounter {
         }
         if (!goldor.isAlive() || goldor.isRemoved()) return;
         if (allFightersDead(server)) {
-            abortBecauseAllFightersDied();
+            pendingAbortMessage = "All players fighting Goldor have been defeated. The encounter has ended.";
             return;
         }
 
@@ -505,6 +530,8 @@ public final class GoldorEncounter {
         altarOwner = null;
         breakTimer = 0;
         normalTrial = false;
+        pendingAbortMessage = null;
+        pendingSuccessfulFinish = false;
         PLAYER_DAMAGE.clear();
         DEAD_PARTICIPANTS.clear();
         attackTimer = 0;

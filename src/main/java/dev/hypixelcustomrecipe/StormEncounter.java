@@ -72,6 +72,10 @@ public final class StormEncounter {
     private static boolean testMode;
     private static int pillarSpawnTimer = 80; // One pillar every 4 seconds
     private static final List<FallingPillar> PILLARS = new ArrayList<>();
+    // Encounter teardown is deferred until the next server tick so the current
+    // death callback and the attack tick that caused it can finish safely.
+    private static String pendingAbortMessage;
+    private static boolean pendingSuccessfulFinish;
 
     private StormEncounter() {
     }
@@ -96,16 +100,15 @@ public final class StormEncounter {
             if (entity instanceof ServerPlayer player && PARTICIPANTS.contains(player.getUUID())) {
                 DEAD_PARTICIPANTS.add(player.getUUID());
                 if (level != null && allFightersDead(player.level().getServer())) {
-                    abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
-                    return;
+                    pendingAbortMessage = "All players fighting Storm have been defeated. The encounter has ended.";
                 }
             }
             if (storm != null && entity == storm) {
                 if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                     // /kill aborts the phase instead of awarding a legitimate clear.
-                    abortAndReturnAltar("Storm was removed. The encounter has been reset.");
+                    pendingAbortMessage = "Storm was removed. The encounter has been reset.";
                 } else {
-                    finishSuccessfully();
+                    pendingSuccessfulFinish = true;
                 }
             }
         });
@@ -142,8 +145,19 @@ public final class StormEncounter {
 
     private static void tick(MinecraftServer server) {
         if (level == null) return;
+        if (pendingAbortMessage != null) {
+            String message = pendingAbortMessage;
+            pendingAbortMessage = null;
+            abortAndReturnAltar(message);
+            return;
+        }
+        if (pendingSuccessfulFinish) {
+            pendingSuccessfulFinish = false;
+            finishSuccessfully();
+            return;
+        }
         if (allFightersDead(server)) {
-            abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
+            pendingAbortMessage = "All players fighting Storm have been defeated. The encounter has ended.";
             return;
         }
         if (storm == null) {
@@ -166,7 +180,7 @@ public final class StormEncounter {
         if (currentHealth > lastHealth) storm.setHealth(lastHealth);
         else lastHealth = currentHealth;
         if (allFightersDead(server)) {
-            abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
+            pendingAbortMessage = "All players fighting Storm have been defeated. The encounter has ended.";
             return;
         }
 
@@ -220,7 +234,7 @@ public final class StormEncounter {
         SAFE_ZONES.clear();
         STRIKES.clear();
         clearPillars();
-        pillarSpawnTimer = 60;
+        pillarSpawnTimer = 80;
         breakTimer = 0;
         warningTimer = -1;
         waveTimer = WAVE_INTERVAL_TICKS;
@@ -476,6 +490,8 @@ public final class StormEncounter {
         breakTimer = 0;
         warningTimer = -1;
         waveTimer = WAVE_INTERVAL_TICKS;
+        pendingAbortMessage = null;
+        pendingSuccessfulFinish = false;
         PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
 
