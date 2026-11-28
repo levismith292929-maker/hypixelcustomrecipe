@@ -181,18 +181,20 @@ public final class DatapackItems {
     private static Item registerHealingSword(String path, String name, String... loreLines) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
                 Identifier.fromNamespaceAndPath(NAMESPACE, path));
+        Identifier modelId = Identifier.fromNamespaceAndPath(NAMESPACE, path);
         Item.Properties properties = new Item.Properties()
                 .setId(key)
                 .stacksTo(1)
                 .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(name, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
-                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY)
+                .component(DataComponents.ITEM_MODEL, modelId);
         if (loreLines.length > 0) {
             properties.component(DataComponents.LORE, new ItemLore(Arrays.stream(loreLines)
                     .<Component>map(ItemFormatting::lore).toList()));
         }
         return Registry.register(BuiltInRegistries.ITEM, key,
-                new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, Items.GOLDEN_SWORD));
+                new TexturedPolymerItem(properties, Items.GOLDEN_SWORD, modelId));
     }
 
     private static Item registerStackableGlint(String path, String name, Item fallback, String... loreLines) {
@@ -293,7 +295,8 @@ public final class DatapackItems {
             case "drill_bit", "ruby_drill", "amethyst_drill", "amber_drill", "topaz_drill",
                     "sapphire_drill", "jade_drill", "opal_drill", "jasper_drill", "gemstone_gauntlet",
                     "aotv", "aotd", "astraea", "hyperion", "voidsplit_katana",
-                    "livid_dagger", "dark_claymore", "halberd_of_the_shredded" -> true;
+                    "livid_dagger", "dark_claymore", "halberd_of_the_shredded",
+                    "zombie_sword", "ornate_zombie_sword", "embellished_zombie_sword" -> true;
             default -> false;
         };
     }
