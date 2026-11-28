@@ -346,13 +346,24 @@ public final class SkyblockAbilityHandler {
                                 : NecronEncounter.isNecron(target)
                                     ? NecronEncounter.logicalMaximumHealth()
                                     : target.getMaxHealth();
-                        // Soul Blade damage is determined ONLY by the target's maximum
-                        // Health and its digit count. Attacker stats, accessories, weapon
-                        // damage, Strength, Crit Damage, and other bonuses are ignored.
-                        int healthDigits = Math.max(3,
-                                Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
-                        double percentage = Math.max(0.0025D, 0.035D / healthDigits);
-                        double soulBladeDamage = maximumHealth * percentage;
+                        // During Necron, Soul Blade deals a flat 10% max-HP true-damage
+                        // hit to the Voidridden wave. Their damage deliberately ignores
+                        // the normal digit-based scaling used for other targets.
+                        boolean necronVoidridden = NecronEncounter.isActive()
+                                && (target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSkeleton
+                                || target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSpider
+                                || target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenZombie
+                                || target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEnderman);
+                        double soulBladeDamage;
+                        if (necronVoidridden) {
+                            soulBladeDamage = maximumHealth * 0.10D;
+                        } else {
+                            // Other targets use the normal maximum-Health digit scaling.
+                            int healthDigits = Math.max(3,
+                                    Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
+                            double percentage = Math.max(0.0025D, 0.035D / healthDigits);
+                            soulBladeDamage = maximumHealth * percentage;
+                        }
                         if (NecronEncounter.isNecron(target)) {
                             soulBladeDamage = NecronEncounter.toEntityDamage(soulBladeDamage);
                         }
