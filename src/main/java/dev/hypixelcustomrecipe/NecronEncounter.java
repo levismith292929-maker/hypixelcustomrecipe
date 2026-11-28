@@ -386,8 +386,9 @@ public final class NecronEncounter {
         safeRadius = Math.sqrt(farX * farX + farZ * farZ) + 2.0D;
         attack1Ticks = (int) Math.ceil((safeRadius - 2.5D) / 0.25D);
         clearDisplayList(CLOSING_WALL_DISPLAYS);
-        for (int i = 0; i < 16; i++) {
-            Display.BlockDisplay segment = createBlockDisplay(Blocks.AMETHYST_BLOCK.defaultBlockState(),
+        // Use many short translucent panels so the circular wall reads as one connected ring.
+        for (int i = 0; i < 96; i++) {
+            Display.BlockDisplay segment = createBlockDisplay(Blocks.PURPLE_STAINED_GLASS.defaultBlockState(),
                     safeX, center.getY() + 5.2D, safeZ, 1.0F, 10.0F, 0.18F, new Quaternionf());
             if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
         }
@@ -919,12 +920,13 @@ public final class NecronEncounter {
         if (count == 0) return;
         for (int i = 0; i < count; i++) {
             double angle = Math.PI * 2.0D * i / count;
-            double arcLength = Math.max(1.0D, Math.PI * 2.0D * safeRadius / count);
+            // Slight overlap compensates for the chord/arc difference, preventing visible gaps.
+            double segmentLength = Math.max(0.5D, Math.PI * 2.0D * safeRadius / count * 1.08D);
             Display.BlockDisplay display = CLOSING_WALL_DISPLAYS.get(i);
             display.setPos(safeX + Math.cos(angle) * safeRadius, center.getY() + 5.2D,
                     safeZ + Math.sin(angle) * safeRadius);
             display.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY((float) (Math.PI / 2.0D - angle)),
-                    new Vector3f((float) arcLength, 10.0F, 0.18F), new Quaternionf()));
+                    new Vector3f((float) segmentLength, 10.0F, 0.18F), new Quaternionf()));
         }
     }
 
