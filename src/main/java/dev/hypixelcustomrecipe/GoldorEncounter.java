@@ -244,7 +244,7 @@ public final class GoldorEncounter {
         for (BlockPos pos : positions) {
             Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
             if (display == null) continue;
-            display.setBlockState(Blocks.PUMPKIN.defaultBlockState());
+            display.setBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.ResourceLocation.withDefaultNamespace("orange_concrete")).defaultBlockState());
             display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
                     new Vector3f(1.5F, 0.08F, 1.5F), new Quaternionf()));
             display.setNoGravity(true);
