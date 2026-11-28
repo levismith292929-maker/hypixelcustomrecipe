@@ -61,6 +61,7 @@ public final class StormEncounter {
             UUID.randomUUID(), Component.literal("Storm"), BossEvent.BossBarColor.BLUE,
             BossEvent.BossBarOverlay.PROGRESS);
     private static WitherBoss storm;
+    private static float lastHealth;
     private static int breakTimer;
     private static int warningTimer = -1;
     private static int waveTimer = WAVE_INTERVAL_TICKS;
@@ -144,6 +145,10 @@ public final class StormEncounter {
             return;
         }
         if (!storm.isAlive() || storm.isRemoved()) return;
+        // Vanilla Withers regenerate naturally; Storm's encounter health must not increase.
+        float currentHealth = storm.getHealth();
+        if (currentHealth > lastHealth) storm.setHealth(lastHealth);
+        else lastHealth = currentHealth;
         if (allFightersDead(server)) {
             abortAndReturnAltar("All players fighting Storm have been defeated. The encounter has ended.");
             return;
@@ -219,6 +224,7 @@ public final class StormEncounter {
             return false;
         }
         storm = boss;
+        lastHealth = (float) ENTITY_HEALTH;
         breakTimer = 0;
         waveTimer = WAVE_INTERVAL_TICKS;
         BOSS_BAR.setName(Component.literal("Storm: 100,000,000 / 100,000,000 HP"));
@@ -237,9 +243,13 @@ public final class StormEncounter {
         STRIKES.clear();
         for (int i = 0; i < SAFE_ZONE_COUNT; i++) {
             for (int attempt = 0; attempt < 200; attempt++) {
-                double x = arenaCenter.getX() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
+                // Safe-zone coordinates represent centers, so use the center of the
+                // arena's center block rather than its north-west block corner.
+                double x = arenaCenter.getX() + 0.5D
+                        + (level.getRandom().nextDouble() * 2.0D - 1.0D)
                         * (ARENA_HALF_SIZE - SAFE_ZONE_RADIUS);
-                double z = arenaCenter.getZ() + (level.getRandom().nextDouble() * 2.0D - 1.0D)
+                double z = arenaCenter.getZ() + 0.5D
+                        + (level.getRandom().nextDouble() * 2.0D - 1.0D)
                         * (ARENA_HALF_SIZE - SAFE_ZONE_RADIUS);
                 boolean overlaps = false;
                 for (SafeZone existing : SAFE_ZONES) {
@@ -264,7 +274,10 @@ public final class StormEncounter {
                         new org.joml.Quaternionf(), new org.joml.Vector3f(4.0F, 0.08F, 4.0F),
                         new org.joml.Quaternionf()));
                 marker.setNoGravity(true);
-                marker.setPos(zone.x, arenaCenter.getY() + 1.08D, zone.z);
+                // The 4x4 display scales outward from its lower corner; center it
+                // on the same coordinates used by the safe-zone collision check.
+                marker.setPos(zone.x - SAFE_ZONE_RADIUS, arenaCenter.getY() + 1.08D,
+                        zone.z - SAFE_ZONE_RADIUS);
                 if (level.addFreshEntity(marker)) SAFE_ZONE_DISPLAYS.add(marker);
             }
         }
@@ -432,6 +445,7 @@ public final class StormEncounter {
 
     private static void clear() {
         storm = null;
+        lastHealth = 0.0F;
         testMode = false;
         level = null;
         arenaCenter = null;
