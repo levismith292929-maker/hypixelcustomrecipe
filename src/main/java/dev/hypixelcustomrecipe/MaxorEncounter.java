@@ -3,6 +3,7 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -100,6 +101,8 @@ public final class MaxorEncounter {
 
     public static boolean isActive() { return maxor != null && maxor.isAlive(); }
     public static boolean isMaxor(LivingEntity entity) { return maxor != null && entity == maxor; }
+    /** Soul Blade and other direct-damage paths must respect Maxor's laser immunity. */
+    public static boolean canDamageMaxor() { return maxor == null || maxorVulnerable; }
     public static boolean isMaxorMinion(UUID entityId) { return MINIONS.contains(entityId); }
 
     /** Maxor's displayed/logical health; vanilla Wither health is only the backing pool. */
@@ -132,6 +135,19 @@ public final class MaxorEncounter {
             if (!serverPlayer.getAbilities().instabuild) {
                 held.shrink(1);
             }
+            return InteractionResult.SUCCESS;
+        });
+
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
+            if (!(entity instanceof EndCrystal) || level.isClientSide()
+                    || !challengeCrystals.contains(entity.getUUID())
+                    || !(level instanceof ServerLevel serverLevel)) {
+                return InteractionResult.PASS;
+            }
+            // Explicitly route attacks to the encounter crystals. This keeps the
+            // challenge breakable even if another combat hook interferes with vanilla hits.
+            entity.setInvulnerable(false);
+            entity.hurtServer(serverLevel, player.damageSources().playerAttack(player), 1.0F);
             return InteractionResult.SUCCESS;
         });
 
@@ -355,11 +371,11 @@ public final class MaxorEncounter {
         double radiusSquared = LASER_HIT_RADIUS * LASER_HIT_RADIUS;
         for (ServerPlayer player : encounterLevel.getServer().getPlayerList().getPlayers()) {
             if (player.level() != encounterLevel || !player.isAlive()
-                    || player.isCreative() || player.isSpectator()
+                    || player.isSpectator()
                     || LASER_HIT_COOLDOWNS.containsKey(player.getUUID())) continue;
-            // Test the whole player hitbox against the beam, not only the eye point.
-            // This lets the narrow beam hit a player's body while preserving its small radius.
-            if (player.getBoundingBox().inflate(LASER_HIT_RADIUS)
+            // The HP laser also affects creative players. Check the entire hitbox
+            // against a slightly forgiving ray so a beam crossing the body registers.
+            if (player.getBoundingBox().inflate(0.45D)
                     .clip(laserShotStart, laserShotEnd).isEmpty()) continue;
 
             SkyblockPlayerState.get(player).addMaxorLaserStack();
@@ -406,6 +422,7 @@ public final class MaxorEncounter {
             double radius = 12.0D + encounterLevel.getRandom().nextDouble() * 22.0D;
             crystal.setPos(center.getX() + 0.5D + Math.cos(angle) * radius,
                     center.getY() + 1.0D, center.getZ() + 0.5D + Math.sin(angle) * radius);
+            crystal.setInvulnerable(false);
             if (encounterLevel.addFreshEntity(crystal)) challengeCrystals.add(crystal.getUUID());
         }
         crystalChallengeTicks = 400;
@@ -421,10 +438,12 @@ public final class MaxorEncounter {
             stationaryLaser = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
             if (stationaryLaser == null) { stationaryLaserTimer = 300; return; }
             stationaryLaser.setBlockState(BuiltInRegistries.BLOCK.getValue(Identifier.parse("minecraft:red_stained_glass")).defaultBlockState());
+            // A tall, vertical sheet across the arena. Display entities are visual-only,
+            // so players can walk through it; the server-side AABB below handles hits.
             stationaryLaser.setTransformation(new Transformation(
-                    new Vector3f(), new Quaternionf(), new Vector3f(100.0F, 0.18F, 0.22F), new Quaternionf()));
+                    new Vector3f(), new Quaternionf(), new Vector3f(100.0F, 12.0F, 0.22F), new Quaternionf()));
             stationaryLaser.setNoGravity(true);
-            stationaryLaser.setPos(center.getX() - 50.0D, center.getY() + 2.0D, center.getZ() + 0.39D);
+            stationaryLaser.setPos(center.getX() - 50.0D, center.getY(), center.getZ() + 0.39D);
             encounterLevel.addFreshEntity(stationaryLaser);
             stationaryLaserActive = true;
             maxorVulnerable = false;
@@ -433,8 +452,10 @@ public final class MaxorEncounter {
                             .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
         }
         BlockPos center = BossArena.getCenter(encounterLevel, maxor.blockPosition());
-        AABB beam = new AABB(center.getX() - 50.0D, center.getY() + 1.95D,
-                center.getZ() + 0.25D, center.getX() + 50.0D, center.getY() + 2.25D,
+        // Full-height vertical laser wall. It has no physical collision; only this
+        // overlap test makes it lethal, so players can freely walk through it.
+        AABB beam = new AABB(center.getX() - 50.0D, center.getY(),
+                center.getZ() + 0.25D, center.getX() + 50.0D, center.getY() + 12.0D,
                 center.getZ() + 0.55D);
         if (maxor.getBoundingBox().intersects(beam)) {
             stationaryLaser.discard();

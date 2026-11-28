@@ -445,6 +445,7 @@ public final class SkyblockAbilityHandler {
         // Soul Blade is explicitly true damage: do not reject targets because
         // their normal damage immunity blocks the synthetic damage source.
         if (damage <= 0.0F) return;
+        if (MaxorEncounter.isMaxor(target) && !MaxorEncounter.canDamageMaxor()) return;
         if (target instanceof ServerPlayer defender) {
             SkyblockPlayerState state = SkyblockPlayerState.get(defender);
             state.markCombat();
