@@ -514,7 +514,7 @@ public final class SkyblockAbilityHandler {
         }
 
         ACTIVE_HEALING_RINGS.put(player.getUUID(),
-                new HealingRingState(radius, player.position().y));
+                new HealingRingState(radius));
         playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.9F, 1.25F);
     }
 
@@ -540,7 +540,7 @@ public final class SkyblockAbilityHandler {
     private static final class HealingRingState {
         private final double radius;
         private int age;
-        private HealingRingState(double radius, double ignoredStartingY) {
+        private HealingRingState(double radius) {
             this.radius = radius;
         }
     }
