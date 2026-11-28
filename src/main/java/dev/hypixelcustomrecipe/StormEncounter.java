@@ -155,7 +155,7 @@ public final class StormEncounter {
         long hp = Math.max(0L, Math.round(progress * BOSS_HEALTH));
         BOSS_BAR.setName(Component.literal("Storm: "
                 + String.format(java.util.Locale.ROOT, "%,d", hp)
-                + " / 18,000,000 HP"));
+                + " / 100,000,000 HP"));
         updateBossBarPlayers(server);
 
         if (warningTimer >= 0) {
