@@ -167,7 +167,7 @@ public final class MaxorEncounter {
             return false;
         }
 
-        BossArena.ensure(level, spawnPos);
+        BossArena.ensure(level, spawnPos.below());
         maxor = boss;
         testMode = testing;
         encounterLevel = level;

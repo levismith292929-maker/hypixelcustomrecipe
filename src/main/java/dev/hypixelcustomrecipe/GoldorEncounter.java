@@ -134,7 +134,7 @@ public final class GoldorEncounter {
     private static boolean summonTrialGoldor() {
         WitherBoss boss = EntityTypes.WITHER.create(encounterLevel, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) { abortTrial("Goldor could not be summoned."); return false; }
-        boss.setPos(trialCenter.getX() + 0.5D, trialCenter.getY(), trialCenter.getZ() + 0.5D);
+        boss.setPos(trialCenter.getX() + 0.5D, trialCenter.getY() + 1.0D, trialCenter.getZ() + 0.5D);
         boss.setCustomName(Component.literal("Goldor").withStyle(s -> s.withColor(0xFFAA00).withBold(true)));
         boss.setCustomNameVisible(true);
         boss.setPersistenceRequired();
@@ -202,7 +202,7 @@ public final class GoldorEncounter {
 
         goldor = boss;
         encounterLevel = level;
-        BossArena.ensure(level, spawn);
+        BossArena.ensure(level, spawn.below());
         attackTimer = 60;
         lastHealth = (float) ENTITY_HEALTH;
         clearSwords();

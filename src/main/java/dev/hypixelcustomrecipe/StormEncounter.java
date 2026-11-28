@@ -185,7 +185,7 @@ public final class StormEncounter {
     public static boolean summonForTesting(ServerPlayer player) {
         if (level != null) return false;
         level = (ServerLevel) player.level();
-        arenaCenter = BossArena.ensure(level, player.blockPosition());
+        arenaCenter = BossArena.ensure(level, player.blockPosition().below());
         altarOwner = player.getUUID();
         PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
@@ -206,7 +206,7 @@ public final class StormEncounter {
             abortAndReturnAltar("Storm could not be summoned.");
             return false;
         }
-        boss.setPos(arenaCenter.getX() + 0.5D, arenaCenter.getY(),
+        boss.setPos(arenaCenter.getX() + 0.5D, arenaCenter.getY() + 1.0D,
                 arenaCenter.getZ() + 0.5D);
         boss.setCustomName(Component.literal("Storm").withStyle(style ->
                 style.withColor(0x5555FF).withBold(true)));
