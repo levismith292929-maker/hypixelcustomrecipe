@@ -1,6 +1,7 @@
 package dev.hypixelcustomrecipe.entity.voidridden;
 
 import net.minecraft.server.level.ServerLevel;
+import dev.hypixelcustomrecipe.NecronEncounter;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball;
@@ -23,7 +24,11 @@ public final class VoidballEntity extends DragonFireball {
             } else {
                 target.hurtServer(serverLevel, serverLevel.damageSources().generic(), 500.0F);
             }
-            VoidriddenEffects.applyVoid(target, 10);
+            // Necron's Voidridden wave should still deal its hit damage, but not
+            // apply the long-lasting Void status effect during the boss encounter.
+            if (!NecronEncounter.isActive()) {
+                VoidriddenEffects.applyVoid(target, 10);
+            }
         }
 
         // This projectile uses the dragon-fireball appearance, but deliberately
