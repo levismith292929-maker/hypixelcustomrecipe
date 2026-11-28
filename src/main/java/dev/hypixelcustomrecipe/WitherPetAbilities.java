@@ -105,7 +105,7 @@ public final class WitherPetAbilities {
                 }
                 strike.level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + 0.8D,
                         target.getZ(), 18, 0.35D, 0.35D, 0.35D, 0.15D);
-                strike.level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT,
+                strike.level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP,
                         SoundSource.PLAYERS, 1.0F, 0.7F);
                 strike.display.discard();
                 iterator.remove();
