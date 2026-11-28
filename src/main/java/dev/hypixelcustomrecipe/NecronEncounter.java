@@ -211,6 +211,9 @@ public final class NecronEncounter {
     }
 
     private static int random(int min, int max) {
+        // A player can die inside an attack and end the encounter immediately.
+        // Never dereference the cleared encounter level during that same tick.
+        if (level == null) return min + java.util.concurrent.ThreadLocalRandom.current().nextInt(max - min + 1);
         return min + level.getRandom().nextInt(max - min + 1);
     }
 
@@ -296,6 +299,7 @@ public final class NecronEncounter {
             tickOtherAttacks(target);
         }
 
+        if (level == null || necron == null || !necron.isAlive()) return;
         float progress = Math.max(0.0F, Math.min(1.0F, necron.getHealth() / (float) ENTITY_HP));
         BAR.setProgress(progress);
         long shown = Math.max(0L, Math.round(progress * MAX_HP));
@@ -333,9 +337,13 @@ public final class NecronEncounter {
 
     private static void tickOtherAttacks(ServerPlayer target) {
         tickAttack1();
+        if (level == null || necron == null) return;
         tickAttack2();
+        if (level == null || necron == null) return;
         tickAttack4();
+        if (level == null || necron == null) return;
         tickAttack6();
+        if (level == null || necron == null) return;
         tickAttack7(target);
         if (attack1Ticks <= 0 && attack1Timer > 0) attack1Timer--;
         if (attack2Timer > 0) attack2Timer--;
