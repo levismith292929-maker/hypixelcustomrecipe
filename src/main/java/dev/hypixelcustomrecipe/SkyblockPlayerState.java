@@ -48,22 +48,29 @@ public final class SkyblockPlayerState {
         NONE(500, 40, 0.0),
         ENDERMAN(1000, 50, -0.20),
         ENDER_DRAGON(300, 20, 0.15),
-        GOLDEN_DRAGON(750, 10, 0.40),
-        IRON_GOLEM(600, 30, 0.05);
+        GOLDEN_DRAGON(750, 10, 0.40, 0),
+        IRON_GOLEM(600, 30, 0.05, 0),
+        MAXOR(500, 40, 0.0, 10),
+        STORM(500, 40, 0.0, 5),
+        GOLDOR(500, 40, 0.0, 5),
+        NECRON(500, 40, 0.50, 25);
 
         private final int manaMaximum;
         private final int manaRegeneration;
         private final double damageBonus;
+        private final int trueDefenseBonus;
 
-        Pet(int manaMaximum, int manaRegeneration, double damageBonus) {
+        Pet(int manaMaximum, int manaRegeneration, double damageBonus, int trueDefenseBonus) {
             this.manaMaximum = manaMaximum;
             this.manaRegeneration = manaRegeneration;
             this.damageBonus = damageBonus;
+            this.trueDefenseBonus = trueDefenseBonus;
         }
 
         public int manaMaximum() { return manaMaximum; }
         public int manaRegeneration() { return manaRegeneration; }
         public double damageMultiplier() { return 1.0 + damageBonus; }
+        public int trueDefenseBonus() { return trueDefenseBonus; }
     }
 
     private static final Map<UUID, SkyblockPlayerState> PLAYERS = new ConcurrentHashMap<>();
@@ -314,8 +321,12 @@ public final class SkyblockPlayerState {
     }
 
     /** Subtracts post-vanilla-mitigation damage using the custom Defense formula. */
+    public double applyDefense(double incomingDamage) {
+        return stats.applyDefense(incomingDamage, activePet.trueDefenseBonus());
+    }
+
     public boolean applyIncomingDamage(float vanillaDamage) {
-        int effective = (int) Math.round(stats.applyDefense(vanillaDamage) * 10.0);
+        int effective = (int) Math.round(applyDefense(vanillaDamage) * 10.0);
         if (effective > 0) currentHealth = Math.max(0, currentHealth - effective);
         return currentHealth <= 0;
     }
@@ -419,6 +430,24 @@ public final class SkyblockPlayerState {
         return Math.max(0, pet.manaRegeneration() + intelligenceBonus);
     }
 
+    private SkyblockStats applyPetStatBonuses(SkyblockStats base) {
+        return switch (activePet) {
+            case MAXOR -> new SkyblockStats(base.health(), base.defense() * 2,
+                    base.strength(), base.armorStrength(), base.weaponStrength(),
+                    base.critChance(), base.critDamage(), base.intelligence(),
+                    base.manaMaximum(), base.manaRegeneration(), base.weaponDamage());
+            case GOLDOR -> new SkyblockStats(base.health(), base.defense(),
+                    base.strength() * 2, base.armorStrength() * 2, base.weaponStrength() * 2,
+                    base.critChance(), base.critDamage(), Math.max(0, (int) Math.round(base.intelligence() * 0.90D)),
+                    base.manaMaximum(), base.manaRegeneration(), base.weaponDamage());
+            case NECRON -> new SkyblockStats(base.health() * 2, base.defense() * 2,
+                    base.strength() * 2, base.armorStrength() * 2, base.weaponStrength() * 2,
+                    base.critChance() * 2, base.critDamage() * 2, base.intelligence() * 2,
+                    base.manaMaximum() * 2, base.manaRegeneration() * 2, base.weaponDamage() * 2.0D);
+            default -> base;
+        };
+    }
+
     public void activatePet(ServerPlayer player, Pet pet) {
         if (activePet == Pet.IRON_GOLEM) player.removeEffect(MobEffects.RESISTANCE);
         removePetDisplay();
@@ -439,6 +468,10 @@ public final class SkyblockPlayerState {
                     "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=");
             case GOLDEN_DRAGON -> setHeadTexture(head,
                     "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU5ZjliMWZjMDE0MTY2Y2I0NmEwOTNlNTM0OWIyYmY2ZWRkMjAxYjY4MGQ2MmU0OGRiZjNhZjliMDQ1OTExNiJ9fX0=");
+            case MAXOR -> head = new ItemStack(Items.WITHER_SKELETON_SKULL);
+            case STORM -> head = new ItemStack(Items.SKELETON_SKULL);
+            case GOLDOR -> head = new ItemStack(Items.ZOMBIE_HEAD);
+            case NECRON -> head = new ItemStack(Items.WITHER_SKELETON_SKULL);
             default -> { return; }
         }
 
@@ -622,8 +655,8 @@ public final class SkyblockPlayerState {
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
         }
         stripVanillaArmorAttributes(player);
-        stats = SkyblockLevelBonuses.apply(AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(
-                VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel);
+        stats = applyPetStatBonuses(SkyblockLevelBonuses.apply(AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(
+                VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel));
 
         int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health()
                 * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.90D, necronFlameWallStacks)));
