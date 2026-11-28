@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "ggg",
+    "gsg",
+    "ggg"
+  ],
+  "key": {
+    "s": [
+      "hypixel:zombie_sword"
+    ],
+    "g": [
+      "hypixel:compact_gold_ingot"
+    ]
+  },
+  "result": {
+    "id": "hypixel:ornate_zombie_sword",
+    "count": 1
+  }
+}
