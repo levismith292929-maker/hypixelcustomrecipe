@@ -147,13 +147,22 @@ public final class WitherPetAbilities {
         double actualDamage = Math.min(target.getHealth(), requestedDamage);
         if (actualDamage <= 0.0D) return;
 
-        if (MaxorEncounter.isMaxor(target) || StormEncounter.isStorm(target)
-                || GoldorEncounter.isGoldor(target) || NecronEncounter.isNecron(target)) {
+        if (MaxorEncounter.isMaxor(target)) {
             MaxorEncounter.recordDirectDamage(target, attacker, actualDamage);
+            target.setHealth((float) Math.max(0.0D, target.getHealth() - requestedDamage));
+        } else if (StormEncounter.isStorm(target)) {
+            StormEncounter.recordDirectDamage(target, attacker, actualDamage);
+            target.setHealth((float) Math.max(0.0D, target.getHealth() - requestedDamage));
+        } else if (GoldorEncounter.isGoldor(target)) {
+            // Goldor's direct-damage method also applies the health subtraction.
+            GoldorEncounter.recordDirectDamage(target, attacker, actualDamage);
+        } else if (NecronEncounter.isNecron(target)) {
+            NecronEncounter.recordDirectDamage(target, attacker, actualDamage);
+            target.setHealth((float) Math.max(0.0D, target.getHealth() - requestedDamage));
         } else {
             target.setHealth((float) Math.max(0.0D, target.getHealth() - requestedDamage));
-            if (target.getHealth() <= 0.0F) target.die(level.damageSources().magic());
         }
+        if (target.getHealth() <= 0.0F && target.isAlive()) target.die(level.damageSources().magic());
         DamageNumberHandler.show(level, target, (float) actualDamage, false);
     }
 
