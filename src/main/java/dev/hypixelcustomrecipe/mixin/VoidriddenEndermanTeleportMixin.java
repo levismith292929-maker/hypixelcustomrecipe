@@ -37,8 +37,8 @@ public abstract class VoidriddenEndermanTeleportMixin {
                 || !((Object) this instanceof VoidriddenEnderman enderman)
                 || !(enderman.level() instanceof ServerLevel serverLevel)) return;
         if (!NecronEncounter.isInsideArenaForVoidridden(enderman.getX(), enderman.getZ())) {
+            // Revert the position after the teleport returns; never cancel randomTeleport here.
             enderman.setPos(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY, hypixelcustomrecipe$oldZ);
-            cir.setReturnValue(false);
             return;
         }
         Vec3 start = new Vec3(hypixelcustomrecipe$oldX, hypixelcustomrecipe$oldY + 1.0, hypixelcustomrecipe$oldZ);
