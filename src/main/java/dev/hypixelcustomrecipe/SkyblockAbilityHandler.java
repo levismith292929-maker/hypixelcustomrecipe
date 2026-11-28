@@ -546,12 +546,21 @@ public final class SkyblockAbilityHandler {
         ring.age++;
         double progress = Math.min(1.0D, ring.age / 40.0D);
         double y = player.getY() + 0.08D + progress * 4.0D;
-        double rotation = ring.age * (Math.PI / 20.0D);
+        // Two interleaved rings of four hearts rotate in opposite directions.
+        // Half the previous angular speed makes the motion slower and smoother.
+        double rotation = ring.age * (Math.PI / 40.0D);
         for (int i = 0; i < 4; i++) {
-            double angle = rotation + i * (Math.PI / 2.0D);
-            double x = player.getX() + Math.cos(angle) * ring.radius;
-            double z = player.getZ() + Math.sin(angle) * ring.radius;
-            level.sendParticles(ParticleTypes.HEART, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            double forwardAngle = rotation + i * (Math.PI / 2.0D);
+            double forwardX = player.getX() + Math.cos(forwardAngle) * ring.radius;
+            double forwardZ = player.getZ() + Math.sin(forwardAngle) * ring.radius;
+            level.sendParticles(ParticleTypes.HEART, forwardX, y, forwardZ,
+                    1, 0.0D, 0.0D, 0.0D, 0.0D);
+
+            double reverseAngle = -rotation + (i + 0.5D) * (Math.PI / 2.0D);
+            double reverseX = player.getX() + Math.cos(reverseAngle) * ring.radius;
+            double reverseZ = player.getZ() + Math.sin(reverseAngle) * ring.radius;
+            level.sendParticles(ParticleTypes.HEART, reverseX, y, reverseZ,
+                    1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         if (ring.age >= 40) ACTIVE_HEALING_RINGS.remove(player.getUUID());
     }
