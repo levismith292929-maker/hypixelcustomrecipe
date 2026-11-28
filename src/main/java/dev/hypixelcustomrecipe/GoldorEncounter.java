@@ -37,7 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /** Goldor's chase-and-sword-slam encounter. */
 public final class GoldorEncounter {
-    private static final double MAX_HEALTH = 25_000_000.0D;
+    private static final double MAX_HEALTH = 250_000_000.0D;
     private static final double ENTITY_HEALTH = 1_024.0D;
     private static final int WARNING_TICKS = 40;
     private static final int SWORD_LIFETIME = 600;
@@ -124,7 +124,7 @@ public final class GoldorEncounter {
         clearSwords();
         PARTICIPANTS.clear();
         DEAD_PARTICIPANTS.clear();
-        BAR.setName(Component.literal("Goldor: 25,000,000 / 25,000,000 HP"));
+        BAR.setName(Component.literal("Goldor: 250,000,000 / 250,000,000 HP"));
         BAR.setProgress(1.0F);
         BAR.addPlayer(player);
         level.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 2.0F, 0.55F);
