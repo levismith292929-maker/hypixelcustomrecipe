@@ -3,6 +3,7 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import com.mojang.math.Transformation;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.network.chat.Component;
@@ -489,7 +490,7 @@ public final class StormEncounter {
             Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
             if (display != null) {
                 display.setBlockState(Blocks.IRON_BLOCK.defaultBlockState());
-                display.setTransformation(new net.minecraft.world.entity.Display.Transformation(
+                display.setTransformation(new Transformation(
                         new Vector3f(), new Quaternionf(), new Vector3f(1.0F, 4.0F, 1.0F), new Quaternionf()));
                 double x = arenaCenter.getX() - 45 + level.getRandom().nextInt(91) + 0.5D;
                 double z = arenaCenter.getZ() - 45 + level.getRandom().nextInt(91) + 0.5D;
