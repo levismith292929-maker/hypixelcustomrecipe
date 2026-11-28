@@ -111,7 +111,7 @@ public final class NecronEncounter {
                     return;
                 }
             }
-            if (necron != null && entity == necron) finish(true);
+            if (necron != null && entity == necron) finish(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
         });
         ServerTickEvents.END_SERVER_TICK.register(NecronEncounter::tick);
     }
@@ -147,7 +147,7 @@ public final class NecronEncounter {
     }
 
     public static boolean summonForTesting(ServerPlayer player) {
-        if (isActive() || MaxorEncounter.isActive() || StormEncounter.isActive()
+        if (level != null || isActive() || MaxorEncounter.isActive() || StormEncounter.isActive()
                 || GoldorEncounter.isActive()) return false;
         return start(player, (ServerLevel) player.level(), true);
     }
@@ -920,6 +920,7 @@ public final class NecronEncounter {
 
     private static void finish(boolean defeated) {
         if (level == null) return;
+        if (!defeated && normalTrial) { abortTrial("The Normal Wither Trial failed during Necron. Your Wither Altar has been returned."); return; }
         BAR.removeAllPlayers();
         if (!defeated && necron != null) necron.discard();
         if (defeated && necron != null) {
