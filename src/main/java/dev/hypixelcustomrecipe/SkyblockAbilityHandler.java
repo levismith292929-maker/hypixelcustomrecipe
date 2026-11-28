@@ -140,6 +140,14 @@ public final class SkyblockAbilityHandler {
             } else if (stack.is(DatapackItems.PET_IRON_GOLEM)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.IRON_GOLEM);
                 if (!serverPlayer.getAbilities().instabuild) stack.shrink(1);
+            } else if (stack.is(DatapackItems.MAXOR_PET)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.MAXOR);
+            } else if (stack.is(DatapackItems.STORM_PET)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.STORM);
+            } else if (stack.is(DatapackItems.GOLDOR_PET)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.GOLDOR);
+            } else if (stack.is(DatapackItems.NECRON_PET)) {
+                activatePet(serverPlayer, SkyblockPlayerState.Pet.NECRON);
             } else if (stack.is(DatapackItems.PET_REMOVER)) {
                 activatePet(serverPlayer, SkyblockPlayerState.Pet.NONE);
                 serverPlayer.sendSystemMessage(Component.literal("Your pet has been removed. Your normal stats have been restored."));
@@ -322,7 +330,10 @@ public final class SkyblockAbilityHandler {
 
     private static void useScytheAbility(ServerPlayer player, boolean soulBlade) {
         String abilityId = soulBlade ? "soul_blade" : "necrons_scythe";
-        if (!beginAbility(player, abilityId, soulBlade ? 100 : 1, 1)) {
+        boolean freeNecronScythe = !soulBlade
+                && SkyblockPlayerState.get(player).activePet() == SkyblockPlayerState.Pet.NECRON;
+        if (!beginAbility(player, abilityId, freeNecronScythe ? 0 : (soulBlade ? 100 : 1),
+                freeNecronScythe ? 0 : 1)) {
             if (soulBlade && mana(player).isOnCooldown(abilityId)) {
                 player.sendSystemMessage(Component.literal("Soul Blade is recharging!"));
             }
@@ -362,19 +373,28 @@ public final class SkyblockAbilityHandler {
                                 || target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenSpider
                                 || target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenZombie
                                 || target instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEnderman);
-                        double soulBladeDamage;
+                        boolean trialEnemy = WitherPetAbilities.isWitherTrialEnemy(target);
+                        SkyblockPlayerState.Pet activePet = SkyblockPlayerState.get(player).activePet();
+                        double percentage;
                         if (necronVoidridden) {
-                            soulBladeDamage = maximumHealth * 0.10D;
+                            percentage = 0.10D;
                         } else {
-                            // Other targets use the normal maximum-Health digit scaling.
                             int healthDigits = Math.max(3,
                                     Long.toString(Math.max(1L, (long) Math.ceil(maximumHealth))).length());
-                            double percentage = Math.max(0.0025D, 0.035D / healthDigits);
-                            soulBladeDamage = maximumHealth * percentage;
+                            percentage = Math.max(0.0025D, 0.035D / healthDigits);
                         }
+                        double petSoulBladeBonus = switch (activePet) {
+                            case STORM -> trialEnemy ? 0.005D : 0.065D;
+                            case NECRON -> trialEnemy ? 0.065D : 0.215D;
+                            default -> 0.0D;
+                        };
+                        percentage += petSoulBladeBonus;
+                        double soulBladeDamage = maximumHealth * percentage;
                         if (NecronEncounter.isNecron(target)) {
-                            // Soul Blade has a fixed 250,000 logical-damage cap per hit on Necron.
-                            soulBladeDamage = NecronEncounter.toEntityDamage(250_000.0D);
+                            // Preserve the existing 250,000 logical base hit, then add the pet's
+                            // percentage-point bonus against this Trial boss.
+                            soulBladeDamage = NecronEncounter.toEntityDamage(
+                                    250_000.0D + maximumHealth * petSoulBladeBonus);
                         }
                         applyScytheTrueDamage(level, target, source, (float) soulBladeDamage);
                     }
