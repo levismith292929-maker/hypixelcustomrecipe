@@ -192,21 +192,18 @@ public final class ModItems {
         Item.Properties itemProperties = new Item.Properties()
                 .setId(key)
                 .stacksTo(maxStackSize)
-                .component(DataComponents.CUSTOM_NAME, (isStarShard(path) || isVoidMaterial(path))
-                        ? Component.literal(displayName).withStyle(style -> style
-                                .withColor(net.minecraft.ChatFormatting.GOLD)
-                                .withBold(true)
-                                .withUnderlined(true)
-                                .withItalic(false))
-                        : ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
+                .component(DataComponents.CUSTOM_NAME, isVoidMaterial(path)
+                        ? ItemFormatting.name(displayName, net.minecraft.ChatFormatting.WHITE)
+                        : isStarShard(path)
+                                ? Component.literal(displayName).withStyle(style -> style
+                                        .withColor(net.minecraft.ChatFormatting.GOLD)
+                                        .withBold(true)
+                                        .withUnderlined(true)
+                                        .withItalic(false))
+                                : ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
         if (isVoidMaterial(path)) {
-            int customHeadId = voidMaterialHeadId(path);
-            itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(
-                    Component.literal("Custom Head ID: " + customHeadId).withStyle(style -> style
-                            .withColor(net.minecraft.ChatFormatting.GRAY).withItalic(false)),
-                    Component.literal("www.minecraft-heads.com").withStyle(style -> style
-                            .withColor(net.minecraft.ChatFormatting.BLUE).withItalic(false)))));
+            // Void materials intentionally have no lore.
         } else if (description != null) {
             itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(
                     ItemFormatting.lore(description))));
