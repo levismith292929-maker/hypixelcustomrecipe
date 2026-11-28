@@ -44,7 +44,7 @@ public final class VoidTrailManager {
                 continue;
             }
             if (now % 2L == 0L) emitTrailParticles(level, trail);
-            if (now % 10L == 0L) damagePlayersAlongEntireTrail(level, trail);
+            if (now % 20L == 0L) damagePlayersAlongEntireTrail(level, trail);
         }
         if (trails.isEmpty()) TRAILS.remove(level);
     }
@@ -86,7 +86,11 @@ public final class VoidTrailManager {
                     break;
                 }
             }
-            if (insideTrail) player.hurtServer(level, level.damageSources().generic(), 10.0F);
+            if (insideTrail) {
+                // The trail removes 5% of the player's current maximum health once per second.
+                float damage = (float) (player.getMaxHealth() * 0.05D);
+                player.hurtServer(level, level.damageSources().generic(), damage);
+            }
         }
     }
 
