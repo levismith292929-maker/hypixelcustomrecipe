@@ -60,15 +60,22 @@ public final class ModItems {
             "6f89b150be9c4c5249f355f68ea0c4391300a9be1f260d750fc35a1817ad796e"
     );
 
-    public static final Item VOID_FRAGMENT = registerTexturedHeadFromValue(
-            "void_fragment", "Void Fragment",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIwMWFlMWE4YTA0ZGY1MjY1NmY1ZTQ4MTNlMWZiY2Y5Nzg3N2RiYmZiYzQyNjhkMDQzMTZkNmY5Zjc1MyJ9fX0=", 64,
-            "Dropped by Voidridden enemies."
+    public static final Item VOID_FRAGMENT = registerVoidMaterialHead(
+            "void_fragment", "Void Block",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzlmY2Y2M2I4OGQwY2FkMDgyZGMyMzgzM2FjMjFiN2IwYWZkNGM3ZWExNDcxMWVlYmRlZDYwNTczNDBkODM5NCJ9fX0=", 119280
     );
-
-    public static final Item VOID_SHARD = registerMaterialItem("void_shard", "Void Shard", Items.AMETHYST_SHARD, false);
-    public static final Item FINE_VOID_SHARD = registerMaterialItem("fine_void_shard", "Fine Void Shard", Items.PRISMARINE_SHARD, true);
-    public static final Item PURE_VOID_SHARD = registerMaterialItem("pure_void_shard", "Pure Void Shard", Items.NETHER_STAR, true);
+    public static final Item VOID_SHARD = registerVoidMaterialHead(
+            "void_shard", "Void Orb",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIwMWFlMWE4YTA0ZGY1MjY1NmY1ZTQ4MTNlMWZiY2Y5Nzg3N2RiYmZiYzQyNjhkMDQzMTZkNmY5Zjc1MyJ9fX0=", 14324
+    );
+    public static final Item FINE_VOID_SHARD = registerVoidMaterialHead(
+            "fine_void_shard", "Void Knight",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTFhM2Y4ZjFiZjk1MDFlOGY4ZDRiYmMzMTJhNjEzNGVjMjEwOWZmMTkxZWJhOTRiMDYwNzhkMjNhYzYyZDg5NCJ9fX0=", 79604
+    );
+    public static final Item PURE_VOID_SHARD = registerVoidMaterialHead(
+            "pure_void_shard", "Void Orb",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjcyYWM2YTM0YWU1NWRhNjk2MGI4ZWRmZDAzYmJiNTliOTY5ZTkxZjVmMWJlOTRmMDVlZTFlZDU5YjEwZjBlOSJ9fX0=", 98860
+    );
     public static final Item SOUL_SHARD = registerTexturedHeadFromValue(
             "soul_shard", "Soul Shard",
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTRiOGYzZGJlYTA4YjM2NDA1NTU3MjljMzJkNzQ2MWFhNDllZTIyOWI5ZDZiYjliYTNjOTA3ZmRjNDVmYTk1MiJ9fX0=", 64,
@@ -141,12 +148,31 @@ public final class ModItems {
         return registerTexturedHeadFromValue(path, displayName, textureValue, maxStackSize);
     }
 
+    private static Item registerVoidMaterialHead(String path, String displayName, String textureValue, int customHeadId) {
+        return registerTexturedHeadFromValue(path, displayName, textureValue, 64, "Custom Head ID: " + customHeadId);
+    }
+
     private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue, int maxStackSize) {
         return registerTexturedHeadFromValue(path, displayName, textureValue, maxStackSize, null);
     }
 
     private static boolean isStarShard(String path) {
         return path.equals("star_shard1") || path.equals("star_shard2") || path.equals("star_shard3");
+    }
+
+    private static boolean isVoidMaterial(String path) {
+        return path.equals("void_fragment") || path.equals("void_shard")
+                || path.equals("fine_void_shard") || path.equals("pure_void_shard");
+    }
+
+    private static int voidMaterialHeadId(String path) {
+        return switch (path) {
+            case "void_fragment" -> 119280;
+            case "void_shard" -> 14324;
+            case "fine_void_shard" -> 79604;
+            case "pure_void_shard" -> 98860;
+            default -> throw new IllegalArgumentException("Not a Void material: " + path);
+        };
     }
 
     private static Item registerTexturedHeadFromValue(String path, String displayName, String textureValue, int maxStackSize, String description) {
@@ -165,7 +191,7 @@ public final class ModItems {
         Item.Properties itemProperties = new Item.Properties()
                 .setId(key)
                 .stacksTo(maxStackSize)
-                .component(DataComponents.CUSTOM_NAME, isStarShard(path)
+                .component(DataComponents.CUSTOM_NAME, (isStarShard(path) || isVoidMaterial(path))
                         ? Component.literal(displayName).withStyle(style -> style
                                 .withColor(net.minecraft.ChatFormatting.GOLD)
                                 .withBold(true)
@@ -173,7 +199,14 @@ public final class ModItems {
                                 .withItalic(false))
                         : ItemFormatting.name(displayName, ItemFormatting.rarityColor(path)))
                 .component(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
-        if (description != null) {
+        if (isVoidMaterial(path)) {
+            int customHeadId = voidMaterialHeadId(path);
+            itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(
+                    Component.literal("Custom Head ID: " + customHeadId).withStyle(style -> style
+                            .withColor(net.minecraft.ChatFormatting.GRAY).withItalic(false)),
+                    Component.literal("www.minecraft-heads.com").withStyle(style -> style
+                            .withColor(net.minecraft.ChatFormatting.BLUE).withItalic(false)))));
+        } else if (description != null) {
             itemProperties.component(DataComponents.LORE, new ItemLore(java.util.List.of(
                     ItemFormatting.lore(description))));
         }
