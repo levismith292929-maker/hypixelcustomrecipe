@@ -447,7 +447,7 @@ public final class SkyblockPlayerState {
         return Math.max(0, pet.manaRegeneration() + intelligenceBonus);
     }
 
-    private SkyblockStats applyPetStatBonuses(SkyblockStats base) {
+    public SkyblockStats applyPetStatBonuses(SkyblockStats base) {
         return switch (activePet) {
             case MAXOR -> new SkyblockStats(base.health(), base.defense() * 2,
                     base.strength(), base.armorStrength(), base.weaponStrength(),
