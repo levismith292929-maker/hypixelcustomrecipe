@@ -486,15 +486,15 @@ public final class SkyblockPlayerState {
                     "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=");
             case GOLDEN_DRAGON -> setHeadTexture(head,
                     "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU5ZjliMWZjMDE0MTY2Y2I0NmEwOTNlNTM0OWIyYmY2ZWRkMjAxYjY4MGQ2MmU0OGRiZjNhZjliMDQ1OTExNiJ9fX0=");
-            case MAXOR -> head = new ItemStack(Items.WITHER_SKELETON_SKULL);
-            case STORM -> head = new ItemStack(Items.SKELETON_SKULL);
-            case GOLDOR -> head = new ItemStack(Items.ZOMBIE_HEAD);
-            case NECRON -> head = new ItemStack(Items.WITHER_SKELETON_SKULL);
+            case MAXOR -> head = new ItemStack(DatapackItems.MAXOR_PET);
+            case STORM -> head = new ItemStack(DatapackItems.STORM_PET);
+            case GOLDOR -> head = new ItemStack(DatapackItems.GOLDOR_PET);
+            case NECRON -> head = new ItemStack(DatapackItems.NECRON_PET);
             default -> { return; }
         }
 
         ServerLevel level = (ServerLevel) player.level();
-        petDisplay = new ArmorStand(level, player.getX(), player.getY() - 0.6, player.getZ());
+        petDisplay = new ArmorStand(level, player.getX(), player.getY() + 1.0D, player.getZ());
         petDisplay.setInvisible(true);
         petDisplay.setNoGravity(true);
         petDisplay.getEntityData().set(ArmorStand.DATA_CLIENT_FLAGS,
@@ -529,7 +529,12 @@ public final class SkyblockPlayerState {
             return;
         }
         double bob = Math.sin(player.tickCount * 0.12) * 0.12;
-        petDisplay.setPos(player.getX(), player.getY() - 0.6 + bob, player.getZ());
+        double yaw = Math.toRadians(player.getYRot());
+        // Keep the pet diagonally behind and to the player's right.
+        double offsetX = Math.sin(yaw) + Math.cos(yaw);
+        double offsetZ = -Math.cos(yaw) + Math.sin(yaw);
+        petDisplay.setPos(player.getX() + offsetX, player.getY() + 1.0D + bob,
+                player.getZ() + offsetZ);
         petDisplay.setYRot(player.getYRot());
     }
 
