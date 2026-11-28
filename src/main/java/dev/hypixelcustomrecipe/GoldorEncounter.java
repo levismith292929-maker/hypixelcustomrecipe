@@ -183,7 +183,7 @@ public final class GoldorEncounter {
     }
 
     public static boolean summonForTesting(ServerPlayer player) {
-        if (goldor != null && goldor.isAlive()) return false;
+        if (encounterLevel != null || (goldor != null && goldor.isAlive())) return false;
         ServerLevel level = (ServerLevel) player.level();
         WitherBoss boss = EntityTypes.WITHER.create(level, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) return false;
@@ -418,6 +418,7 @@ public final class GoldorEncounter {
 
     private static void abortAfterBossRemoval() {
         if (encounterLevel == null) return;
+        if (normalTrial) { abortTrial("Goldor was removed. The encounter has been reset."); return; }
         BAR.removeAllPlayers();
         clearSwords();
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
@@ -436,6 +437,7 @@ public final class GoldorEncounter {
 
     private static void abortBecauseAllFightersDied() {
         if (encounterLevel == null) return;
+        if (normalTrial) { abortTrial("All players fighting Goldor have been defeated. The encounter has ended."); return; }
         if (goldor != null) goldor.discard();
         BAR.removeAllPlayers();
         clearSwords();
