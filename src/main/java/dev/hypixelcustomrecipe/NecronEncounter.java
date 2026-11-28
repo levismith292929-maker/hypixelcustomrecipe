@@ -324,7 +324,8 @@ public final class NecronEncounter {
 
         if (attack3Timer > 0) attack3Timer--;
         if (attack7Ticks <= 0 && attack7Timer > 0) attack7Timer--;
-        if (attack3Timer <= 0 && attack4Ticks == 0) {
+        if (attack3Timer <= 0 && attack1Ticks == 0 && attack4Ticks == 0
+                && attack6Ticks == 0 && attack7Ticks == 0 && BOMBS.isEmpty()) {
             beginLaser();
             return;
         }
