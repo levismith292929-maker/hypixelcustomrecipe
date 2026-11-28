@@ -391,7 +391,10 @@ public final class StormEncounter {
         level.playSound(null, storm.blockPosition(), SoundEvents.WITHER_DEATH,
                 SoundSource.HOSTILE, 2.0F, 0.9F);
         server.getPlayerList().broadcastSystemMessage(Component.literal(
-                (testMode ? "Storm test encounter completed. No progression or rewards were triggered." : "Storm has been defeated! " + rewarded + " player(s) earned the reward.")), false);
+                (testMode ? "Storm test encounter completed. No progression or rewards were triggered." : "Storm has been defeated! " + rewarded + " player(s) earned the reward. Goldor begins in 2 minutes!")), false);
+        if (!testMode) {
+            GoldorEncounter.beginBreak(level, arenaCenter, altarOwner, Set.copyOf(PARTICIPANTS));
+        }
         clear();
     }
 
