@@ -332,8 +332,7 @@ public final class SkyblockAbilityHandler {
         String abilityId = soulBlade ? "soul_blade" : "necrons_scythe";
         boolean freeNecronScythe = !soulBlade
                 && SkyblockPlayerState.get(player).activePet() == SkyblockPlayerState.Pet.NECRON;
-        if (!beginAbility(player, abilityId, freeNecronScythe ? 0 : (soulBlade ? 100 : 1),
-                freeNecronScythe ? 0 : 1)) {
+        if (!freeNecronScythe && !beginAbility(player, abilityId, soulBlade ? 100 : 1, 1)) {
             if (soulBlade && mana(player).isOnCooldown(abilityId)) {
                 player.sendSystemMessage(Component.literal("Soul Blade is recharging!"));
             }
