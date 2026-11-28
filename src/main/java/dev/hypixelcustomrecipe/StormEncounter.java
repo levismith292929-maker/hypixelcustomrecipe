@@ -39,7 +39,7 @@ public final class StormEncounter {
     private static final double ENTITY_HEALTH = 1_024.0D;
     private static final double BOSS_HP_PER_ENTITY_HP = BOSS_HEALTH / ENTITY_HEALTH;
     private static final double REWARD_THRESHOLD = BOSS_HEALTH * 0.20D;
-    private static final int BREAK_TICKS = 5 * 60 * 20;
+    private static final int BREAK_TICKS = 2 * 60 * 20;
     private static final int ARENA_HALF_SIZE = 50;
     private static final int SAFE_ZONE_COUNT = 5;
     // Each safe zone is 4 blocks across (2-block radius).
@@ -112,7 +112,7 @@ public final class StormEncounter {
         breakTimer = BREAK_TICKS;
         warningTimer = -1;
         waveTimer = WAVE_INTERVAL_TICKS;
-        BOSS_BAR.setName(Component.literal("Storm begins in 5:00"));
+        BOSS_BAR.setName(Component.literal("Storm begins in 2:00"));
         BOSS_BAR.setProgress(1.0F);
         BOSS_BAR.removeAllPlayers();
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
