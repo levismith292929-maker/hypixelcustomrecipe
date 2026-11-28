@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SkyblockAbilityHandler {
     private static final Map<UUID, BreathState> ACTIVE_BREATHS = new ConcurrentHashMap<>();
     private static final Map<UUID, SlashState> ACTIVE_SLASHES = new ConcurrentHashMap<>();
+    private static final Map<UUID, HealingRingState> ACTIVE_HEALING_RINGS = new ConcurrentHashMap<>();
 
     private SkyblockAbilityHandler() {
     }
@@ -83,6 +84,8 @@ public final class SkyblockAbilityHandler {
                 if (breath != null) tickDragonBreath(player, breath);
                 SlashState slash = ACTIVE_SLASHES.get(player.getUUID());
                 if (slash != null) tickScytheSlash(player, slash);
+                HealingRingState healingRing = ACTIVE_HEALING_RINGS.get(player.getUUID());
+                if (healingRing != null) tickHealingRing(player, healingRing);
                 OreTrackerSearch.tick(player);
             }
             ACTIVE_BREATHS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
@@ -91,6 +94,7 @@ public final class SkyblockAbilityHandler {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             ACTIVE_BREATHS.clear();
             ACTIVE_SLASHES.clear();
+            ACTIVE_HEALING_RINGS.clear();
             OreTrackerSearch.clear();
         });
 
@@ -116,6 +120,10 @@ public final class SkyblockAbilityHandler {
                 useSoulBlade(serverPlayer);
             } else if (stack.is(DatapackItems.ZOMBIE_SWORD)) {
                 useZombieSword(serverPlayer);
+            } else if (stack.is(DatapackItems.ORNATE_ZOMBIE_SWORD)) {
+                useOrnateZombieSword(serverPlayer);
+            } else if (stack.is(DatapackItems.EMBELLISHED_ZOMBIE_SWORD)) {
+                useEmbellishedZombieSword(serverPlayer);
             } else if (stack.is(DatapackItems.ORE_TRACKER)) {
                 useOreTracker(serverPlayer);
             } else if (stack.is(DatapackItems.STAT_VIEWER)) {
@@ -464,11 +472,77 @@ public final class SkyblockAbilityHandler {
         }
     }
 
-    /** Zombie Sword: restore one heart, with its one-second cooldown. */
+    /** Zombie Sword: heal the wielder for 5% of maximum custom Health. */
     private static void useZombieSword(ServerPlayer player) {
         if (!beginAbility(player, "zombie_sword", 50, 20)) return;
-        SkyblockPlayerState.get(player).heal(20);
+        SkyblockPlayerState state = SkyblockPlayerState.get(player);
+        state.heal((int) Math.ceil(state.maximumHealth() * 0.05D));
         playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.7F, 1.4F);
+    }
+
+    private static void useOrnateZombieSword(ServerPlayer player) {
+        useHealingZombieSword(player, "ornate_zombie_sword", 100, 20,
+                0.15D, 0.02D, 2.0D, 0.1D);
+    }
+
+    private static void useEmbellishedZombieSword(ServerPlayer player) {
+        useHealingZombieSword(player, "embellished_zombie_sword", 300, 200,
+                0.25D, 0.06D, 2.5D, 0.2D);
+    }
+
+    private static void useHealingZombieSword(ServerPlayer player, String abilityId, int manaCost,
+                                               int cooldown, double selfFraction, double allyFraction,
+                                               double baseRadius, double radiusPerIntelligenceDigit) {
+        if (!beginAbility(player, abilityId, manaCost, cooldown)) return;
+        ServerLevel level = (ServerLevel) player.level();
+        SkyblockPlayerState ownState = SkyblockPlayerState.get(player);
+        ownState.heal((int) Math.ceil(ownState.maximumHealth() * selfFraction));
+
+        int intelligence = Math.max(0, ownState.stats().intelligence());
+        int intelligenceDigits = Integer.toString(intelligence).length();
+        double radius = baseRadius + intelligenceDigits * radiusPerIntelligenceDigit;
+        double radiusSquared = radius * radius;
+        AABB nearby = player.getBoundingBox().inflate(radius);
+        for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, nearby,
+                candidate -> candidate != player && candidate.isAlive()
+                        && candidate.distanceToSqr(player) <= radiusSquared)) {
+            SkyblockPlayerState allyState = SkyblockPlayerState.get(ally);
+            allyState.heal((int) Math.ceil(allyState.maximumHealth() * allyFraction));
+            ally.sendSystemMessage(Component.literal("You were healed by " + player.getName().getString() + "'s "
+                    + (abilityId.equals("ornate_zombie_sword") ? "Ornate Zombie Sword" : "Embellished Zombie Sword") + "!")
+                    .withStyle(style -> style.withColor(0x55FF55)));
+        }
+
+        ACTIVE_HEALING_RINGS.put(player.getUUID(),
+                new HealingRingState(radius, player.position().y));
+        playSound(player, net.minecraft.sounds.SoundEvents.ZOMBIE_VILLAGER_CURE, 0.9F, 1.25F);
+    }
+
+    /** Four hearts rise four blocks from the ground while rotating around the healing radius. */
+    private static void tickHealingRing(ServerPlayer player, HealingRingState ring) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            ACTIVE_HEALING_RINGS.remove(player.getUUID());
+            return;
+        }
+        ring.age++;
+        double progress = Math.min(1.0D, ring.age / 40.0D);
+        double y = player.getY() + 0.08D + progress * 4.0D;
+        double rotation = ring.age * (Math.PI / 20.0D);
+        for (int i = 0; i < 4; i++) {
+            double angle = rotation + i * (Math.PI / 2.0D);
+            double x = player.getX() + Math.cos(angle) * ring.radius;
+            double z = player.getZ() + Math.sin(angle) * ring.radius;
+            level.sendParticles(ParticleTypes.HEART, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+        if (ring.age >= 40) ACTIVE_HEALING_RINGS.remove(player.getUUID());
+    }
+
+    private static final class HealingRingState {
+        private final double radius;
+        private int age;
+        private HealingRingState(double radius, double ignoredStartingY) {
+            this.radius = radius;
+        }
     }
 
 
