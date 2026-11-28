@@ -897,8 +897,11 @@ public final class NecronEncounter {
     private static void updateDangerZoneDisplays(int color) {
         if (dangerDisplayColor == color) return;
         dangerDisplayColor = color;
-        net.minecraft.world.level.block.Block block = color == 0xFFFF00 ? Blocks.GOLD_BLOCK
-                : color == 0xFF8800 ? Blocks.PUMPKIN : Blocks.REDSTONE_BLOCK;
+        net.minecraft.world.level.block.Block block = color == 0xFFFF00
+                ? net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.ResourceLocation.withDefaultNamespace("yellow_concrete"))
+                : color == 0xFF8800
+                ? net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.ResourceLocation.withDefaultNamespace("orange_concrete"))
+                : net.minecraft.core.registries.BLOCK.getValue(net.minecraft.resources.ResourceLocation.withDefaultNamespace("red_concrete"));
         for (Display.BlockDisplay display : DANGER_ZONE_DISPLAYS) display.setBlockState(block.defaultBlockState());
     }
 
