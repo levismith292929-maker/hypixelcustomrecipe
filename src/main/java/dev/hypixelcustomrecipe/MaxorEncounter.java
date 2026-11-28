@@ -83,6 +83,14 @@ public final class MaxorEncounter {
     public static boolean isMaxor(LivingEntity entity) { return maxor != null && entity == maxor; }
     public static boolean isMaxorMinion(UUID entityId) { return MINIONS.contains(entityId); }
 
+    /** Maxor's displayed/logical health; vanilla Wither health is only the backing pool. */
+    public static double logicalMaximumHealth() { return MAXOR_HEALTH; }
+
+    /** Converts logical boss damage into the Wither's vanilla-compatible backing health. */
+    public static double toEntityDamage(double logicalDamage) {
+        return logicalDamage * ENTITY_HEALTH / MAXOR_HEALTH;
+    }
+
     public static void initialize() {
         UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
             ItemStack held = player.getItemInHand(hand);
@@ -322,10 +330,10 @@ public final class MaxorEncounter {
             if (player.level() != encounterLevel || !player.isAlive()
                     || player.isCreative() || player.isSpectator()
                     || LASER_HIT_COOLDOWNS.containsKey(player.getUUID())) continue;
-            Vec3 relative = player.getEyePosition().subtract(laserShotStart);
-            double projection = Math.max(0.0D, Math.min(1.0D, relative.dot(segment) / lengthSquared));
-            Vec3 closest = laserShotStart.add(segment.scale(projection));
-            if (player.getEyePosition().distanceToSqr(closest) > radiusSquared) continue;
+            // Test the whole player hitbox against the beam, not only the eye point.
+            // This lets the narrow beam hit a player's body while preserving its small radius.
+            if (player.getBoundingBox().inflate(LASER_HIT_RADIUS)
+                    .clip(laserShotStart, laserShotEnd).isEmpty()) continue;
 
             SkyblockPlayerState.get(player).addMaxorLaserStack();
             LASER_AFFECTED.add(player.getUUID());

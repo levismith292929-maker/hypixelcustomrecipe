@@ -71,6 +71,14 @@ public final class StormEncounter {
     public static boolean isActive() { return storm != null && storm.isAlive(); }
     public static boolean isStorm(LivingEntity entity) { return storm != null && entity == storm; }
 
+    /** Storm's displayed/logical health; vanilla Wither health is only the backing pool. */
+    public static double logicalMaximumHealth() { return BOSS_HEALTH; }
+
+    /** Converts logical boss damage into the Wither's vanilla-compatible backing health. */
+    public static double toEntityDamage(double logicalDamage) {
+        return logicalDamage * ENTITY_HEALTH / BOSS_HEALTH;
+    }
+
     public static void initialize() {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
                 storm == null || entity != storm

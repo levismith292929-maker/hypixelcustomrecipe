@@ -365,9 +365,13 @@ public final class SkyblockAbilityHandler {
                     if (hitTargets.add(target.getUUID())) {
                         double maximumHealth = target instanceof ServerPlayer targetPlayer
                                 ? SkyblockPlayerState.get(targetPlayer).maximumHealth()
-                                : NecronEncounter.isNecron(target)
-                                    ? NecronEncounter.logicalMaximumHealth()
-                                    : target.getMaxHealth();
+                                : StormEncounter.isStorm(target)
+                                    ? StormEncounter.logicalMaximumHealth()
+                                    : MaxorEncounter.isMaxor(target)
+                                        ? MaxorEncounter.logicalMaximumHealth()
+                                        : NecronEncounter.isNecron(target)
+                                            ? NecronEncounter.logicalMaximumHealth()
+                                            : target.getMaxHealth();
                         // During Necron, Soul Blade deals a flat 10% max-HP true-damage
                         // hit to the Voidridden wave. Their damage deliberately ignores
                         // the normal digit-based scaling used for other targets.
@@ -398,6 +402,10 @@ public final class SkyblockAbilityHandler {
                             // percentage-point bonus against this Trial boss.
                             soulBladeDamage = NecronEncounter.toEntityDamage(
                                     250_000.0D + maximumHealth * petSoulBladeBonus);
+                        } else if (StormEncounter.isStorm(target)) {
+                            soulBladeDamage = StormEncounter.toEntityDamage(soulBladeDamage);
+                        } else if (MaxorEncounter.isMaxor(target)) {
+                            soulBladeDamage = MaxorEncounter.toEntityDamage(soulBladeDamage);
                         }
                         applyScytheTrueDamage(level, target, source, (float) soulBladeDamage);
                     }
