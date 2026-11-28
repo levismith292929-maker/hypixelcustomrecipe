@@ -54,11 +54,21 @@ public record SkyblockStats(
      * damage reduction is 30%; additional Defense continues scaling smoothly.
      */
     public double damageReduction() {
-        return defense / (defense + 30333.3333333333D);
+        return damageReduction(0);
+    }
+
+    /** True Defense raises the maximum reduction cap by one percentage point per point. */
+    public double damageReduction(int trueDefense) {
+        double cap = Math.min(1.0D, 0.60D + Math.max(0, trueDefense) / 100.0D);
+        return Math.min(cap, defense / (defense + 30333.3333333333D));
     }
 
     public double applyDefense(double incomingDamage) {
-        return Math.max(0.0, incomingDamage) * (1.0 - damageReduction());
+        return applyDefense(incomingDamage, 0);
+    }
+
+    public double applyDefense(double incomingDamage, int trueDefense) {
+        return Math.max(0.0, incomingDamage) * (1.0 - damageReduction(trueDefense));
     }
 
     public double calculateWeaponDamage(boolean critical) {
