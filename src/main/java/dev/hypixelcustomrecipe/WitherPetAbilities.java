@@ -42,6 +42,7 @@ public final class WitherPetAbilities {
 
     public static boolean isWitherTrialEnemy(LivingEntity target) {
         return MaxorEncounter.isMaxor(target)
+                || MaxorEncounter.isMaxorMinion(target.getUUID())
                 || StormEncounter.isStorm(target)
                 || GoldorEncounter.isGoldor(target)
                 || NecronEncounter.isNecron(target)
