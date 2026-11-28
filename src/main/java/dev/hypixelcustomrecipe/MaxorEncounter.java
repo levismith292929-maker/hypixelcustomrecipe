@@ -438,12 +438,12 @@ public final class MaxorEncounter {
             stationaryLaser = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
             if (stationaryLaser == null) { stationaryLaserTimer = 300; return; }
             stationaryLaser.setBlockState(BuiltInRegistries.BLOCK.getValue(Identifier.parse("minecraft:red_stained_glass")).defaultBlockState());
-            // A tall, vertical sheet across the arena. Display entities are visual-only,
+            // A 2x2 vertical pillar, 12 blocks tall. Display entities are visual-only,
             // so players can walk through it; the server-side AABB below handles hits.
             stationaryLaser.setTransformation(new Transformation(
-                    new Vector3f(), new Quaternionf(), new Vector3f(100.0F, 12.0F, 0.22F), new Quaternionf()));
+                    new Vector3f(), new Quaternionf(), new Vector3f(2.0F, 12.0F, 2.0F), new Quaternionf()));
             stationaryLaser.setNoGravity(true);
-            stationaryLaser.setPos(center.getX() - 50.0D, center.getY(), center.getZ() + 0.39D);
+            stationaryLaser.setPos(center.getX() - 1.0D, center.getY(), center.getZ() - 1.0D);
             encounterLevel.addFreshEntity(stationaryLaser);
             stationaryLaserActive = true;
             maxorVulnerable = false;
@@ -452,11 +452,11 @@ public final class MaxorEncounter {
                             .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
         }
         BlockPos center = BossArena.getCenter(encounterLevel, maxor.blockPosition());
-        // Full-height vertical laser wall. It has no physical collision; only this
-        // overlap test makes it lethal, so players can freely walk through it.
-        AABB beam = new AABB(center.getX() - 50.0D, center.getY(),
-                center.getZ() + 0.25D, center.getX() + 50.0D, center.getY() + 12.0D,
-                center.getZ() + 0.55D);
+        // 2x2 vertical laser pillar, 12 blocks tall. It has no physical collision;
+        // only this overlap test makes it lethal, so players can walk through it.
+        AABB beam = new AABB(center.getX() - 1.0D, center.getY(),
+                center.getZ() - 1.0D, center.getX() + 1.0D, center.getY() + 12.0D,
+                center.getZ() + 1.0D);
         if (maxor.getBoundingBox().intersects(beam)) {
             stationaryLaser.discard();
             stationaryLaser = null;
