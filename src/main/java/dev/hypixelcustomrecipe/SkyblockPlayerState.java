@@ -148,6 +148,7 @@ public final class SkyblockPlayerState {
                             break;
                         }
                     }
+                    if (newPlayer.getOffhandItem().is(DatapackItems.SOUL_BLADE)) hasSoulBlade = true;
                     if (!hasSoulBlade) {
                         ItemStack soulBlade = new ItemStack(DatapackItems.SOUL_BLADE);
                         if (!newPlayer.getInventory().add(soulBlade)) newPlayer.drop(soulBlade, false);
