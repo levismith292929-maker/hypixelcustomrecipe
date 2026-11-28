@@ -389,7 +389,7 @@ public final class NecronEncounter {
         // Use many short translucent panels so the circular wall reads as one connected ring.
         for (int i = 0; i < 96; i++) {
             Display.BlockDisplay segment = createBlockDisplay(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("purple_stained_glass")).defaultBlockState(),
-                    safeX, center.getY() + 5.2D, safeZ, 1.0F, 10.0F, 0.18F, new Quaternionf());
+                    safeX, center.getY() + 1.0D, safeZ, 1.0F, WALL_HEIGHT, 0.18F, new Quaternionf());
             if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
         }
         safeZoneDisplay = createBlockDisplay(Blocks.EMERALD_BLOCK.defaultBlockState(),
@@ -923,10 +923,12 @@ public final class NecronEncounter {
             // Slight overlap compensates for the chord/arc difference, preventing visible gaps.
             double segmentLength = Math.max(0.5D, Math.PI * 2.0D * safeRadius / count * 1.08D);
             Display.BlockDisplay display = CLOSING_WALL_DISPLAYS.get(i);
-            display.setPos(safeX + Math.cos(angle) * safeRadius, center.getY() + 5.2D,
+            // The arena floor is the bedrock layer at centerY; start the wall directly
+            // on its top surface, not five blocks above it.
+            display.setPos(safeX + Math.cos(angle) * safeRadius, center.getY() + 1.0D,
                     safeZ + Math.sin(angle) * safeRadius);
             display.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY((float) (Math.PI / 2.0D - angle)),
-                    new Vector3f((float) segmentLength, 10.0F, 0.18F), new Quaternionf()));
+                    new Vector3f((float) segmentLength, WALL_HEIGHT, 0.18F), new Quaternionf()));
         }
     }
 
