@@ -115,7 +115,7 @@ public final class GoldorEncounter {
     public static void beginBreak(ServerLevel level, BlockPos center, UUID owner, Set<UUID> participants) {
         if (goldor != null || encounterLevel != null) return;
         encounterLevel = level;
-        trialCenter = center.immutable();
+        trialCenter = BossArena.ensure(level, center);
         altarOwner = owner;
         normalTrial = true;
         breakTimer = BREAK_TICKS;
@@ -180,6 +180,7 @@ public final class GoldorEncounter {
         }
         server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
         BAR.removeAllPlayers();
+        BossArena.restore();
         clear();
     }
 
@@ -201,6 +202,7 @@ public final class GoldorEncounter {
 
         goldor = boss;
         encounterLevel = level;
+        BossArena.ensure(level, spawn);
         attackTimer = 60;
         lastHealth = (float) ENTITY_HEALTH;
         clearSwords();
@@ -415,7 +417,12 @@ public final class GoldorEncounter {
         server.getPlayerList().broadcastSystemMessage(Component.literal(normalTrial
                 ? "Goldor has been defeated! " + rewarded + " player(s) earned +100 Player Levels. Necron begins in 2 minutes!"
                 : "Goldor has been defeated!"), false);
-        if (normalTrial) NecronEncounter.beginBreak(encounterLevel, trialCenter, altarOwner, Set.copyOf(PARTICIPANTS));
+        if (normalTrial) {
+            NecronEncounter.beginBreak(encounterLevel, BossArena.getCenter(encounterLevel, trialCenter),
+                    altarOwner, Set.copyOf(PARTICIPANTS));
+        } else {
+            BossArena.restore();
+        }
         clear();
     }
 
@@ -426,6 +433,7 @@ public final class GoldorEncounter {
         clearSwords();
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("Goldor was removed. The encounter has been reset."), false);
+        BossArena.restore();
         clear();
     }
 
@@ -446,6 +454,7 @@ public final class GoldorEncounter {
         clearSwords();
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("All players fighting Goldor have been defeated. The encounter has ended."), false);
+        BossArena.restore();
         clear();
     }
 

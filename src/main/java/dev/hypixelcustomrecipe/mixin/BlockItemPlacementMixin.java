@@ -1,7 +1,7 @@
 package dev.hypixelcustomrecipe.mixin;
 
 import dev.hypixelcustomrecipe.PlayerPlacedBlockData;
-import dev.hypixelcustomrecipe.NecronEncounter;
+import dev.hypixelcustomrecipe.BossArena;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -16,15 +16,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockItem.class)
 public abstract class BlockItemPlacementMixin {
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
-    private void hypixelcustomrecipe$restrictNecronArenaBuilding(
+    private void hypixelcustomrecipe$restrictWitherArenaBuilding(
             BlockPlaceContext context,
             CallbackInfoReturnable<InteractionResult> cir
     ) {
         if (context.getPlayer() instanceof ServerPlayer player
                 && context.getLevel() instanceof ServerLevel
-                && !NecronEncounter.canPlaceBlock(player, context.getClickedPos())) {
+                && !BossArena.canPlaceBlock(player, context.getClickedPos())) {
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "Building is disabled during Necron's Guardian laser!"));
+                    "Building is disabled inside the Wither Trial arena!"));
             cir.setReturnValue(InteractionResult.FAIL);
         }
     }

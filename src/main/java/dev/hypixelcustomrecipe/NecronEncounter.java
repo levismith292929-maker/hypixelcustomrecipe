@@ -84,7 +84,6 @@ public final class NecronEncounter {
     private static float lastHealth;
     private static int attackSpeedMilestones;
 
-    private static final Map<BlockPos, BlockState> ORIGINAL_ARENA = new LinkedHashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final Set<UUID> MINIONS = new HashSet<>();
@@ -133,8 +132,7 @@ public final class NecronEncounter {
     }
 
     public static boolean canPlaceBlock(ServerPlayer player, BlockPos pos) {
-        if (!isActive() || player.level() != level || !insideArena(pos)) return true;
-        return !laserActive;
+        return BossArena.canPlaceBlock(player, pos);
     }
 
     private static boolean insideArena(BlockPos pos) {
@@ -155,7 +153,7 @@ public final class NecronEncounter {
     public static void beginBreak(ServerLevel world, BlockPos arenaCenter, UUID owner, Set<UUID> participants) {
         if (level != null || necron != null) return;
         level = world;
-        trialCenter = arenaCenter.immutable();
+        trialCenter = BossArena.ensure(world, arenaCenter);
         altarOwner = owner;
         normalTrial = true;
         breakTimer = BREAK_TICKS;
@@ -176,9 +174,8 @@ public final class NecronEncounter {
 
     private static boolean start(ServerPlayer starter, ServerLevel world, boolean testing,
                                  BlockPos spawnCenter, Set<UUID> participants) {
-        center = spawnCenter.immutable();
+        center = BossArena.ensure(world, spawnCenter);
         level = world;
-        buildArena();
 
         WitherBoss boss = EntityTypes.WITHER.create(world, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) {
@@ -248,45 +245,8 @@ public final class NecronEncounter {
         return min + level.getRandom().nextInt(max - min + 1);
     }
 
-    private static void buildArena() {
-        ORIGINAL_ARENA.clear();
-        int minX = center.getX() - HALF_ARENA;
-        int maxX = center.getX() + HALF_ARENA - 1;
-        int minZ = center.getZ() - HALF_ARENA;
-        int maxZ = center.getZ() + HALF_ARENA - 1;
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                saveAndPlaceBedrock(new BlockPos(x, center.getY(), z));
-                boolean boundary = x == minX || x == maxX || z == minZ || z == maxZ;
-                for (int y = 1; y <= WALL_HEIGHT; y++) {
-                    BlockPos pos = new BlockPos(x, center.getY() + y, z);
-                    if (boundary) {
-                        saveAndPlaceBedrock(pos);
-                    } else {
-                        BlockPos immutable = pos.immutable();
-                        BlockState original = level.getBlockState(immutable);
-                        if (!original.isAir()) {
-                            ORIGINAL_ARENA.putIfAbsent(immutable, original);
-                            level.setBlock(immutable, Blocks.AIR.defaultBlockState(), 3);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private static void saveAndPlaceBedrock(BlockPos pos) {
-        BlockPos immutable = pos.immutable();
-        ORIGINAL_ARENA.putIfAbsent(immutable, level.getBlockState(immutable));
-        level.setBlock(immutable, Blocks.BEDROCK.defaultBlockState(), 3);
-    }
-
     private static void restoreArena() {
-        if (level == null) return;
-        for (Map.Entry<BlockPos, BlockState> entry : ORIGINAL_ARENA.entrySet()) {
-            level.setBlock(entry.getKey(), entry.getValue(), 3);
-        }
-        ORIGINAL_ARENA.clear();
+        BossArena.restore();
     }
 
     private static void tick(MinecraftServer server) {
@@ -330,7 +290,6 @@ public final class NecronEncounter {
             }
             if (player.distanceToSqr(Vec3.atCenterOf(center)) <= 110.0D * 110.0D) BAR.addPlayer(player);
             else BAR.removePlayer(player);
-            if (player.isFallFlying()) player.stopFallFlying();
         }
 
         MINIONS.removeIf(id -> {
@@ -1024,7 +983,6 @@ public final class NecronEncounter {
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
         BOMBS.clear();
-        ORIGINAL_ARENA.clear();
     }
 
 

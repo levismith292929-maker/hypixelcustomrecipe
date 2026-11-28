@@ -167,6 +167,7 @@ public final class MaxorEncounter {
             return false;
         }
 
+        BossArena.ensure(level, spawnPos);
         maxor = boss;
         testMode = testing;
         encounterLevel = level;
@@ -378,9 +379,10 @@ public final class MaxorEncounter {
         if (testMode) {
             encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
                     Component.literal("Maxor test encounter completed. No progression or rewards were triggered."), false);
+            BossArena.restore();
         } else {
-            StormEncounter.beginBreak(encounterLevel, maxor.blockPosition(), altarOwner,
-                    Set.copyOf(PARTICIPANTS));
+            StormEncounter.beginBreak(encounterLevel, BossArena.getCenter(encounterLevel, maxor.blockPosition()),
+                    altarOwner, Set.copyOf(PARTICIPANTS));
         }
         clearEncounter();
     }
@@ -417,6 +419,7 @@ public final class MaxorEncounter {
                     .withStyle(style -> style.withColor(0xFF5555)));
         }
         server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
+        BossArena.restore();
         clearEncounter();
     }
 

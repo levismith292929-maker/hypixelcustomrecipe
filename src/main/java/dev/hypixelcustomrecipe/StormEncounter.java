@@ -102,7 +102,7 @@ public final class StormEncounter {
                                   UUID owner, Set<UUID> participants) {
         testMode = false;
         level = encounterLevel;
-        arenaCenter = center.immutable();
+        arenaCenter = BossArena.ensure(encounterLevel, center);
         altarOwner = owner;
         PARTICIPANTS.clear();
         PARTICIPANTS.addAll(participants);
@@ -185,7 +185,7 @@ public final class StormEncounter {
     public static boolean summonForTesting(ServerPlayer player) {
         if (level != null) return false;
         level = (ServerLevel) player.level();
-        arenaCenter = player.blockPosition().immutable();
+        arenaCenter = BossArena.ensure(level, player.blockPosition());
         altarOwner = player.getUUID();
         PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
@@ -404,6 +404,8 @@ public final class StormEncounter {
                 (testMode ? "Storm test encounter completed. No progression or rewards were triggered." : "Storm has been defeated! " + rewarded + " player(s) earned the reward. Goldor begins in 2 minutes!")), false);
         if (!testMode) {
             GoldorEncounter.beginBreak(level, arenaCenter, altarOwner, Set.copyOf(PARTICIPANTS));
+        } else {
+            BossArena.restore();
         }
         clear();
     }
@@ -430,6 +432,7 @@ public final class StormEncounter {
         }
         server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
         BOSS_BAR.removeAllPlayers();
+        BossArena.restore();
         clear();
     }
 

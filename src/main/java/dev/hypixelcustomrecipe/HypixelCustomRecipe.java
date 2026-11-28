@@ -39,6 +39,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         VoidriddenEffects.initialize();
         VoidriddenMobs.initialize();
         VoidTrailManager.initialize();
+        BossArena.initialize();
         MaxorEncounter.initialize();
         StormEncounter.initialize();
         GoldorEncounter.initialize();
