@@ -80,6 +80,7 @@ public final class NecronEncounter {
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
     private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final Set<UUID> MINIONS = new HashSet<>();
+    private static final Deque<EntityType<? extends net.minecraft.world.entity.Mob>> PENDING_VOIDRIDDEN = new ArrayDeque<>();
     private static final Set<UUID> PROJECTILES = new HashSet<>();
     private static final Set<UUID> FLAME_HIT_PLAYERS = new HashSet<>();
     private static final List<TntBomb> BOMBS = new ArrayList<>();
@@ -175,6 +176,7 @@ public final class NecronEncounter {
         PARTICIPANTS.clear();
         DEAD_PARTICIPANTS.clear();
         MINIONS.clear();
+        PENDING_VOIDRIDDEN.clear();
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
         BOMBS.clear();
@@ -263,6 +265,7 @@ public final class NecronEncounter {
         else lastHealth = hp;
 
         ServerPlayer target = nearestPlayer();
+        spawnNextVoidridden(target);
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.level() != level) {
                 BAR.removePlayer(player);
@@ -608,14 +611,19 @@ public final class NecronEncounter {
         double zoneMidX = (dangerMinX + dangerMaxX + 1.0D) * 0.5D;
         double zoneMidZ = (dangerMinZ + dangerMaxZ + 1.0D) * 0.5D;
         double zoneY = center.getY() + 1.08D;
-        for (int side = 0; side < 4; side++) {
-            boolean alongX = side < 2;
-            double px = alongX ? zoneMidX : (side == 2 ? dangerMinX + 0.5D : dangerMaxX + 0.5D);
-            double pz = alongX ? (side == 0 ? dangerMinZ + 0.5D : dangerMaxZ + 0.5D) : zoneMidZ;
-            Display.BlockDisplay edge = createBlockDisplay(Blocks.GOLD_BLOCK.defaultBlockState(),
-                    px, zoneY, pz, alongX ? 50.0F : 0.15F, 0.08F, alongX ? 0.15F : 50.0F, new Quaternionf());
-            if (edge != null) DANGER_ZONE_DISPLAYS.add(edge);
-        }
+        // Block-display scale extends from its origin, so place each edge at its starting corner.
+        Display.BlockDisplay north = createBlockDisplay(Blocks.GOLD_BLOCK.defaultBlockState(),
+                dangerMinX, zoneY, dangerMinZ, 50.0F, 0.08F, 0.15F, new Quaternionf());
+        Display.BlockDisplay south = createBlockDisplay(Blocks.GOLD_BLOCK.defaultBlockState(),
+                dangerMinX, zoneY, dangerMaxZ + 0.85D, 50.0F, 0.08F, 0.15F, new Quaternionf());
+        Display.BlockDisplay west = createBlockDisplay(Blocks.GOLD_BLOCK.defaultBlockState(),
+                dangerMinX, zoneY, dangerMinZ, 0.15F, 0.08F, 50.0F, new Quaternionf());
+        Display.BlockDisplay east = createBlockDisplay(Blocks.GOLD_BLOCK.defaultBlockState(),
+                dangerMaxX + 0.85D, zoneY, dangerMinZ, 0.15F, 0.08F, 50.0F, new Quaternionf());
+        if (north != null) DANGER_ZONE_DISPLAYS.add(north);
+        if (south != null) DANGER_ZONE_DISPLAYS.add(south);
+        if (west != null) DANGER_ZONE_DISPLAYS.add(west);
+        if (east != null) DANGER_ZONE_DISPLAYS.add(east);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: DANGER ZONE! Leave the outlined area before it turns red!")
                 .withStyle(s -> s.withColor(0xFFFF55).withBold(true)), false);
@@ -646,29 +654,29 @@ public final class NecronEncounter {
 
     // Attack 5 — summon the existing custom Voidridden mobs.
     private static void spawnVoidriddenWave(ServerPlayer target) {
-        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_SKELETON, 10, target);
-        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_SPIDER, 8, target);
-        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_ZOMBIE, 5, target);
-        spawnVoidridden(VoidriddenMobs.VOIDRIDDEN_ENDERMAN, 2, target);
+        // Queue the full wave, but add only one mob per server tick to avoid a 25-entity spawn spike.
+        for (int i = 0; i < 10; i++) PENDING_VOIDRIDDEN.addLast(VoidriddenMobs.VOIDRIDDEN_SKELETON);
+        for (int i = 0; i < 8; i++) PENDING_VOIDRIDDEN.addLast(VoidriddenMobs.VOIDRIDDEN_SPIDER);
+        for (int i = 0; i < 5; i++) PENDING_VOIDRIDDEN.addLast(VoidriddenMobs.VOIDRIDDEN_ZOMBIE);
+        for (int i = 0; i < 2; i++) PENDING_VOIDRIDDEN.addLast(VoidriddenMobs.VOIDRIDDEN_ENDERMAN);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
-                "NECRON: VOIDRIDDEN WAVE! 25 minions have entered the arena.")
+                "NECRON: VOIDRIDDEN WAVE! 25 minions are entering the arena.")
                 .withStyle(s -> s.withColor(0xAA00AA).withBold(true)), false);
     }
 
-    private static void spawnVoidridden(EntityType<? extends net.minecraft.world.entity.Mob> type,
-                                        int count, ServerPlayer target) {
-        for (int i = 0; i < count; i++) {
-            net.minecraft.world.entity.Mob mob = type.create(level, EntitySpawnReason.MOB_SUMMONED);
-            if (mob == null) continue;
-            double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
-            double radius = 12.0D + level.getRandom().nextDouble() * 28.0D;
-            double x = center.getX() + 0.5D + Math.cos(angle) * radius;
-            double z = center.getZ() + 0.5D + Math.sin(angle) * radius;
-            mob.setPos(x, center.getY() + 1.0D, z);
-            mob.setPersistenceRequired();
-            if (target != null) mob.setTarget(target);
-            if (level.addFreshEntity(mob)) MINIONS.add(mob.getUUID());
-        }
+    private static void spawnNextVoidridden(ServerPlayer target) {
+        if (PENDING_VOIDRIDDEN.isEmpty()) return;
+        EntityType<? extends net.minecraft.world.entity.Mob> type = PENDING_VOIDRIDDEN.removeFirst();
+        net.minecraft.world.entity.Mob mob = type.create(level, EntitySpawnReason.MOB_SUMMONED);
+        if (mob == null) return;
+        double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
+        double radius = 12.0D + level.getRandom().nextDouble() * 28.0D;
+        double x = center.getX() + 0.5D + Math.cos(angle) * radius;
+        double z = center.getZ() + 0.5D + Math.sin(angle) * radius;
+        mob.setPos(x, center.getY() + 1.0D, z);
+        mob.setPersistenceRequired();
+        if (target != null) mob.setTarget(target);
+        if (level.addFreshEntity(mob)) MINIONS.add(mob.getUUID());
     }
 
     // Attack 6 — a moving flame wall with a 3x3 bottom gap; each player can be hit once per wall.
@@ -851,6 +859,7 @@ public final class NecronEncounter {
         attack5Timer = attack6Timer = attack7Timer = 0;
         PARTICIPANTS.clear();
         MINIONS.clear();
+        PENDING_VOIDRIDDEN.clear();
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
         BOMBS.clear();
@@ -910,20 +919,21 @@ public final class NecronEncounter {
         double gapEnd = flameGap + 1.5D;
         double leftWidth = Math.max(0.1D, gapStart + 49.0D);
         double rightWidth = Math.max(0.1D, 49.0D - gapEnd);
-        setFlameDisplay(FLAME_WALL_DISPLAYS.get(0), plane,
-                (verticalX ? center.getZ() : center.getX()) + (-49.0D + gapStart) * 0.5D,
-                yBottom + 1.5D, verticalX, leftWidth, 3.0F);
-        setFlameDisplay(FLAME_WALL_DISPLAYS.get(1), plane,
-                (verticalX ? center.getZ() : center.getX()) + (gapEnd + 49.0D) * 0.5D,
-                yBottom + 1.5D, verticalX, rightWidth, 3.0F);
-        setFlameDisplay(FLAME_WALL_DISPLAYS.get(2), plane,
-                verticalX ? center.getZ() : center.getX(), yBottom + 7.0D, verticalX, 98.0D, 8.0F);
+        double axisCenter = verticalX ? center.getZ() : center.getX();
+        double wallStart = axisCenter - 49.0D;
+        // The lower pieces stop at the 3-block opening; the upper piece covers the full width.
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(0), plane, wallStart,
+                yBottom, verticalX, leftWidth, 3.0F);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(1), plane, axisCenter + gapEnd,
+                yBottom, verticalX, rightWidth, 3.0F);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(2), plane, wallStart,
+                yBottom + 3.0D, verticalX, 98.0D, 9.0F);
     }
 
-    private static void setFlameDisplay(Display.BlockDisplay display, double plane, double alongCenter,
+    private static void setFlameDisplay(Display.BlockDisplay display, double plane, double alongStart,
                                         double y, boolean verticalX, double width, float height) {
-        double x = verticalX ? plane : alongCenter;
-        double z = verticalX ? alongCenter : plane;
+        double x = verticalX ? plane : alongStart;
+        double z = verticalX ? alongStart : plane;
         display.setPos(x, y, z);
         display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
                 verticalX ? new Vector3f(0.18F, height, (float) width)
