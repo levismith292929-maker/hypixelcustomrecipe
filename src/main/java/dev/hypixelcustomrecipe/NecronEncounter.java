@@ -75,6 +75,7 @@ public final class NecronEncounter {
     private static double flameOffset;
     private static int skullFireTicks;
     private static float lastHealth;
+    private static int attackSpeedMilestones;
 
     private static final Map<BlockPos, BlockState> ORIGINAL_ARENA = new LinkedHashMap<>();
     private static final Set<UUID> PARTICIPANTS = new HashSet<>();
@@ -180,13 +181,14 @@ public final class NecronEncounter {
         PROJECTILES.clear();
         FLAME_HIT_PLAYERS.clear();
         BOMBS.clear();
-        attack1Timer = random(225, 338);
-        attack2Timer = random(150, 263);
-        attack3Timer = random(150, 300);
-        attack4Timer = random(300, 375);
-        attack5Timer = random(150, 300);
-        attack6Timer = 450;
-        attack7Timer = random(100, 160);
+        attackSpeedMilestones = 0;
+        attack1Timer = attackCooldown(225, 338);
+        attack2Timer = attackCooldown(150, 263);
+        attack3Timer = attackCooldown(150, 300);
+        attack4Timer = attackCooldown(300, 375);
+        attack5Timer = attackCooldown(150, 300);
+        attack6Timer = attackCooldown(450, 450);
+        attack7Timer = attackCooldown(100, 160);
         laserActive = false;
         laserTicks = 0;
         attack1Ticks = attack4Ticks = attack6Ticks = attack7Ticks = 0;
@@ -263,6 +265,7 @@ public final class NecronEncounter {
         float hp = necron.getHealth();
         if (hp > lastHealth) necron.setHealth(lastHealth);
         else lastHealth = hp;
+        updateAttackSpeedMilestones();
 
         ServerPlayer target = nearestPlayer();
         spawnNextVoidridden(target);
@@ -314,6 +317,20 @@ public final class NecronEncounter {
         return nearest;
     }
 
+    // Every 50 million logical damage removes 3 seconds (60 ticks) from
+    // attack cooldowns. Keep a 1-second floor so attacks never become continuous.
+    private static int attackCooldown(int minimum, int maximum) {
+        int reduction = attackSpeedMilestones * 60;
+        return Math.max(20, random(minimum, maximum) - reduction);
+    }
+
+    private static void updateAttackSpeedMilestones() {
+        if (necron == null) return;
+        double dealtDamage = (ENTITY_HP - necron.getHealth()) * HP_PER_ENTITY_HP;
+        int reached = Math.max(0, (int) Math.floor(dealtDamage / 50_000_000.0D));
+        attackSpeedMilestones = Math.min(10, reached);
+    }
+
     private static void tickOtherAttacks(ServerPlayer target) {
         tickAttack1();
         tickAttack2();
@@ -343,7 +360,7 @@ public final class NecronEncounter {
                 && attack6Ticks == 0) beginAttack2();
         if (attack5Timer <= 0) {
             spawnVoidriddenWave(target);
-            attack5Timer = random(150, 300);
+            attack5Timer = attackCooldown(150, 300);
         }
         if (attack7Ticks == 0 && attack7Timer <= 0) beginAttack7();
     }
@@ -394,7 +411,7 @@ public final class NecronEncounter {
         }
         safeZoneDisplay = createBlockDisplay(Blocks.EMERALD_BLOCK.defaultBlockState(),
                 safeX, center.getY() + 1.04D, safeZ, 5.0F, 0.08F, 5.0F, new Quaternionf());
-        attack1Timer = random(225, 338);
+        attack1Timer = attackCooldown(225, 338);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: EVAPORATION! Reach the 5-block safe circle!")
                 .withStyle(s -> s.withColor(0x55FFFF).withBold(true)), false);
@@ -470,7 +487,7 @@ public final class NecronEncounter {
                     x, center.getY() + 1.04D, z, 10.0F, 0.06F, 10.0F, new Quaternionf());
             BOMBS.add(new TntBomb(x, z, y, display, marker, 0));
         }
-        attack2Timer = random(150, 263);
+        attack2Timer = attackCooldown(150, 263);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: TNT RAIN! Keep moving!")
                 .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
@@ -599,7 +616,7 @@ public final class NecronEncounter {
         if (laserTicks <= 0) {
             laserActive = false;
             // Start the next laser cooldown only after this laser has fully ended.
-            attack3Timer = random(150, 300);
+            attack3Timer = attackCooldown(150, 300);
             discardDisplay(laserBeamDisplay);
             laserBeamDisplay = null;
             if (laserGuardian != null) laserGuardian.discard();
@@ -673,7 +690,7 @@ public final class NecronEncounter {
         if (attack4Ticks <= 0) {
             clearDisplayList(DANGER_ZONE_DISPLAYS);
             dangerDisplayColor = -1;
-            attack4Timer = random(300, 375);
+            attack4Timer = attackCooldown(300, 375);
             level.playSound(null, center, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
         }
     }
@@ -719,7 +736,7 @@ public final class NecronEncounter {
             if (fire != null) FLAME_WALL_DISPLAYS.add(fire);
         }
         FLAME_HIT_PLAYERS.clear();
-        attack6Timer = 450;
+        attack6Timer = attackCooldown(450, 450);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: FLAME WALL! Find the 3x3 opening at the bottom!")
                 .withStyle(s -> s.withColor(0xFF8800).withBold(true)), false);
@@ -797,7 +814,7 @@ public final class NecronEncounter {
             }
         }
         attack7Ticks--;
-        if (attack7Ticks <= 0) attack7Timer = random(100, 160);
+        if (attack7Ticks <= 0) attack7Timer = attackCooldown(100, 160);
     }
 
     private static void kill(ServerPlayer player, String cause) {
