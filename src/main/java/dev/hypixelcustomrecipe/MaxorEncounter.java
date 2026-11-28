@@ -17,6 +17,15 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import org.joml.Vector3f;
+import org.joml.Quaternionf;
+import net.minecraft.world.entity.Display.BlockDisplay;
+import net.minecraft.world.entity.Display.BillboardConstraints;
+import net.minecraft.world.entity.Display.BlockDisplay;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -54,6 +63,13 @@ public final class MaxorEncounter {
     private static UUID altarOwner;
     private static int minionSpawnTimer;
     private static int laserBeamTimer;
+    private static boolean maxorVulnerable = true;
+    private static int stationaryLaserTimer = 300;
+    private static BlockDisplay stationaryLaser;
+    private static boolean stationaryLaserActive;
+    private static int crystalChallengeTimer = 400;
+    private static int crystalChallengeTicks;
+    private static final List<UUID> challengeCrystals = new ArrayList<>();
     private static final DustParticleOptions LASER_PARTICLE = new DustParticleOptions(0xAA00FF, 0.85F);
     private static final double LASER_HIT_RADIUS = 0.22D;
     private static final int LASER_CHARGE_TICKS = 12;
@@ -119,7 +135,7 @@ public final class MaxorEncounter {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
             // Keep Maxor immune to normal attacks, but let operator /kill work.
             // Soul Blade uses its separate direct true-damage path.
-            if (maxor != null && entity == maxor
+            if (maxor != null && entity == maxor && !maxorVulnerable
                     && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                 return false;
             }
@@ -186,6 +202,12 @@ public final class MaxorEncounter {
         altarOwner = starter.getUUID();
         minionSpawnTimer = MINION_INTERVAL_TICKS;
         laserBeamTimer = 0;
+        maxorVulnerable = true;
+        stationaryLaserTimer = 300;
+        stationaryLaserActive = false;
+        crystalChallengeTimer = 400;
+        crystalChallengeTicks = 0;
+        challengeCrystals.clear();
         laserChargeTicks = 0;
         laserBeamTicks = 0;
         laserShotStart = null;
@@ -247,6 +269,8 @@ public final class MaxorEncounter {
                 maxor.setDeltaMovement(motion.x, Math.min(motion.y, -0.12D), motion.z);
             }
         }
+        tickCrystalChallenge(server);
+        tickStationaryLaser();
         LASER_HIT_COOLDOWNS.replaceAll((uuid, ticks) -> ticks - 1);
         LASER_HIT_COOLDOWNS.values().removeIf(ticks -> ticks <= 0);
 
@@ -340,6 +364,92 @@ public final class MaxorEncounter {
             LASER_HIT_COOLDOWNS.put(player.getUUID(), 100);
             player.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
                     .withStyle(style -> style.withColor(0xAA00AA)));
+        }
+    }
+
+    private static void tickCrystalChallenge(MinecraftServer server) {
+        if (crystalChallengeTicks > 0) {
+            challengeCrystals.removeIf(id -> {
+                Entity crystal = encounterLevel.getEntity(id);
+                return crystal == null || !crystal.isAlive() || crystal.isRemoved();
+            });
+            if (--crystalChallengeTicks <= 0) {
+                if (!challengeCrystals.isEmpty()) {
+                    for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                        if (player.level() == encounterLevel && player.isAlive()
+                                && Math.abs(player.getX() - maxor.blockPosition().getX()) <= 50
+                                && Math.abs(player.getZ() - maxor.blockPosition().getZ()) <= 50) {
+                            player.setHealth(0.0F);
+                            player.die(encounterLevel.damageSources().generic());
+                        }
+                    }
+                }
+                for (UUID id : challengeCrystals) {
+                    Entity crystal = encounterLevel.getEntity(id);
+                    if (crystal != null) crystal.discard();
+                }
+                challengeCrystals.clear();
+                crystalChallengeTimer = 600;
+            }
+            return;
+        }
+        if (--crystalChallengeTimer > 0) return;
+        int count = 5 + encounterLevel.getRandom().nextInt(4);
+        BlockPos center = BossArena.getCenter(encounterLevel, maxor.blockPosition());
+        for (int i = 0; i < count; i++) {
+            EndCrystal crystal = EntityTypes.END_CRYSTAL.create(encounterLevel, EntitySpawnReason.COMMAND);
+            if (crystal == null) continue;
+            double angle = Math.PI * 2.0D * i / count;
+            double radius = 12.0D + encounterLevel.getRandom().nextDouble() * 22.0D;
+            crystal.setPos(center.getX() + 0.5D + Math.cos(angle) * radius,
+                    center.getY() + 1.0D, center.getZ() + 0.5D + Math.sin(angle) * radius);
+            if (encounterLevel.addFreshEntity(crystal)) challengeCrystals.add(crystal.getUUID());
+        }
+        crystalChallengeTicks = 400;
+        encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("MAXOR: Destroy every End Crystal! 20 seconds!")
+                        .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
+    }
+
+    private static void tickStationaryLaser() {
+        if (!stationaryLaserActive) {
+            if (--stationaryLaserTimer > 0) return;
+            BlockPos center = BossArena.getCenter(encounterLevel, maxor.blockPosition());
+            stationaryLaser = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
+            if (stationaryLaser == null) { stationaryLaserTimer = 300; return; }
+            stationaryLaser.setBlockState(Blocks.RED_STAINED_GLASS.defaultBlockState());
+            stationaryLaser.setTransformation(new net.minecraft.world.entity.Display.Transformation(
+                    new Vector3f(), new Quaternionf(), new Vector3f(100.0F, 0.18F, 0.22F), new Quaternionf()));
+            stationaryLaser.setNoGravity(true);
+            stationaryLaser.setPos(center.getX() - 50.0D, center.getY() + 2.0D, center.getZ() + 0.39D);
+            encounterLevel.addFreshEntity(stationaryLaser);
+            stationaryLaserActive = true;
+            maxorVulnerable = false;
+            encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                    Component.literal("MAXOR IS IMMUNE! Lure him into the red laser!")
+                            .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
+        }
+        BlockPos center = BossArena.getCenter(encounterLevel, maxor.blockPosition());
+        AABB beam = new AABB(center.getX() - 50.0D, center.getY() + 1.95D,
+                center.getZ() + 0.25D, center.getX() + 50.0D, center.getY() + 2.25D,
+                center.getZ() + 0.55D);
+        if (maxor.getBoundingBox().intersects(beam)) {
+            stationaryLaser.discard();
+            stationaryLaser = null;
+            stationaryLaserActive = false;
+            maxorVulnerable = true;
+            stationaryLaserTimer = 300;
+            encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                    Component.literal("MAXOR HIT THE LASER! He is vulnerable again!")
+                            .withStyle(s -> s.withColor(0x55FF55).withBold(true)), false);
+            return;
+        }
+        for (ServerPlayer player : encounterLevel.getServer().getPlayerList().getPlayers()) {
+            if (player.level() == encounterLevel && player.isAlive()
+                    && player.getBoundingBox().intersects(beam)) {
+                player.setHealth(0.0F);
+                player.die(encounterLevel.damageSources().generic());
+            }
         }
     }
 
@@ -506,7 +616,7 @@ public final class MaxorEncounter {
         PARTICIPANTS.add(player.getUUID());
     }
 
-    private static void clearEncounter() {
+    private static void clearEncounter() {\n        if (stationaryLaser != null) stationaryLaser.discard();\n        stationaryLaser = null;\n        stationaryLaserActive = false;\n        for (UUID id : challengeCrystals) { Entity crystal = encounterLevel == null ? null : encounterLevel.getEntity(id); if (crystal != null) crystal.discard(); }\n        challengeCrystals.clear();\n        crystalChallengeTicks = 0;\n        maxorVulnerable = true;
         laserChargeTicks = 0;
         laserBeamTicks = 0;
         laserShotStart = null;

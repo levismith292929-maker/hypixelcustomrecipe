@@ -16,6 +16,11 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import org.joml.Vector3f;
+import org.joml.Quaternionf;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
@@ -64,6 +69,8 @@ public final class StormEncounter {
     private static int warningTimer = -1;
     private static int waveTimer = WAVE_INTERVAL_TICKS;
     private static boolean testMode;
+    private static int pillarSpawnTimer = 60;
+    private static final List<FallingPillar> PILLARS = new ArrayList<>();
 
     private StormEncounter() {
     }
@@ -118,6 +125,8 @@ public final class StormEncounter {
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
         STRIKES.clear();
+        clearPillars();
+        pillarSpawnTimer = 60;
         storm = null;
         breakTimer = BREAK_TICKS;
         warningTimer = -1;
@@ -180,6 +189,7 @@ public final class StormEncounter {
                 + String.format(java.util.Locale.ROOT, "%,d", hp)
                 + " / 100,000,000 HP"));
         updateBossBarPlayers(server);
+        tickPillars(server);
 
         if (warningTimer >= 0) {
             renderSafeZoneParticles();
@@ -208,6 +218,8 @@ public final class StormEncounter {
         PLAYER_DAMAGE.clear();
         SAFE_ZONES.clear();
         STRIKES.clear();
+        clearPillars();
+        pillarSpawnTimer = 60;
         breakTimer = 0;
         warningTimer = -1;
         waveTimer = WAVE_INTERVAL_TICKS;
@@ -468,6 +480,56 @@ public final class StormEncounter {
 
         SAFE_ZONES.clear();
         STRIKES.clear();
+        clearPillars();
+    }
+
+    private static void tickPillars(MinecraftServer server) {
+        if (--pillarSpawnTimer <= 0) {
+            pillarSpawnTimer = 60 + level.getRandom().nextInt(81);
+            Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
+            if (display != null) {
+                display.setBlockState(Blocks.IRON_BLOCK.defaultBlockState());
+                display.setTransformation(new net.minecraft.world.entity.Display.Transformation(
+                        new Vector3f(), new Quaternionf(), new Vector3f(1.0F, 4.0F, 1.0F), new Quaternionf()));
+                double x = arenaCenter.getX() - 45 + level.getRandom().nextInt(91) + 0.5D;
+                double z = arenaCenter.getZ() - 45 + level.getRandom().nextInt(91) + 0.5D;
+                display.setNoGravity(true);
+                display.setPos(x, arenaCenter.getY() + 18.0D, z);
+                if (level.addFreshEntity(display)) PILLARS.add(new FallingPillar(display, x, z));
+            }
+        }
+        var iterator = PILLARS.iterator();
+        while (iterator.hasNext()) {
+            FallingPillar pillar = iterator.next();
+            if (pillar.display.isRemoved()) { iterator.remove(); continue; }
+            if (!pillar.landed) {
+                double y = Math.max(arenaCenter.getY() + 1.0D, pillar.display.getY() - 0.12D);
+                pillar.display.setPos(pillar.x, y, pillar.z);
+                AABB hit = new AABB(pillar.x - 0.5D, y, pillar.z - 0.5D,
+                        pillar.x + 0.5D, y + 4.0D, pillar.z + 0.5D);
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    if (player.level() == level && player.isAlive() && player.getBoundingBox().intersects(hit)) {
+                        player.setHealth(0.0F);
+                        player.die(level.damageSources().generic());
+                    }
+                }
+                if (y <= arenaCenter.getY() + 1.0D) pillar.landed = true;
+            } else if (++pillar.landedTicks >= 100) {
+                pillar.display.discard();
+                iterator.remove();
+            }
+        }
+    }
+
+    private static void clearPillars() {
+        for (FallingPillar pillar : PILLARS) pillar.display.discard();
+        PILLARS.clear();
+    }
+
+    private static final class FallingPillar {
+        private final Display.BlockDisplay display; private final double x, z;
+        private boolean landed; private int landedTicks;
+        private FallingPillar(Display.BlockDisplay display, double x, double z) { this.display = display; this.x = x; this.z = z; }
     }
 
     private record SafeZone(double x, double z) {}

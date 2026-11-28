@@ -52,6 +52,9 @@ public final class GoldorEncounter {
     private static WitherBoss goldor;
     private static ServerLevel encounterLevel;
     private static int attackTimer;
+    private static int rainTimer = 300;
+    private static int rainLinesRemaining;
+    private static int rainLineDelay;
     private static float lastHealth;
     private static BlockPos trialCenter;
     private static UUID altarOwner;
@@ -146,6 +149,7 @@ public final class GoldorEncounter {
         if (!encounterLevel.addFreshEntity(boss)) { abortTrial("Goldor could not be spawned."); return false; }
         goldor = boss;
         attackTimer = 60;
+        rainTimer = 300; rainLinesRemaining = 0; rainLineDelay = 0;
         lastHealth = (float) ENTITY_HEALTH;
         BAR.setName(Component.literal("Goldor: 250,000,000 / 250,000,000 HP"));
         BAR.setProgress(1.0F);
@@ -204,6 +208,7 @@ public final class GoldorEncounter {
         encounterLevel = level;
         BossArena.ensure(level, spawn.below());
         attackTimer = 60;
+        rainTimer = 300; rainLinesRemaining = 0; rainLineDelay = 0;
         lastHealth = (float) ENTITY_HEALTH;
         clearSwords();
         PARTICIPANTS.clear();
@@ -251,6 +256,18 @@ public final class GoldorEncounter {
             } else {
                 goldor.setDeltaMovement(Vec3.ZERO);
             }
+        }
+
+        if (rainLinesRemaining > 0) {
+            if (--rainLineDelay <= 0 && target != null) {
+                createSwordRainLine(target.position());
+                rainLinesRemaining--;
+                rainLineDelay = 40;
+            }
+        } else if (--rainTimer <= 0 && target != null) {
+            rainLinesRemaining = 5;
+            rainLineDelay = 0;
+            rainTimer = 500;
         }
 
         if (--attackTimer <= 0 && target != null) {
@@ -333,6 +350,18 @@ public final class GoldorEncounter {
             if (distance < best) { best = distance; nearest = player; }
         }
         return nearest;
+    }
+
+    private static void createSwordRainLine(Vec3 lockedPosition) {
+        List<BlockPos> positions = new ArrayList<>();
+        int z = Math.max(trialCenter.getZ() - 48, Math.min(trialCenter.getZ() + 47, (int) Math.floor(lockedPosition.z)));
+        for (int x = trialCenter.getX() - 48; x <= trialCenter.getX() + 47; x += 3) {
+            positions.add(new BlockPos(x, Math.max(trialCenter.getY() + 1, (int) Math.floor(lockedPosition.y)), z));
+        }
+        PENDING.add(new PendingSword(positions, 60, createWarningDisplays(positions)));
+        encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("GOLDOR: SWORD RAIN INCOMING!")
+                        .withStyle(s -> s.withColor(0xFF5555).withBold(true)), false);
     }
 
     private static List<Display.BlockDisplay> createWarningDisplays(List<BlockPos> positions) {
@@ -479,6 +508,7 @@ public final class GoldorEncounter {
         PLAYER_DAMAGE.clear();
         DEAD_PARTICIPANTS.clear();
         attackTimer = 0;
+        rainTimer = 300; rainLinesRemaining = 0; rainLineDelay = 0;
         lastHealth = 0.0F;
         PENDING.clear();
         FLYING.clear();
