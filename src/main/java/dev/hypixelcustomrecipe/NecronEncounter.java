@@ -898,7 +898,7 @@ public final class NecronEncounter {
         if (dangerDisplayColor == color) return;
         dangerDisplayColor = color;
         net.minecraft.world.level.block.Block block = color == 0xFFFF00 ? Blocks.GOLD_BLOCK
-                : color == 0xFF8800 ? Blocks.ORANGE_WOOL : Blocks.REDSTONE_BLOCK;
+                : color == 0xFF8800 ? Blocks.PUMPKIN : Blocks.REDSTONE_BLOCK;
         for (Display.BlockDisplay display : DANGER_ZONE_DISPLAYS) display.setBlockState(block.defaultBlockState());
     }
 
