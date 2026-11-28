@@ -388,7 +388,7 @@ public final class NecronEncounter {
         clearDisplayList(CLOSING_WALL_DISPLAYS);
         // Use many short translucent panels so the circular wall reads as one connected ring.
         for (int i = 0; i < 96; i++) {
-            Display.BlockDisplay segment = createBlockDisplay(Blocks.PURPLE_STAINED_GLASS.defaultBlockState(),
+            Display.BlockDisplay segment = createBlockDisplay(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("purple_stained_glass")).defaultBlockState(),
                     safeX, center.getY() + 5.2D, safeZ, 1.0F, 10.0F, 0.18F, new Quaternionf());
             if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
         }
