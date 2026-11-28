@@ -210,7 +210,7 @@ public final class GoldorEncounter {
 
         goldor = boss;
         encounterLevel = level;
-        BossArena.ensure(level, spawn.below());
+        trialCenter = BossArena.ensure(level, spawn.below());
         attackTimer = 60;
         rainTimer = 300; rainLinesRemaining = 0; rainLineDelay = 0;
         lastHealth = (float) ENTITY_HEALTH;
@@ -378,6 +378,9 @@ public final class GoldorEncounter {
     }
 
     private static void createSwordRainLine(Vec3 lockedPosition) {
+        // Test-mode encounters must retain the arena center too; never start a
+        // Sword Rain line if the arena context has already been torn down.
+        if (encounterLevel == null || trialCenter == null || goldor == null || !goldor.isAlive()) return;
         List<BlockPos> positions = new ArrayList<>();
         int z = Math.max(trialCenter.getZ() - 48, Math.min(trialCenter.getZ() + 47, (int) Math.floor(lockedPosition.z)));
         for (int x = trialCenter.getX() - 48; x <= trialCenter.getX() + 47; x += 3) {
