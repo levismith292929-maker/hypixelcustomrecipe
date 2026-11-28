@@ -563,6 +563,8 @@ public final class SkyblockPlayerState {
         else if (held.is(DatapackItems.AOTD)) { ability = "aotd"; label = "AOTD"; }
         else if (held.is(DatapackItems.NECRONS_SCYTHE)) { ability = "necrons_scythe"; label = "Necron's Scythe"; }
         else if (held.is(DatapackItems.ZOMBIE_SWORD)) { ability = "zombie_sword"; label = "Zombie Sword"; }
+        else if (held.is(DatapackItems.ORNATE_ZOMBIE_SWORD)) { ability = "ornate_zombie_sword"; label = "Ornate Zombie Sword"; }
+        else if (held.is(DatapackItems.EMBELLISHED_ZOMBIE_SWORD)) { ability = "embellished_zombie_sword"; label = "Embellished Zombie Sword"; }
         else if (held.is(DatapackItems.ORE_TRACKER)) { ability = "ore_tracker"; label = "Ore Tracker"; }
 
         if (ability == null) return "";
