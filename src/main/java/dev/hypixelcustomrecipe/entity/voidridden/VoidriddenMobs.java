@@ -78,7 +78,7 @@ public final class VoidriddenMobs {
                 VOIDRIDDEN_ENDERMAN, EnderMan.createAttributes().add(Attributes.MAX_HEALTH, 200000.0)
         );
         FabricDefaultAttributeRegistry.register(
-                VOIDRIDDEN_SPIDER, Spider.createAttributes().add(Attributes.MAX_HEALTH, 4000.0)
+                VOIDRIDDEN_SPIDER, Spider.createAttributes().add(Attributes.MAX_HEALTH, 1000.0)
         );
         FabricDefaultAttributeRegistry.register(
                 VOIDRIDDEN_CREEPER, Creeper.createAttributes().add(Attributes.MAX_HEALTH, 100000.0)
