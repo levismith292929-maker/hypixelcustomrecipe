@@ -257,11 +257,9 @@ public final class SkyblockAbilityHandler {
         playSound(player, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.2F);
     }
 
-    /** Astraea: Resistance II and Absorption IV for ten seconds. */
+    /** Astraea: +500 Defense for ten seconds. */
     private static void useAstraea(ServerPlayer player) {
         if (!beginAbility(player, "astraea", 40, 200)) return;
-        player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 200, 1));
-        player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 200, 3));
         SkyblockPlayerState.get(player).startAstraeaOrbs();
         playSound(player, net.minecraft.sounds.SoundEvents.WITHER_AMBIENT, 0.6F, 1.6F);
     }
