@@ -365,7 +365,8 @@ public final class SkyblockAbilityHandler {
                             soulBladeDamage = maximumHealth * percentage;
                         }
                         if (NecronEncounter.isNecron(target)) {
-                            soulBladeDamage = NecronEncounter.toEntityDamage(soulBladeDamage);
+                            // Soul Blade has a fixed 250,000 logical-damage cap per hit on Necron.
+                            soulBladeDamage = NecronEncounter.toEntityDamage(250_000.0D);
                         }
                         applyScytheTrueDamage(level, target, source, (float) soulBladeDamage);
                     }
