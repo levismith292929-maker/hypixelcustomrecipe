@@ -353,7 +353,9 @@ public final class MaxorEncounter {
                 ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
                 if (player != null) {
                     SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
-                    player.sendSystemMessage(Component.literal("Maxor defeated! +100 Player Levels")
+                    ItemStack maxorPet = new ItemStack(DatapackItems.MAXOR_PET);
+                    if (!player.getInventory().add(maxorPet)) player.drop(maxorPet, false);
+                    player.sendSystemMessage(Component.literal("Maxor defeated! +100 Player Levels + Maxor Pet")
                             .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
                     rewarded++;
                 }
