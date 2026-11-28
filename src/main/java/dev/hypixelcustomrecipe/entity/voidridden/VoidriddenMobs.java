@@ -78,7 +78,7 @@ public final class VoidriddenMobs {
                 VOIDRIDDEN_ENDERMAN, EnderMan.createAttributes().add(Attributes.MAX_HEALTH, 200000.0)
         );
         FabricDefaultAttributeRegistry.register(
-                VOIDRIDDEN_SPIDER, Spider.createAttributes().add(Attributes.MAX_HEALTH, 80000.0)
+                VOIDRIDDEN_SPIDER, Spider.createAttributes().add(Attributes.MAX_HEALTH, 4000.0)
         );
         FabricDefaultAttributeRegistry.register(
                 VOIDRIDDEN_CREEPER, Creeper.createAttributes().add(Attributes.MAX_HEALTH, 100000.0)
@@ -91,9 +91,12 @@ public final class VoidriddenMobs {
                     || type == VOIDRIDDEN_CREEPER) {
                 if (NecronEncounter.isNecronMinion(entity.getUUID())) return;
                 if (entity.level() instanceof ServerLevel level) {
-                    ItemEntity fragment = new ItemEntity(level, entity.getX(), entity.getY() + 0.5,
-                            entity.getZ(), new ItemStack(ModItems.VOID_FRAGMENT));
-                    level.addFreshEntity(fragment);
+                    // Voidridden Spiders have a 20% Void Fragment drop chance; other variants are guaranteed.
+                    if (type != VOIDRIDDEN_SPIDER || level.getRandom().nextFloat() < 0.20F) {
+                        ItemEntity fragment = new ItemEntity(level, entity.getX(), entity.getY() + 0.5,
+                                entity.getZ(), new ItemStack(ModItems.VOID_FRAGMENT));
+                        level.addFreshEntity(fragment);
+                    }
                     // Soul Shards have a 10% chance to drop from any Voidridden mob.
                     if (level.getRandom().nextFloat() < 0.10F) {
                         ItemEntity soulShard = new ItemEntity(level, entity.getX(), entity.getY() + 0.5,
