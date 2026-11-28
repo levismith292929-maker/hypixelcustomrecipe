@@ -35,7 +35,7 @@ import java.util.UUID;
 
 /** Storm phase of the Wither Altar encounter. */
 public final class StormEncounter {
-    private static final double BOSS_HEALTH = 18_000_000.0D;
+    private static final double BOSS_HEALTH = 100_000_000.0D;
     private static final double ENTITY_HEALTH = 1_024.0D;
     private static final double BOSS_HP_PER_ENTITY_HP = BOSS_HEALTH / ENTITY_HEALTH;
     private static final double REWARD_THRESHOLD = BOSS_HEALTH * 0.20D;
@@ -218,7 +218,7 @@ public final class StormEncounter {
         storm = boss;
         breakTimer = 0;
         waveTimer = WAVE_INTERVAL_TICKS;
-        BOSS_BAR.setName(Component.literal("Storm: 18,000,000 / 18,000,000 HP"));
+        BOSS_BAR.setName(Component.literal("Storm: 100,000,000 / 100,000,000 HP"));
         BOSS_BAR.setProgress(1.0F);
         level.playSound(null, boss.blockPosition(), SoundEvents.WITHER_SPAWN,
                 SoundSource.HOSTILE, 2.0F, 0.9F);
