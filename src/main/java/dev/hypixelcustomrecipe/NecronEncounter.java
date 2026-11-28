@@ -495,7 +495,6 @@ public final class NecronEncounter {
     private static void beginLaser() {
         laserActive = true;
         laserTicks = LASER_DURATION;
-        attack3Timer = random(150, 300);
         laserAngle = 0.0D;
         if (necron != null) {
             necron.setPos(center.getX() + 0.5D, center.getY() + 5.0D, center.getZ() + 0.5D);
@@ -523,7 +522,6 @@ public final class NecronEncounter {
     }
 
     private static void tickLaser() {
-        if (attack3Timer > 0) attack3Timer--;
         laserAngle += Math.PI * 2.0D / 160.0D;
         double radius = 48.0D;
         double endX = center.getX() + 0.5D + Math.cos(laserAngle) * radius;
@@ -571,6 +569,8 @@ public final class NecronEncounter {
         laserTicks--;
         if (laserTicks <= 0) {
             laserActive = false;
+            // Start the next laser cooldown only after this laser has fully ended.
+            attack3Timer = random(150, 300);
             discardDisplay(laserBeamDisplay);
             laserBeamDisplay = null;
             if (laserGuardian != null) laserGuardian.discard();
