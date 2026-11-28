@@ -367,7 +367,7 @@ public final class MaxorEncounter {
         encounterLevel.playSound(null, maxor.blockPosition(), SoundEvents.WITHER_DEATH,
                 SoundSource.HOSTILE, 2.0F, 0.8F);
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("Maxor has been defeated! " + rewarded + " player(s) earned the reward. Storm begins in 5 minutes!"),
+                Component.literal("Maxor has been defeated! " + rewarded + " player(s) earned the reward. Storm begins in 2 minutes!"),
                 false);
         // Preserve the encounter location, owner, and participants for Storm's
         // five-minute intermission before clearing Maxor's phase state.
