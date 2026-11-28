@@ -387,7 +387,9 @@ public final class StormEncounter {
                 SkyblockPlayerState.get(player).addLevelExperience(player, 5_000);
                 ItemStack adminRing = new ItemStack(DatapackItems.ADMIN_RING);
                 if (!player.getInventory().add(adminRing)) player.drop(adminRing, false);
-                player.sendSystemMessage(Component.literal("Storm defeated! +100 Player Levels + Admin Ring")
+                ItemStack stormPet = new ItemStack(DatapackItems.STORM_PET);
+                if (!player.getInventory().add(stormPet)) player.drop(stormPet, false);
+                player.sendSystemMessage(Component.literal("Storm defeated! +100 Player Levels + Admin Ring + Storm Pet")
                         .withStyle(style -> style.withColor(0x55FF55).withBold(true)));
                 rewarded++;
             }
