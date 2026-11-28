@@ -60,6 +60,10 @@ public final class SkyblockPlayerState {
         private final double damageBonus;
         private final int trueDefenseBonus;
 
+        Pet(int manaMaximum, int manaRegeneration, double damageBonus) {
+            this(manaMaximum, manaRegeneration, damageBonus, 0);
+        }
+
         Pet(int manaMaximum, int manaRegeneration, double damageBonus, int trueDefenseBonus) {
             this.manaMaximum = manaMaximum;
             this.manaRegeneration = manaRegeneration;
@@ -136,6 +140,19 @@ public final class SkyblockPlayerState {
             SkyblockPlayerState state = PLAYERS.get(newPlayer.getUUID());
             if (state != null) {
                 state.resetAfterRespawn(newPlayer);
+                if (state.activePet == Pet.STORM) {
+                    boolean hasSoulBlade = false;
+                    for (int slot = 0; slot < newPlayer.getInventory().getContainerSize(); slot++) {
+                        if (newPlayer.getInventory().getItem(slot).is(DatapackItems.SOUL_BLADE)) {
+                            hasSoulBlade = true;
+                            break;
+                        }
+                    }
+                    if (!hasSoulBlade) {
+                        ItemStack soulBlade = new ItemStack(DatapackItems.SOUL_BLADE);
+                        if (!newPlayer.getInventory().add(soulBlade)) newPlayer.drop(soulBlade, false);
+                    }
+                }
             }
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
