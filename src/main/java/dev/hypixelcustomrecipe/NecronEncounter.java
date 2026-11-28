@@ -441,7 +441,6 @@ public final class NecronEncounter {
             }
         }
         attack1Ticks--;
-        if (attack1Timer > 0) attack1Timer--;
         if (attack1Ticks <= 0) {
             clearDisplayList(CLOSING_WALL_DISPLAYS);
             discardDisplay(safeZoneDisplay);
