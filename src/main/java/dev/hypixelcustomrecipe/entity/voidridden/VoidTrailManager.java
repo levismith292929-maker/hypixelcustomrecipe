@@ -39,7 +39,7 @@ public final class VoidTrailManager {
         float yaw = (float) Math.atan2(horizontal.x, horizontal.z);
         Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
         if (display != null) {
-            display.setBlockState(Blocks.AMETHYST_BLOCK.defaultBlockState());
+            display.setBlockState(Blocks.GLASS.defaultBlockState());
             display.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY(yaw),
                     new Vector3f((float) (TRAIL_HALF_WIDTH * 2.0D), (float) TRAIL_HEIGHT,
                             (float) Math.max(1.0D, horizontal.length())), new Quaternionf()));
