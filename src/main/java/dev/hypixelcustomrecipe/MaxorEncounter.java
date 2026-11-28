@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,7 +22,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -55,8 +54,13 @@ public final class MaxorEncounter {
     private static UUID altarOwner;
     private static int minionSpawnTimer;
     private static int laserBeamTimer;
-    private static Display.BlockDisplay laserBeamDisplay;
+    private static final DustParticleOptions LASER_PARTICLE = new DustParticleOptions(0xAA00FF, 0.85F);
+    private static final double LASER_HIT_RADIUS = 0.22D;
+    private static final int LASER_CHARGE_TICKS = 12;
+    private static int laserChargeTicks;
     private static int laserBeamTicks;
+    private static Vec3 laserShotStart;
+    private static Vec3 laserShotEnd;
     // Vanilla Withers regenerate naturally; remember the last legitimate HP value
     // so Maxor cannot recover health during the encounter.
     private static float lastKnownHealth;
@@ -174,6 +178,10 @@ public final class MaxorEncounter {
         altarOwner = starter.getUUID();
         minionSpawnTimer = MINION_INTERVAL_TICKS;
         laserBeamTimer = 0;
+        laserChargeTicks = 0;
+        laserBeamTicks = 0;
+        laserShotStart = null;
+        laserShotEnd = null;
         lastKnownHealth = (float) ENTITY_HEALTH;
         PLAYER_DAMAGE.clear();
         PARTICIPANTS.clear();
@@ -217,6 +225,13 @@ public final class MaxorEncounter {
         ServerPlayer target = nearestPlayerInEncounter();
         if (target != null) {
             maxor.setTarget(target);
+            Vec3 delta = target.position().subtract(maxor.position());
+            Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
+            if (horizontal.lengthSqr() > 2.25D) {
+                Vec3 motion = horizontal.normalize().scale(0.20D);
+                maxor.setDeltaMovement(motion.x,
+                        Math.max(-0.08D, Math.min(0.08D, delta.y * 0.035D)), motion.z);
+            }
             double maximumY = target.getY() + 2.0D;
             if (maxor.getY() > maximumY) {
                 maxor.setPos(maxor.getX(), maximumY, maxor.getZ());
@@ -224,17 +239,28 @@ public final class MaxorEncounter {
                 maxor.setDeltaMovement(motion.x, Math.min(motion.y, -0.12D), motion.z);
             }
         }
-        if (laserBeamTicks > 0 && --laserBeamTicks <= 0) {
-            if (laserBeamDisplay != null) laserBeamDisplay.discard();
-            laserBeamDisplay = null;
-        }
         LASER_HIT_COOLDOWNS.replaceAll((uuid, ticks) -> ticks - 1);
         LASER_HIT_COOLDOWNS.values().removeIf(ticks -> ticks <= 0);
-        // Fire the visible laser as a short pulse every five seconds,
-        // matching the existing 100-tick (5-second) laser effect cooldown.
+
+        if (laserChargeTicks > 0) {
+            renderLaserParticles(laserShotStart, laserShotEnd, 0.55F);
+            if (--laserChargeTicks <= 0) {
+                laserBeamTicks = 8;
+            }
+        } else if (laserBeamTicks > 0) {
+            renderLaserParticles(laserShotStart, laserShotEnd, 0.95F);
+            applyLaserBeamHits();
+            laserBeamTicks--;
+            if (laserBeamTicks <= 0) {
+                laserShotStart = null;
+                laserShotEnd = null;
+            }
+        }
+
+        // A short visible charge-up gives players time to move out of the narrow beam.
         if (--laserBeamTimer <= 0) {
             if (target != null) {
-                renderLaserBeam(target);
+                beginLaserCharge(target);
             }
             laserBeamTimer = 100;
         }
@@ -259,36 +285,52 @@ public final class MaxorEncounter {
         }
     }
 
-    /**
-     * Draws a continuous purple guardian-style beam from Maxor to his player
-     * target. The beam applies a 2% max-Health laser stack every five seconds.
-     */
-    private static void renderLaserBeam(ServerPlayer target) {
-        Vec3 start = maxor.getEyePosition();
-        Vec3 end = target.getEyePosition();
+    /** Locks the beam's aim point during a brief charge-up so players can dodge it. */
+    private static void beginLaserCharge(ServerPlayer target) {
+        laserShotStart = maxor.getEyePosition();
+        laserShotEnd = target.getEyePosition();
+        if (laserShotEnd.subtract(laserShotStart).lengthSqr() <= 0.01D) return;
+        laserChargeTicks = LASER_CHARGE_TICKS;
+        encounterLevel.playSound(null, maxor.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
+                SoundSource.HOSTILE, 1.2F, 1.6F);
+    }
+
+    /** Draws the beam as particles only; particles have no entity-sized collision box. */
+    private static void renderLaserParticles(Vec3 start, Vec3 end, float scale) {
+        if (start == null || end == null) return;
         Vec3 delta = end.subtract(start);
         double distance = delta.length();
         if (distance <= 0.0D) return;
-        if (laserBeamDisplay != null) laserBeamDisplay.discard();
-        Vec3 midpoint = start.add(end).scale(0.5D);
-        float yaw = (float) Math.atan2(delta.x, delta.z);
-        laserBeamDisplay = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
-        if (laserBeamDisplay != null) {
-            laserBeamDisplay.setBlockState(Blocks.AMETHYST_BLOCK.defaultBlockState());
-            laserBeamDisplay.setTransformation(new com.mojang.math.Transformation(new org.joml.Vector3f(),
-                    new org.joml.Quaternionf().rotationY(yaw),
-                    new org.joml.Vector3f(0.12F, 0.12F, (float) distance), new org.joml.Quaternionf()));
-            laserBeamDisplay.setNoGravity(true);
-            laserBeamDisplay.setPos(midpoint.x, midpoint.y, midpoint.z);
-            if (!encounterLevel.addFreshEntity(laserBeamDisplay)) laserBeamDisplay = null;
+        Vec3 step = delta.scale(0.5D / distance);
+        int count = Math.max(1, (int) Math.ceil(distance / 0.5D));
+        DustParticleOptions particle = new DustParticleOptions(0xAA00FF, scale);
+        for (int i = 0; i <= count; i++) {
+            Vec3 point = start.add(step.scale(i));
+            encounterLevel.sendParticles(particle, point.x, point.y, point.z,
+                    1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
-        laserBeamTicks = 8;
-        UUID id = target.getUUID();
-        if (!LASER_HIT_COOLDOWNS.containsKey(id)) {
-            SkyblockPlayerState.get(target).addMaxorLaserStack();
-            LASER_AFFECTED.add(id);
-            LASER_HIT_COOLDOWNS.put(id, 100);
-            target.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
+    }
+
+    /** Only players close to the actual beam segment are hit; being the target is not enough. */
+    private static void applyLaserBeamHits() {
+        if (laserShotStart == null || laserShotEnd == null) return;
+        Vec3 segment = laserShotEnd.subtract(laserShotStart);
+        double lengthSquared = segment.lengthSqr();
+        if (lengthSquared <= 0.0001D) return;
+        double radiusSquared = LASER_HIT_RADIUS * LASER_HIT_RADIUS;
+        for (ServerPlayer player : encounterLevel.getServer().getPlayerList().getPlayers()) {
+            if (player.level() != encounterLevel || !player.isAlive()
+                    || player.isCreative() || player.isSpectator()
+                    || LASER_HIT_COOLDOWNS.containsKey(player.getUUID())) continue;
+            Vec3 relative = player.getEyePosition().subtract(laserShotStart);
+            double projection = Math.max(0.0D, Math.min(1.0D, relative.dot(segment) / lengthSquared));
+            Vec3 closest = laserShotStart.add(segment.scale(projection));
+            if (player.getEyePosition().distanceToSqr(closest) > radiusSquared) continue;
+
+            SkyblockPlayerState.get(player).addMaxorLaserStack();
+            LASER_AFFECTED.add(player.getUUID());
+            LASER_HIT_COOLDOWNS.put(player.getUUID(), 100);
+            player.sendSystemMessage(Component.literal("Maxor's laser reduced your maximum Health by 2%!")
                     .withStyle(style -> style.withColor(0xAA00AA)));
         }
     }
@@ -457,9 +499,10 @@ public final class MaxorEncounter {
     }
 
     private static void clearEncounter() {
-        if (laserBeamDisplay != null) laserBeamDisplay.discard();
-        laserBeamDisplay = null;
+        laserChargeTicks = 0;
         laserBeamTicks = 0;
+        laserShotStart = null;
+        laserShotEnd = null;
         maxor = null;
         testMode = false;
         lastKnownHealth = 0.0F;

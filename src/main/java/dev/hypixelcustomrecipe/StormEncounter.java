@@ -153,7 +153,16 @@ public final class StormEncounter {
         }
 
         ServerPlayer target = nearestPlayer();
-        if (target != null) storm.setTarget(target);
+        if (target != null) {
+            storm.setTarget(target);
+            Vec3 delta = target.position().subtract(storm.position());
+            Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
+            if (horizontal.lengthSqr() > 2.25D) {
+                Vec3 motion = horizontal.normalize().scale(0.22D);
+                storm.setDeltaMovement(motion.x,
+                        Math.max(-0.08D, Math.min(0.08D, delta.y * 0.035D)), motion.z);
+            }
+        }
 
         float progress = Math.max(0.0F, Math.min(1.0F,
                 storm.getHealth() / (float) ENTITY_HEALTH));
