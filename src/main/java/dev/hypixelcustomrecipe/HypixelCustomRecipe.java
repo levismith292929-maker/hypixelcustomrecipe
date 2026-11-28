@@ -34,6 +34,7 @@ public final class HypixelCustomRecipe implements ModInitializer {
         SkyblockPlayerState.initialize();
         SkyblockAbilityHandler.initialize();
         NecronGuardHandler.initialize();
+        WitherPetAbilities.initialize();
         DamageNumberHandler.initialize();
         VoidriddenEffects.initialize();
         VoidriddenMobs.initialize();
