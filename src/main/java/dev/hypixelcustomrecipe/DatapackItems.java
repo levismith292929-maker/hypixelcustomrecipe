@@ -173,25 +173,29 @@ public final class DatapackItems {
             "Ability: Summon Pet", "Damage: +40%", "Max Mana: 750", "Mana Regeneration: 10/sec");
     public static final Item PET_IRON_GOLEM = registerProfileHead("pet_iron_golem", "Iron Golem", "MHF_Golem", null,
             "Ability: Summon Pet", "Damage: +5%", "Max Mana: 600", "Mana Regeneration: 30/sec", "Permanent Resistance I");
-    public static final Item MAXOR_PET = register("maxor_pet", "Maxor Pet", Items.WITHER_SKELETON_SKULL,
+    public static final Item MAXOR_PET = registerProfileHead("maxor_pet", "Maxor Pet", null,
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhjZDNlMTBiM2E0M2MwNTY0MTI3OWU5YjhlZWFmZWI3OWFiODY1ZWM0MTRjNjJhODJiN2M3MTkzZDE2OWUyIn19fQ==",
             "Pet Ability: Hardened Presence",
             "+100% Defense",
             "+10 True Defense",
             "Necron's Guard summons 20 guards instead of 2 when ready.");
-    public static final Item STORM_PET = register("storm_pet", "Storm Pet", Items.SKELETON_SKULL,
+    public static final Item STORM_PET = registerProfileHead("storm_pet", "Storm Pet", null,
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTliYWVjNWZiNGNkOWRjNTk2ZDYxMGI2YzZiZDM4YWI5OTAxYjY4Yzk1OTQ5ZTJkNzFiOTI1MzE3MjcwZDAxMSJ9fX0=",
             "Pet Ability: Soul Surge",
             "+5 True Defense",
             "Soul Blade: +0.5 percentage points against Wither Trial enemies",
             "Soul Blade: +6.5 percentage points against other enemies",
             "Soul Blade is returned to you when you die.");
-    public static final Item GOLDOR_PET = register("goldor_pet", "Goldor Pet", Items.ZOMBIE_HEAD,
+    public static final Item GOLDOR_PET = registerProfileHead("goldor_pet", "Goldor Pet", null,
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTZlZDM3YTI5ZDRjNTI5ODA5MmY1OGEzMDMyYmFhODQ4Mjk2ZThhZDYxOWNlYzVhM2FmODQ3ZDIzMDllNzAxNCJ9fX0=",
             "Pet Ability: Swordfall",
             "+100% Strength",
             "-10% Intelligence",
             "+5 True Defense",
             "Every 3rd Dark Claymore hit summons a sword above the target",
             "that deals 15% of the target's maximum Health.");
-    public static final Item NECRON_PET = register("necron_pet", "Necron Pet", Items.WITHER_SKELETON_SKULL,
+    public static final Item NECRON_PET = registerProfileHead("necron_pet", "Necron Pet", null,
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDA4MmQ1MTg4OTEyZWE2MjNjZDkyMzAyZDQ4OTYwMWY2MmJmMzg1MjEyN2QxOGRlZjg4YzRjODE0MWUxMjczYyJ9fX0=",
             "Pet Ability: Withering Aura",
             "+25 True Defense",
             "+50% Damage",
