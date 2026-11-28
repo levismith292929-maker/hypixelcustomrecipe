@@ -64,10 +64,10 @@ public final class NecronGuardHandler {
         if (!ModArmorItems.isWearingFullNecronSet(player)) return;
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
         if (!state.tryStartNecronGuardCooldown()) return;
-        summonGuards(player);
+        summonGuards(player, state.activePet() == SkyblockPlayerState.Pet.MAXOR ? 20 : 2);
     }
 
-    private static void summonGuards(ServerPlayer owner) {
+    private static void summonGuards(ServerPlayer owner, int guardCount) {
         ServerLevel level = (ServerLevel) owner.level();
         Player target = level.players().stream()
                 .filter(candidate -> candidate != owner
@@ -80,7 +80,7 @@ public final class NecronGuardHandler {
         if (side.lengthSqr() < 1.0E-6) side = new Vec3(1.0, 0.0, 0.0);
         side = side.normalize();
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < guardCount; i++) {
             var witherSkeletonType = BuiltInRegistries.ENTITY_TYPE.get(
                     Identifier.fromNamespaceAndPath("minecraft", "wither_skeleton")).orElseThrow().value();
             var spawned = witherSkeletonType.create(level, EntitySpawnReason.TRIGGERED);
