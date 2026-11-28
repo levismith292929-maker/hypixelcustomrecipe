@@ -317,7 +317,6 @@ public final class NecronEncounter {
         tickAttack4();
         tickAttack6();
         tickAttack7(target);
-        if (attack1Timer > 0) attack1Timer--;
         if (attack2Timer > 0) attack2Timer--;
         if (attack4Timer > 0) attack4Timer--;
         if (attack5Timer > 0) attack5Timer--;
@@ -336,7 +335,6 @@ public final class NecronEncounter {
                 && attack4Ticks == 0 && attack6Ticks == 0) beginAttack1();
         if (BOMBS.isEmpty() && attack2Timer <= 0
                 && attack6Ticks == 0) beginAttack2();
-        if (attack5Timer > 0) attack5Timer--;
         if (attack5Timer <= 0) {
             spawnVoidriddenWave(target);
             attack5Timer = random(150, 300);
@@ -450,7 +448,6 @@ public final class NecronEncounter {
     }
 
     private static void tickAttack2() {
-        if (attack2Timer > 0) attack2Timer--;
         Iterator<TntBomb> iterator = BOMBS.iterator();
         while (iterator.hasNext()) {
             TntBomb bomb = iterator.next();
@@ -479,7 +476,7 @@ public final class NecronEncounter {
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area)) {
             double dx = player.getX() - x;
             double dz = player.getZ() - z;
-            if (dx * dx + dz * dz > 25.0D || !player.isAlive()) continue;
+            if (dx * dx + dz * dz > 25.0D || !player.isAlive() || player.isCreative()) continue;
             SkyblockPlayerState state = SkyblockPlayerState.get(player);
             state.markCombat();
             if (state.applyNecronCorruptDamage(1_000.0F)) {
@@ -539,14 +536,15 @@ public final class NecronEncounter {
             laserGuardian.setTarget(laserTarget);
         }
 
-        double midX = center.getX() + 0.5D + Math.cos(laserAngle) * radius * 0.5D;
-        double midZ = center.getZ() + 0.5D + Math.sin(laserAngle) * radius * 0.5D;
+        double startX = center.getX() + 0.5D;
+        double startZ = center.getZ() + 0.5D;
+        float beamYaw = (float) Math.atan2(endX - startX, endZ - startZ);
         if (laserBeamDisplay == null || laserBeamDisplay.isRemoved()) {
             laserBeamDisplay = createBlockDisplay(Blocks.AMETHYST_BLOCK.defaultBlockState(),
-                    midX, beamY, midZ, 0.14F, 0.14F, (float) radius, new Quaternionf().rotationY((float) laserAngle));
+                    startX, beamY, startZ, 0.14F, 0.14F, (float) radius, new Quaternionf().rotationY(beamYaw));
         } else {
-            laserBeamDisplay.setPos(midX, beamY, midZ);
-            laserBeamDisplay.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY((float) laserAngle),
+            laserBeamDisplay.setPos(startX, beamY, startZ);
+            laserBeamDisplay.setTransformation(new Transformation(new Vector3f(), new Quaternionf().rotationY(beamYaw),
                     new Vector3f(0.14F, 0.14F, (float) radius), new Quaternionf()));
         }
 
@@ -555,7 +553,7 @@ public final class NecronEncounter {
         Vec3 end = new Vec3(endX, beamY, endZ);
         AABB area = new AABB(start, end).inflate(1.1D, 1.5D, 1.1D);
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area)) {
-            if (player.getY() > beamY + 0.45D) continue;
+            if (player.isCreative() || player.getY() > beamY + 0.45D) continue;
             double distance = distanceToSegment(player.position().add(0.0D, 0.9D, 0.0D), start, end);
             if (distance <= 0.85D) {
                 SkyblockPlayerState state = SkyblockPlayerState.get(player);
@@ -631,7 +629,7 @@ public final class NecronEncounter {
             AABB zone = new AABB(dangerMinX, center.getY() + 1, dangerMinZ,
                     dangerMaxX + 1.0D, center.getY() + WALL_HEIGHT, dangerMaxZ + 1.0D);
             for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, zone)) {
-                if (player.isAlive() && !isInsideClosingWallSafeZone(player)) {
+                if (player.isAlive() && !player.isCreative() && !isInsideClosingWallSafeZone(player)) {
                     kill(player, "Necron's danger zone");
                 }
             }
@@ -710,7 +708,7 @@ public final class NecronEncounter {
                 : new AABB(center.getX() - HALF_ARENA, center.getY() + 1, plane - 1.0D,
                     center.getX() + HALF_ARENA, center.getY() + 12, plane + 1.0D);
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, wall)) {
-            if (FLAME_HIT_PLAYERS.contains(player.getUUID())) continue;
+            if (player.isCreative() || FLAME_HIT_PLAYERS.contains(player.getUUID())) continue;
             double along = verticalX ? player.getZ() - center.getZ() : player.getX() - center.getX();
             boolean inGap = Math.abs(along - flameGap) < 1.5D
                     && player.getY() <= center.getY() + 3.0D;
@@ -767,7 +765,7 @@ public final class NecronEncounter {
     }
 
     private static void kill(ServerPlayer player, String cause) {
-        if (!player.isAlive() || isInsideClosingWallSafeZone(player)) return;
+        if (!player.isAlive() || player.isCreative() || isInsideClosingWallSafeZone(player)) return;
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
         state.applyTrueDamage(state.maximumHealth() / 10.0F + 1.0F);
         player.setHealth(0.0F);
