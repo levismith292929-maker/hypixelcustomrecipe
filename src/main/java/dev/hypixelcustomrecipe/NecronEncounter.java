@@ -468,8 +468,11 @@ public final class NecronEncounter {
                     safeX, center.getY() + 1.0D, safeZ, 1.0F, WALL_HEIGHT, 0.18F, new Quaternionf());
             if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
         }
+        // Block displays are positioned from their lower corner; offset by half the
+        // five-block marker so its visual center matches the safe-zone hitbox center.
         safeZoneDisplay = createBlockDisplay(Blocks.EMERALD_BLOCK.defaultBlockState(),
-                safeX, center.getY() + 1.04D, safeZ, 5.0F, 0.08F, 5.0F, new Quaternionf());
+                safeX - 2.5D, center.getY() + 1.04D, safeZ - 2.5D,
+                5.0F, 0.08F, 5.0F, new Quaternionf());
         attack1Timer = attackCooldown(225, 338);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
                 "NECRON: EVAPORATION! Reach the 5-block safe circle!")
@@ -700,13 +703,29 @@ public final class NecronEncounter {
     // Attack 4 — a yellow/orange/red outline warns about a lethal 50x50 square.
     private static void beginAttack4() {
         // Never place a new Danger Zone over the active Closing Wall safe circle.
-        do {
-            dangerMinX = center.getX() - HALF_ARENA + level.getRandom().nextInt(51);
-            dangerMinZ = center.getZ() - HALF_ARENA + level.getRandom().nextInt(51);
-            dangerMaxX = dangerMinX + 49;
-            dangerMaxZ = dangerMinZ + 49;
-        } while (attack1Ticks > 0 && circleOverlapsRectangle(
-                safeX, safeZ, 2.5D, dangerMinX, dangerMaxX + 1.0D, dangerMinZ, dangerMaxZ + 1.0D));
+        // A centered 50x50 zone can make every legal placement overlap the circle,
+        // so bound the search and defer the attack rather than looping forever.
+        boolean validDangerSpot = false;
+        for (int attempt = 0; attempt < 200 && !validDangerSpot; attempt++) {
+            int candidateMinX = center.getX() - HALF_ARENA + level.getRandom().nextInt(51);
+            int candidateMinZ = center.getZ() - HALF_ARENA + level.getRandom().nextInt(51);
+            int candidateMaxX = candidateMinX + 49;
+            int candidateMaxZ = candidateMinZ + 49;
+            if (attack1Ticks <= 0 || !circleOverlapsRectangle(
+                    safeX, safeZ, 2.5D, candidateMinX, candidateMaxX + 1.0D,
+                    candidateMinZ, candidateMaxZ + 1.0D)) {
+                dangerMinX = candidateMinX;
+                dangerMinZ = candidateMinZ;
+                dangerMaxX = candidateMaxX;
+                dangerMaxZ = candidateMaxZ;
+                validDangerSpot = true;
+            }
+        }
+        if (!validDangerSpot) {
+            // The current safe circle leaves no legal 50x50 placement. Retry shortly.
+            attack4Timer = 20;
+            return;
+        }
         attack4Ticks = DANGER_LIFETIME_TICKS;
         clearDisplayList(DANGER_ZONE_DISPLAYS);
         dangerDisplayColor = -1;
