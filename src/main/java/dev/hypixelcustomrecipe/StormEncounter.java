@@ -3,6 +3,7 @@ package dev.hypixelcustomrecipe;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -13,7 +14,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -23,7 +23,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -55,7 +54,6 @@ public final class StormEncounter {
     private static final Set<UUID> DEAD_PARTICIPANTS = new HashSet<>();
     private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static final List<SafeZone> SAFE_ZONES = new ArrayList<>();
-    private static final List<Display.BlockDisplay> SAFE_ZONE_DISPLAYS = new ArrayList<>();
     private static final List<Strike> STRIKES = new ArrayList<>();
     private static final ServerBossEvent BOSS_BAR = new ServerBossEvent(
             UUID.randomUUID(), Component.literal("Storm"), BossEvent.BossBarColor.BLUE,
@@ -167,6 +165,7 @@ public final class StormEncounter {
         updateBossBarPlayers(server);
 
         if (warningTimer >= 0) {
+            renderSafeZoneParticles();
             warningTimer--;
             if (warningTimer < 0) {
                 // Spawn every strike in the same server tick so the whole arena is hit at once.
@@ -174,7 +173,6 @@ public final class StormEncounter {
                     strike(strike);
                 }
                 damagePlayersCaughtInBarrage();
-                clearSafeZoneDisplays();
                 SAFE_ZONES.clear();
                 STRIKES.clear();
                 waveTimer = WAVE_INTERVAL_TICKS;
@@ -238,7 +236,7 @@ public final class StormEncounter {
     }
 
     private static void beginLightningWave() {
-        clearSafeZoneDisplays();
+
         SAFE_ZONES.clear();
         STRIKES.clear();
         for (int i = 0; i < SAFE_ZONE_COUNT; i++) {
@@ -266,20 +264,6 @@ public final class StormEncounter {
                 }
             }
         }
-        for (SafeZone zone : SAFE_ZONES) {
-            Display.BlockDisplay marker = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
-            if (marker != null) {
-                marker.setBlockState(Blocks.EMERALD_BLOCK.defaultBlockState());
-                marker.setTransformation(new com.mojang.math.Transformation(new org.joml.Vector3f(),
-                        new org.joml.Quaternionf(), new org.joml.Vector3f(4.0F, 0.08F, 4.0F),
-                        new org.joml.Quaternionf()));
-                marker.setNoGravity(true);
-                // Restore the previous particle safe-zone marker placement.
-                marker.setPos(zone.x - SAFE_ZONE_RADIUS, arenaCenter.getY() + 1.08D,
-                        zone.z - SAFE_ZONE_RADIUS);
-                if (level.addFreshEntity(marker)) SAFE_ZONE_DISPLAYS.add(marker);
-            }
-        }
         // Place one lightning strike at the center of every block in the 100 x 100 arena,
         // excluding every block whose center falls inside one of the safe zones.
         for (int xOffset = -ARENA_HALF_SIZE; xOffset < ARENA_HALF_SIZE; xOffset++) {
@@ -297,11 +281,18 @@ public final class StormEncounter {
                         .withStyle(style -> style.withColor(0x55FF55)), false);
     }
 
-    private static void clearSafeZoneDisplays() {
-        for (Display.BlockDisplay display : SAFE_ZONE_DISPLAYS) {
-            if (!display.isRemoved()) display.discard();
+    /** Renders the safe zones as green particle rings throughout the warning window. */
+    private static void renderSafeZoneParticles() {
+        DustParticleOptions green = new DustParticleOptions(0x00FF00, 1.25F);
+        for (SafeZone zone : SAFE_ZONES) {
+            for (int i = 0; i < 20; i++) {
+                double angle = (Math.PI * 2.0D * i) / 20.0D;
+                double x = zone.x + Math.cos(angle) * SAFE_ZONE_RADIUS;
+                double z = zone.z + Math.sin(angle) * SAFE_ZONE_RADIUS;
+                level.sendParticles(green, x, arenaCenter.getY() + 1.08D, z,
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
+            }
         }
-        SAFE_ZONE_DISPLAYS.clear();
     }
 
     private static boolean isSafe(double x, double z) {
@@ -454,7 +445,7 @@ public final class StormEncounter {
         waveTimer = WAVE_INTERVAL_TICKS;
         PARTICIPANTS.clear();
         PLAYER_DAMAGE.clear();
-        clearSafeZoneDisplays();
+
         SAFE_ZONES.clear();
         STRIKES.clear();
     }
