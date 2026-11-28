@@ -70,7 +70,7 @@ public final class StormEncounter {
     private static int warningTimer = -1;
     private static int waveTimer = WAVE_INTERVAL_TICKS;
     private static boolean testMode;
-    private static int pillarSpawnTimer = 60;
+    private static int pillarSpawnTimer = 80; // One pillar every 4 seconds
     private static final List<FallingPillar> PILLARS = new ArrayList<>();
 
     private StormEncounter() {
@@ -127,7 +127,7 @@ public final class StormEncounter {
         SAFE_ZONES.clear();
         STRIKES.clear();
         clearPillars();
-        pillarSpawnTimer = 60;
+        pillarSpawnTimer = 80;
         storm = null;
         breakTimer = BREAK_TICKS;
         warningTimer = -1;
@@ -486,16 +486,16 @@ public final class StormEncounter {
 
     private static void tickPillars(MinecraftServer server) {
         if (--pillarSpawnTimer <= 0) {
-            pillarSpawnTimer = 60 + level.getRandom().nextInt(81);
+            pillarSpawnTimer = 80;
             Display.BlockDisplay display = EntityTypes.BLOCK_DISPLAY.create(level, EntitySpawnReason.COMMAND);
             if (display != null) {
                 display.setBlockState(Blocks.IRON_BLOCK.defaultBlockState());
                 display.setTransformation(new Transformation(
-                        new Vector3f(), new Quaternionf(), new Vector3f(1.0F, 4.0F, 1.0F), new Quaternionf()));
+                        new Vector3f(), new Quaternionf(), new Vector3f(10.0F, 30.0F, 10.0F), new Quaternionf()));
                 double x = arenaCenter.getX() - 45 + level.getRandom().nextInt(91) + 0.5D;
                 double z = arenaCenter.getZ() - 45 + level.getRandom().nextInt(91) + 0.5D;
                 display.setNoGravity(true);
-                display.setPos(x, arenaCenter.getY() + 18.0D, z);
+                display.setPos(x - 5.0D, arenaCenter.getY() + 31.0D, z - 5.0D);
                 if (level.addFreshEntity(display)) PILLARS.add(new FallingPillar(display, x, z));
             }
         }
@@ -505,9 +505,9 @@ public final class StormEncounter {
             if (pillar.display.isRemoved()) { iterator.remove(); continue; }
             if (!pillar.landed) {
                 double y = Math.max(arenaCenter.getY() + 1.0D, pillar.display.getY() - 0.12D);
-                pillar.display.setPos(pillar.x, y, pillar.z);
-                AABB hit = new AABB(pillar.x - 0.5D, y, pillar.z - 0.5D,
-                        pillar.x + 0.5D, y + 4.0D, pillar.z + 0.5D);
+                pillar.display.setPos(pillar.x - 5.0D, y, pillar.z - 5.0D);
+                AABB hit = new AABB(pillar.x - 5.0D, y, pillar.z - 5.0D,
+                        pillar.x + 5.0D, y + 30.0D, pillar.z + 5.0D);
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                     if (player.level() == level && player.isAlive() && player.getBoundingBox().intersects(hit)) {
                         player.setHealth(0.0F);
