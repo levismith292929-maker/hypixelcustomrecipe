@@ -173,6 +173,33 @@ public final class DatapackItems {
             "Ability: Summon Pet", "Damage: +40%", "Max Mana: 750", "Mana Regeneration: 10/sec");
     public static final Item PET_IRON_GOLEM = registerProfileHead("pet_iron_golem", "Iron Golem", "MHF_Golem", null,
             "Ability: Summon Pet", "Damage: +5%", "Max Mana: 600", "Mana Regeneration: 30/sec", "Permanent Resistance I");
+    public static final Item MAXOR_PET = register("maxor_pet", "Maxor Pet", Items.WITHER_SKELETON_SKULL,
+            "Pet Ability: Hardened Presence",
+            "+100% Defense",
+            "+10 True Defense",
+            "Necron's Guard summons 20 guards instead of 2 when ready.");
+    public static final Item STORM_PET = register("storm_pet", "Storm Pet", Items.SKELETON_SKULL,
+            "Pet Ability: Soul Surge",
+            "+5 True Defense",
+            "Soul Blade: +0.5 percentage points against Wither Trial enemies",
+            "Soul Blade: +6.5 percentage points against other enemies",
+            "Soul Blade is returned to you when you die.");
+    public static final Item GOLDOR_PET = register("goldor_pet", "Goldor Pet", Items.ZOMBIE_HEAD,
+            "Pet Ability: Swordfall",
+            "+100% Strength",
+            "-10% Intelligence",
+            "+5 True Defense",
+            "Every 3rd Dark Claymore hit summons a sword above the target",
+            "that deals 15% of the target's maximum Health.");
+    public static final Item NECRON_PET = register("necron_pet", "Necron Pet", Items.WITHER_SKELETON_SKULL,
+            "Pet Ability: Withering Aura",
+            "+25 True Defense",
+            "+50% Damage",
+            "+100% to every stat",
+            "Soul Blade: +6.5 percentage points against Wither Trial enemies",
+            "Soul Blade: +21.5 percentage points against other enemies",
+            "Drains 1% of nearby enemies' maximum Health per second within 2 blocks",
+            "Necron's Scythe has no mana cost or cooldown.");
     public static final Item PET_REMOVER = registerProfileHead("pet_remover", "Pet Remover", "MHF_TNT2", null,
             "Ability: Dismiss Pet", "Removes your active pet and restores your normal mana stats.");
 
