@@ -468,10 +468,10 @@ public final class NecronEncounter {
                     safeX, center.getY() + 1.0D, safeZ, 1.0F, WALL_HEIGHT, 0.18F, new Quaternionf());
             if (segment != null) CLOSING_WALL_DISPLAYS.add(segment);
         }
-        // Block displays are positioned from their lower corner; offset by half the
-        // five-block marker so its visual center matches the safe-zone hitbox center.
+        // Block displays are centered on their entity position. Place the marker
+        // directly at the safe-circle center used by the player collision check.
         safeZoneDisplay = createBlockDisplay(Blocks.EMERALD_BLOCK.defaultBlockState(),
-                safeX - 2.5D, center.getY() + 1.04D, safeZ - 2.5D,
+                safeX, center.getY() + 1.04D, safeZ,
                 5.0F, 0.08F, 5.0F, new Quaternionf());
         attack1Timer = attackCooldown(225, 338);
         level.getServer().getPlayerList().broadcastSystemMessage(Component.literal(
