@@ -205,9 +205,10 @@ public final class GemTankMenu {
                     for (int i = 0; i < Math.min(SIZE, legacy.size()); i++) {
                         JsonElement element = legacy.get(i);
                         if (element == null || element.isJsonNull()) continue;
+                        final int slotIndex = i;
                         ItemStack stack = ItemStack.CODEC.parse(ops, element)
                                 .resultOrPartial(message -> HypixelCustomRecipe.LOGGER.warn(
-                                        "Skipping invalid legacy Gem Tank slot {} for {}: {}", i,
+                                        "Skipping invalid legacy Gem Tank slot {} for {}: {}", slotIndex,
                                         player.getGameProfile().name(), message))
                                 .orElse(ItemStack.EMPTY);
                         if (stack.isEmpty()) continue;
