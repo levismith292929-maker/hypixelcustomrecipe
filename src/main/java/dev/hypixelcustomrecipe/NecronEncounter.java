@@ -44,6 +44,8 @@ public final class NecronEncounter {
     private static final double MAX_HP = 500_000_000.0D;
     private static final double ENTITY_HP = 1_024.0D;
     private static final double HP_PER_ENTITY_HP = MAX_HP / ENTITY_HP;
+    private static final double REWARD_THRESHOLD = MAX_HP * 0.20D;
+    private static final int BREAK_TICKS = 2 * 60 * 20;
     private static final int HALF_ARENA = 50;
     private static final int WALL_HEIGHT = 12;
     private static final int LASER_DURATION = 240;
@@ -55,6 +57,11 @@ public final class NecronEncounter {
     private static ServerLevel level;
     private static BlockPos center;
     private static boolean testMode;
+    private static BlockPos trialCenter;
+    private static UUID altarOwner;
+    private static int breakTimer;
+    private static boolean normalTrial;
+    private static final Map<UUID, Double> PLAYER_DAMAGE = new HashMap<>();
     private static boolean laserActive;
     private static int laserTicks;
     private static double laserAngle;
@@ -145,8 +152,31 @@ public final class NecronEncounter {
         return start(player, (ServerLevel) player.level(), true);
     }
 
+    public static void beginBreak(ServerLevel world, BlockPos arenaCenter, UUID owner, Set<UUID> participants) {
+        if (level != null || necron != null) return;
+        level = world;
+        trialCenter = arenaCenter.immutable();
+        altarOwner = owner;
+        normalTrial = true;
+        breakTimer = BREAK_TICKS;
+        PARTICIPANTS.clear();
+        PARTICIPANTS.addAll(participants);
+        DEAD_PARTICIPANTS.clear();
+        PLAYER_DAMAGE.clear();
+        BAR.removeAllPlayers();
+        BAR.setName(Component.literal("Necron begins in 2:00"));
+        BAR.setProgress(1.0F);
+        for (ServerPlayer player : world.getServer().getPlayerList().getPlayers())
+            if (PARTICIPANTS.contains(player.getUUID())) BAR.addPlayer(player);
+    }
+
     private static boolean start(ServerPlayer starter, ServerLevel world, boolean testing) {
-        center = starter.blockPosition().immutable();
+        return start(starter, world, testing, starter.blockPosition().immutable(), Set.of(starter.getUUID()));
+    }
+
+    private static boolean start(ServerPlayer starter, ServerLevel world, boolean testing,
+                                 BlockPos spawnCenter, Set<UUID> participants) {
+        center = spawnCenter.immutable();
         level = world;
         buildArena();
 
@@ -174,8 +204,9 @@ public final class NecronEncounter {
         necron = boss;
         testMode = testing;
         lastHealth = (float) ENTITY_HP;
-        PARTICIPANTS.clear();
+        if (!normalTrial || testing) PARTICIPANTS.clear();
         DEAD_PARTICIPANTS.clear();
+        PARTICIPANTS.addAll(participants);
         MINIONS.clear();
         PENDING_VOIDRIDDEN.clear();
         PROJECTILES.clear();
@@ -259,7 +290,27 @@ public final class NecronEncounter {
     }
 
     private static void tick(MinecraftServer server) {
-        if (necron == null || level == null || !necron.isAlive() || necron.isRemoved()) return;
+        if (level == null) return;
+        if (necron == null) {
+            if (!normalTrial) return;
+            if (allFightersDead(server)) { abortTrial("All players fighting Necron have been defeated. The encounter has ended."); return; }
+            if (--breakTimer <= 0) {
+                ServerPlayer starter = null;
+                for (UUID id : PARTICIPANTS) { ServerPlayer candidate = server.getPlayerList().getPlayer(id); if (candidate != null && candidate.isAlive()) { starter = candidate; break; } }
+                if (starter == null) { abortTrial("No players remain to begin Necron."); return; }
+                BlockPos savedCenter = trialCenter;
+                Set<UUID> savedParticipants = Set.copyOf(PARTICIPANTS);
+                UUID savedOwner = altarOwner;
+                start(starter, level, false, savedCenter, savedParticipants);
+                altarOwner = savedOwner;
+            } else {
+                int seconds = (breakTimer + 19) / 20;
+                BAR.setName(Component.literal(String.format(Locale.ROOT, "Necron begins in %d:%02d", seconds / 60, seconds % 60)));
+                BAR.setProgress(breakTimer / (float) BREAK_TICKS);
+            }
+            return;
+        }
+        if (!necron.isAlive() || necron.isRemoved()) return;
         if (allFightersDead(server)) {
             finish(false);
             return;
@@ -838,6 +889,24 @@ public final class NecronEncounter {
     public static void recordDirectDamage(LivingEntity target, ServerPlayer attacker, double entityDamage) {
         if (necron == null || target != necron || entityDamage <= 0.0D) return;
         PARTICIPANTS.add(attacker.getUUID());
+        if (normalTrial) PLAYER_DAMAGE.merge(attacker.getUUID(), entityDamage * HP_PER_ENTITY_HP, Double::sum);
+    }
+
+    private static void abortTrial(String message) {
+        if (level == null) return;
+        MinecraftServer server = level.getServer();
+        ServerPlayer owner = altarOwner == null ? null : server.getPlayerList().getPlayer(altarOwner);
+        if (owner != null) {
+            ItemStack altar = new ItemStack(ModItems.WITHER_ALTAR);
+            if (!owner.getInventory().add(altar)) owner.drop(altar, false);
+            owner.sendSystemMessage(Component.literal("The encounter failed. Your Wither Altar has been returned.")
+                    .withStyle(s -> s.withColor(0xFF5555)));
+        }
+        server.getPlayerList().broadcastSystemMessage(Component.literal(message), false);
+        BAR.removeAllPlayers();
+        if (necron != null) necron.discard();
+        restoreArena();
+        clearState();
     }
 
     private static boolean allFightersDead(MinecraftServer server) {
@@ -881,8 +950,20 @@ public final class NecronEncounter {
         if (laserTarget != null) laserTarget.discard();
         SkyblockPlayerState.clearNecronEncounterEffectsForAllPlayers();
         if (defeated) {
+            int rewarded = 0;
+            if (normalTrial) {
+                for (Map.Entry<UUID, Double> entry : PLAYER_DAMAGE.entrySet()) {
+                    if (entry.getValue() < REWARD_THRESHOLD) continue;
+                    ServerPlayer player = level.getServer().getPlayerList().getPlayer(entry.getKey());
+                    if (player == null) continue;
+                    SkyblockPlayerState.get(player).addLevelExperience(player, 25_000);
+                    player.sendSystemMessage(Component.literal("Necron defeated! +500 Player Levels")
+                            .withStyle(s -> s.withColor(0x55FF55).withBold(true)));
+                    rewarded++;
+                }
+            }
             level.getServer().getPlayerList().broadcastSystemMessage(
-                    Component.literal("NECRON HAS BEEN DEFEATED! The arena is disappearing.")
+                    Component.literal("NECRON HAS BEEN DEFEATED!" + (normalTrial ? " " + rewarded + " player(s) earned +500 Player Levels. The Normal Wither Trial is complete!" : " The arena is disappearing."))
                             .withStyle(s -> s.withColor(0x55FF55).withBold(true)), false);
             level.playSound(null, center, SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 4.0F, 0.55F);
         } else {
@@ -898,6 +979,11 @@ public final class NecronEncounter {
         necron = null;
         level = null;
         center = null;
+        trialCenter = null;
+        altarOwner = null;
+        breakTimer = 0;
+        normalTrial = false;
+        PLAYER_DAMAGE.clear();
         testMode = false;
         laserActive = false;
         laserTicks = 0;
