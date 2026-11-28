@@ -114,7 +114,8 @@ public final class DatapackItems {
     public static final Item GEMSTONE_GAUNTLET = registerMiningTool("gemstone_gauntlet", "Gemstone Gauntlet", "All Gemstones");
     public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND, "Needs 160 diamonds to craft");
     public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK, "Needs 80 enchanted diamonds to craft");
-    public static final Item ZOMBIE_SWORD = registerHealingSword("zombie_sword", "Zombie Sword",
+    public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
+            "Damage: 100", "Strength: 50", "Intelligence: 50",
             "Ability: Instant Healing  RIGHT CLICK", "Heals 5% of your maximum Health.",
             "Mana Cost: 50", "Cooldown: 1 second");
     public static final Item ORNATE_ZOMBIE_SWORD = registerHealingSword("ornate_zombie_sword", "Ornate Zombie Sword",
@@ -176,6 +177,23 @@ public final class DatapackItems {
             "Ability: Dismiss Pet", "Removes your active pet and restores your normal mana stats.");
 
     private DatapackItems() {}
+
+    private static Item registerHealingSword(String path, String name, String... loreLines) {
+        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
+                Identifier.fromNamespaceAndPath(NAMESPACE, path));
+        Item.Properties properties = new Item.Properties()
+                .setId(key)
+                .stacksTo(1)
+                .component(DataComponents.CUSTOM_NAME, ItemFormatting.name(name, ItemFormatting.rarityColor(path)))
+                .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+                .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        if (loreLines.length > 0) {
+            properties.component(DataComponents.LORE, new ItemLore(Arrays.stream(loreLines)
+                    .<Component>map(ItemFormatting::lore).toList()));
+        }
+        return Registry.register(BuiltInRegistries.ITEM, key,
+                new eu.pb4.polymer.core.api.item.SimplePolymerItem(properties, Items.GOLDEN_SWORD));
+    }
 
     private static Item registerStackableGlint(String path, String name, Item fallback, String... loreLines) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
