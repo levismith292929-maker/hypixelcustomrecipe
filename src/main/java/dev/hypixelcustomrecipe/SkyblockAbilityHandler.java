@@ -595,9 +595,9 @@ public final class SkyblockAbilityHandler {
         SkyblockPlayerState state = SkyblockPlayerState.get(player);
         // Recalculate at click time so the currently held weapon is included,
         // even when the Stat Viewer itself is clicked from another inventory slot.
-        SkyblockStats stats = AccessoryBag.applyAdminRing(player, state.applyCategoryBonuses(
+        SkyblockStats stats = state.applyPetStatBonuses(AccessoryBag.applyAdminRing(player, state.applyCategoryBonuses(
                 SkyblockLevelBonuses.apply(VanillaWeaponStats.applyHeldWeapon(
-                        ModArmorItems.getSkyblockStats(player), player.getMainHandItem()), state.level())));
+                        ModArmorItems.getSkyblockStats(player), player.getMainHandItem()), state.level()))));
         SkyblockManaState mana = state.mana();
         player.sendSystemMessage(Component.literal("Your Stats").withStyle(style -> style.withColor(0xFFAA00).withBold(true)));
         player.sendSystemMessage(Component.literal("SkyBlock Level: " + state.level()
@@ -611,6 +611,7 @@ public final class SkyblockAbilityHandler {
         player.sendSystemMessage(Component.literal("Maximum Mana: " + mana.maximumMana()));
         player.sendSystemMessage(Component.literal("Mana Regeneration: " + mana.regenerationPerSecond() + " / second"));
         player.sendSystemMessage(Component.literal("Defense: " + stats.defense()));
+        player.sendSystemMessage(Component.literal("True Defense: " + state.activePet().trueDefenseBonus()));
         player.sendSystemMessage(Component.literal("Intelligence: " + stats.intelligence()));
         player.sendSystemMessage(Component.literal("Click here to open Accessory Bag")
                 .withStyle(style -> style.withColor(0x55FFFF)
