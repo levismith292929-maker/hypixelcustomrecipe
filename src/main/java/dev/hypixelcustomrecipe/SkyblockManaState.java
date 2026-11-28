@@ -94,7 +94,7 @@ public final class SkyblockManaState {
         regenerationProgressTicks = Math.max(0, input.getIntOr("hypixel_mana_progress", 0));
         abilityCooldowns.clear();
         for (String id : new String[]{"aote", "aotv", "hyperion", "astraea", "aotd",
-                "necrons_scythe", "zombie_sword", "ore_tracker"}) {
+                "necrons_scythe", "zombie_sword", "ornate_zombie_sword", "embellished_zombie_sword", "ore_tracker"}) {
             int remaining = Math.max(0, input.getIntOr("hypixel_cooldown_" + id, 0));
             if (remaining > 0) abilityCooldowns.put(id, remaining);
         }
