@@ -616,7 +616,19 @@ public final class MaxorEncounter {
         PARTICIPANTS.add(player.getUUID());
     }
 
-    private static void clearEncounter() {\n        if (stationaryLaser != null) stationaryLaser.discard();\n        stationaryLaser = null;\n        stationaryLaserActive = false;\n        for (UUID id : challengeCrystals) { Entity crystal = encounterLevel == null ? null : encounterLevel.getEntity(id); if (crystal != null) crystal.discard(); }\n        challengeCrystals.clear();\n        crystalChallengeTicks = 0;\n        maxorVulnerable = true;
+    private static void clearEncounter() {
+        if (stationaryLaser != null) stationaryLaser.discard();
+        stationaryLaser = null;
+        stationaryLaserActive = false;
+        if (encounterLevel != null) {
+            for (UUID id : challengeCrystals) {
+                Entity crystal = encounterLevel.getEntity(id);
+                if (crystal != null) crystal.discard();
+            }
+        }
+        challengeCrystals.clear();
+        crystalChallengeTicks = 0;
+        maxorVulnerable = true;
         laserChargeTicks = 0;
         laserBeamTicks = 0;
         laserShotStart = null;
