@@ -114,12 +114,19 @@ public final class DatapackItems {
     public static final Item GEMSTONE_GAUNTLET = registerMiningTool("gemstone_gauntlet", "Gemstone Gauntlet", "All Gemstones");
     public static final Item ENCHANTED_DIAMOND = registerStackableGlint("enchanted_diamond", "Enchanted Diamond", Items.DIAMOND, "Needs 160 diamonds to craft");
     public static final Item ENCHANTED_DIAMOND_BLOCK = registerStackableGlint("enchanted_diamond_block", "Enchanted Diamond Block", Items.DIAMOND_BLOCK, "Needs 80 enchanted diamonds to craft");
-    public static final Item ZOMBIE_SWORD = register("zombie_sword", "Zombie Sword", Items.GOLDEN_SWORD,
-            "Damage: 100", "Strength: 50", "Intelligence: 50",
-            "Ability: Instant Healing  RIGHT CLICK",
-            "Instantly heals 1 heart.",
-            "Mana Cost: 50",
-            "Cooldown: 1 second");
+    public static final Item ZOMBIE_SWORD = registerHealingSword("zombie_sword", "Zombie Sword",
+            "Ability: Instant Healing  RIGHT CLICK", "Heals 5% of your maximum Health.",
+            "Mana Cost: 50", "Cooldown: 1 second");
+    public static final Item ORNATE_ZOMBIE_SWORD = registerHealingSword("ornate_zombie_sword", "Ornate Zombie Sword",
+            "Ability: Instant Healing  RIGHT CLICK", "Heals 15% of your maximum Health.",
+            "Heals other players for 2% of their maximum Health.",
+            "Base healing radius: 2 blocks (+0.1 blocks per Intelligence digit).",
+            "Mana Cost: 100", "Cooldown: 20 ticks");
+    public static final Item EMBELLISHED_ZOMBIE_SWORD = registerHealingSword("embellished_zombie_sword", "Embellished Zombie Sword",
+            "Ability: Instant Healing  RIGHT CLICK", "Heals 25% of your maximum Health.",
+            "Heals other players for 6% of their maximum Health.",
+            "Base healing radius: 2.5 blocks (+0.2 blocks per Intelligence digit).",
+            "Mana Cost: 300", "Cooldown: 10 seconds");
     public static final Item ORE_TRACKER = register("ore_tracker", "Ore Tracker", Items.COMPASS,
             "Ability: Ore Search  RIGHT CLICK",
             "Find the nearest diamond ore or ancient debris",
