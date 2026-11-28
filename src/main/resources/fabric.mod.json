@@ -12,7 +12,10 @@
     "main": ["dev.hypixelcustomrecipe.HypixelCustomRecipe"],
     "client": ["dev.hypixelcustomrecipe.HypixelCustomRecipeClient"]
   },
-  "mixins": ["hypixelcustomrecipe.mixins.json"],
+  "mixins": [
+    "hypixelcustomrecipe.mixins.json",
+    {"config": "hypixelcustomrecipe.client.mixins.json", "environment": "client"}
+  ],
   "depends": {
     "fabricloader": ">=0.19.3",
     "minecraft": "~26.2",
