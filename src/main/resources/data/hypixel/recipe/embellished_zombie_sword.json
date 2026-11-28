@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "show_notification": true,
+  "category": "misc",
+  "pattern": [
+    "gGg",
+    "GsG",
+    "gGg"
+  ],
+  "key": {
+    "s": [
+      "hypixel:ornate_zombie_sword"
+    ],
+    "g": [
+      "hypixel:compact_gold_ingot"
+    ],
+    "G": [
+      "hypixel:compact_gold_block"
+    ]
+  },
+  "result": {
+    "id": "hypixel:embellished_zombie_sword",
+    "count": 1
+  }
+}
