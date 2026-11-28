@@ -89,6 +89,7 @@ public final class SkyblockPlayerState {
     private Pet activePet = Pet.NONE;
     private int hudUpdateTicks;
     private int astraeaOrbTicks;
+    private int astraeaDefenseTicks;
     private int currentHealth;
     private int maximumHealth;
     private int maxorLaserStacks;
@@ -435,7 +436,10 @@ public final class SkyblockPlayerState {
         }
     }
 
-    public void startAstraeaOrbs() { astraeaOrbTicks = 100; }
+    public void startAstraeaOrbs() {
+        astraeaOrbTicks = 100;
+        astraeaDefenseTicks = 200;
+    }
 
 
     private int maximumManaFor(Pet pet) {
@@ -682,6 +686,10 @@ public final class SkyblockPlayerState {
         stripVanillaArmorAttributes(player);
         stats = applyPetStatBonuses(SkyblockLevelBonuses.apply(AccessoryBag.applyGemstoneAccessories(player, AccessoryBag.applyAdminRing(player, applyCategoryBonuses(
                 VanillaWeaponStats.applyHeldWeapon(ModArmorItems.getSkyblockStats(player), player.getMainHandItem())))), skyblockLevel));
+        if (astraeaDefenseTicks > 0) {
+            stats = stats.add(0, 500, 0, 0, 0, 0, 0, 0, 0);
+            astraeaDefenseTicks--;
+        }
 
         int recalculatedMaximum = Math.max(1, (int) Math.floor(stats.health()
                 * Math.pow(0.98D, maxorLaserStacks) * Math.pow(0.90D, necronFlameWallStacks)));
