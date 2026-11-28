@@ -320,6 +320,7 @@ public final class NecronEncounter {
         tickAttack4();
         tickAttack6();
         tickAttack7(target);
+        if (attack1Ticks <= 0 && attack1Timer > 0) attack1Timer--;
         if (attack2Timer > 0) attack2Timer--;
         if (attack4Timer > 0) attack4Timer--;
         if (attack5Timer > 0) attack5Timer--;
@@ -333,6 +334,7 @@ public final class NecronEncounter {
             return;
         }
 
+        if (attack1Ticks == 0 && attack1Timer <= 0) beginAttack1();
         if (attack4Ticks == 0 && attack4Timer <= 0) beginAttack4();
         if (attack6Ticks == 0 && attack6Timer <= 0) beginAttack6();
         if (attack1Ticks == 0 && attack1Timer <= 0
@@ -348,11 +350,35 @@ public final class NecronEncounter {
 
     // Attack 1 — a smooth end-rod ring closes toward a five-block safe circle at 5 blocks/second.
     private static void beginAttack1() {
-        // Keep the entire safe circle outside an active Danger Zone.
-        do {
-            safeX = center.getX() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
-            safeZ = center.getZ() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
-        } while (overlapsDangerZone(safeX, safeZ, 2.5D));
+        // Choose a safe-circle center outside any active instant-kill Danger Zone.
+        boolean validSafeSpot = false;
+        for (int attempt = 0; attempt < 200 && !validSafeSpot; attempt++) {
+            double candidateX = center.getX() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+            double candidateZ = center.getZ() + 0.5D + level.getRandom().nextDouble() * 70.0D - 35.0D;
+            if (!overlapsDangerZone(candidateX, candidateZ, 2.5D)) {
+                safeX = candidateX;
+                safeZ = candidateZ;
+                validSafeSpot = true;
+            }
+        }
+        if (!validSafeSpot) {
+            // Fallback: scan a grid so an active danger zone cannot stall attack scheduling.
+            for (int x = -35; x <= 35 && !validSafeSpot; x += 5) {
+                for (int z = -35; z <= 35 && !validSafeSpot; z += 5) {
+                    double candidateX = center.getX() + 0.5D + x;
+                    double candidateZ = center.getZ() + 0.5D + z;
+                    if (!overlapsDangerZone(candidateX, candidateZ, 2.5D)) {
+                        safeX = candidateX;
+                        safeZ = candidateZ;
+                        validSafeSpot = true;
+                    }
+                }
+            }
+        }
+        if (!validSafeSpot) {
+            safeX = center.getX() + 0.5D;
+            safeZ = center.getZ() + 0.5D;
+        }
         double farX = Math.max(Math.abs(safeX - (center.getX() - HALF_ARENA)),
                 Math.abs(safeX - (center.getX() + HALF_ARENA)));
         double farZ = Math.max(Math.abs(safeZ - (center.getZ() - HALF_ARENA)),
@@ -686,7 +712,8 @@ public final class NecronEncounter {
         flameOffset = 0.0D;
         attack6Ticks = 200;
         clearDisplayList(FLAME_WALL_DISPLAYS);
-        for (int i = 0; i < 3; i++) {
+        // Four upper panels plus three lower panels leave the 3x3 bottom opening clear.
+        for (int i = 0; i < 7; i++) {
             Display.BlockDisplay fire = createBlockDisplay(Blocks.FIRE.defaultBlockState(),
                     center.getX(), center.getY() + 1.0D, center.getZ(), 1.0F, 1.0F, 1.0F, new Quaternionf());
             if (fire != null) FLAME_WALL_DISPLAYS.add(fire);
@@ -914,30 +941,39 @@ public final class NecronEncounter {
     }
 
     private static void updateFlameWallDisplays(double plane, boolean verticalX, double yBottom) {
-        if (FLAME_WALL_DISPLAYS.size() != 3) return;
-        double gapStart = flameGap - 1.5D;
-        double gapEnd = flameGap + 1.5D;
-        double leftWidth = Math.max(0.1D, gapStart + 49.0D);
-        double rightWidth = Math.max(0.1D, 49.0D - gapEnd);
+        if (FLAME_WALL_DISPLAYS.size() != 7) return;
         double axisCenter = verticalX ? center.getZ() : center.getX();
         double wallStart = axisCenter - 49.0D;
-        // The lower pieces stop at the 3-block opening; the upper piece covers the full width.
-        setFlameDisplay(FLAME_WALL_DISPLAYS.get(0), plane, wallStart,
-                yBottom, verticalX, leftWidth, 3.0F);
-        setFlameDisplay(FLAME_WALL_DISPLAYS.get(1), plane, axisCenter + gapEnd,
+        double gapStart = flameGap - 1.5D;
+        double gapEnd = flameGap + 1.5D;
+        double leftWidth = Math.max(0.0D, gapStart + 49.0D);
+        double rightWidth = Math.max(0.0D, 49.0D - gapEnd);
+
+        // Four manageable upper panels, each one block thick.
+        double upperWidth = 98.0D / 4.0D;
+        for (int i = 0; i < 4; i++) {
+            setFlameDisplay(FLAME_WALL_DISPLAYS.get(i), plane,
+                    wallStart + i * upperWidth, yBottom + 3.0D,
+                    verticalX, upperWidth, 9.0F);
+        }
+        // Split the longer lower side into two panels; the 3-block opening stays unobstructed.
+        double leftFirst = leftWidth * 0.5D;
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(4), plane, wallStart,
+                yBottom, verticalX, leftFirst, 3.0F);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(5), plane, wallStart + leftFirst,
+                yBottom, verticalX, leftWidth - leftFirst, 3.0F);
+        setFlameDisplay(FLAME_WALL_DISPLAYS.get(6), plane, axisCenter + gapEnd,
                 yBottom, verticalX, rightWidth, 3.0F);
-        setFlameDisplay(FLAME_WALL_DISPLAYS.get(2), plane, wallStart,
-                yBottom + 3.0D, verticalX, 98.0D, 9.0F);
     }
 
     private static void setFlameDisplay(Display.BlockDisplay display, double plane, double alongStart,
-                                        double y, boolean verticalX, double width, float height) {
-        double x = verticalX ? plane : alongStart;
-        double z = verticalX ? alongStart : plane;
+                                         double y, boolean verticalX, double width, float height) {
+        double x = verticalX ? plane - 0.5D : alongStart;
+        double z = verticalX ? alongStart : plane - 0.5D;
         display.setPos(x, y, z);
         display.setTransformation(new Transformation(new Vector3f(), new Quaternionf(),
-                verticalX ? new Vector3f(0.18F, height, (float) width)
-                        : new Vector3f((float) width, height, 0.18F), new Quaternionf()));
+                verticalX ? new Vector3f(1.0F, height, (float) width)
+                        : new Vector3f((float) width, height, 1.0F), new Quaternionf()));
     }
 
     private static final class TntBomb {
