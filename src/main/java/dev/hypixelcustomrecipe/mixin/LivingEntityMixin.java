@@ -156,6 +156,10 @@ public abstract class LivingEntityMixin {
             float displayedDamage = (float) (Math.round(
                     state.applyDefense(adjusted) * 10.0) / 10.0);
             boolean defeated = state.applyIncomingDamage(adjusted);
+            if (source.getEntity() instanceof ServerPlayer attacker
+                    && source.getDirectEntity() == attacker && attacker != defender) {
+                WitherPetAbilities.onMeleeHit(attacker, defender);
+            }
             if (displayedDamage > 0.0F) {
                 DamageNumberHandler.show(level, defender, displayedDamage,
                         hypixelcustomrecipe$criticalHit);
