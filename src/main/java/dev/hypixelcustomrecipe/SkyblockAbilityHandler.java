@@ -221,9 +221,13 @@ public final class SkyblockAbilityHandler {
 
     /** Aspect of the Void: raycast up to 64 blocks and land above the hit block. */
     private static void useAotv(ServerPlayer player) {
-        if (!beginAbility(player, "aotv", 50, 3)) return;
+        // Resolve a destination before charging mana or starting the cooldown.
         BlockPos target = findRaycastTarget(player);
-        if (target == null) return;
+        if (target == null) {
+            player.sendSystemMessage(Component.literal("No valid teleport destination found."));
+            return;
+        }
+        if (!beginAbility(player, "aotv", 50, 3)) return;
         Vec3 destination = Vec3.atBottomCenterOf(target).add(0.0, 1.0, 0.0);
         player.teleportTo(destination.x, destination.y, destination.z);
         player.fallDistance = 0.0F;
