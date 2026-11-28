@@ -154,7 +154,7 @@ public abstract class LivingEntityMixin {
             // Calculate the same rounded post-Defense value used by the custom
             // Health pool, then display it above the player who was hit.
             float displayedDamage = (float) (Math.round(
-                    state.stats().applyDefense(adjusted) * 10.0) / 10.0);
+                    state.applyDefense(adjusted) * 10.0) / 10.0);
             boolean defeated = state.applyIncomingDamage(adjusted);
             if (displayedDamage > 0.0F) {
                 DamageNumberHandler.show(level, defender, displayedDamage,
@@ -195,6 +195,10 @@ public abstract class LivingEntityMixin {
 
         // Cancelling hurtServer at HEAD skips its RETURN injection. Emit the
         // floating number here for attacks whose custom damage differs from vanilla.
+        if (successful && source.getEntity() instanceof ServerPlayer attacker
+                && source.getDirectEntity() == attacker && target != attacker) {
+            WitherPetAbilities.onMeleeHit(attacker, target);
+        }
         if (successful && hypixelcustomrecipe$trackingDamageNumber
                 && hypixelcustomrecipe$damageNumberAmount > 0.0F) {
             DamageNumberHandler.show(level, target, hypixelcustomrecipe$damageNumberAmount,
@@ -230,6 +234,12 @@ public abstract class LivingEntityMixin {
             dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 5);
         } else if (source.getEntity() instanceof dev.hypixelcustomrecipe.entity.voidridden.VoidriddenCreeper) {
             dev.hypixelcustomrecipe.entity.voidridden.VoidriddenEffects.applyVoid(target, 3);
+        }
+
+        if (source.getEntity() instanceof ServerPlayer attacker
+                && source.getDirectEntity() == attacker && target != attacker
+                && hypixelcustomrecipe$trackingDamageNumber) {
+            WitherPetAbilities.onMeleeHit(attacker, target);
         }
 
         if (hypixelcustomrecipe$trackingDamageNumber) {
