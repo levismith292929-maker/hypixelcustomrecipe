@@ -378,13 +378,24 @@ public final class GoldorEncounter {
     }
 
     private static void createSwordRainLine(Vec3 lockedPosition) {
-        // Test-mode encounters must retain the arena center too; never start a
-        // Sword Rain line if the arena context has already been torn down.
+        // Keep the line centered on Goldor and rotate it toward the player's
+        // locked position instead of always laying it along the world X axis.
         if (encounterLevel == null || trialCenter == null || goldor == null || !goldor.isAlive()) return;
         List<BlockPos> positions = new ArrayList<>();
-        int z = Math.max(trialCenter.getZ() - 48, Math.min(trialCenter.getZ() + 47, (int) Math.floor(lockedPosition.z)));
-        for (int x = trialCenter.getX() - 48; x <= trialCenter.getX() + 47; x += 3) {
-            positions.add(new BlockPos(x, Math.max(trialCenter.getY() + 1, (int) Math.floor(lockedPosition.y)), z));
+        Vec3 goldorCenter = goldor.position();
+        Vec3 towardPlayer = new Vec3(lockedPosition.x - goldorCenter.x, 0.0D,
+                lockedPosition.z - goldorCenter.z);
+        if (towardPlayer.lengthSqr() < 1.0E-8D) towardPlayer = new Vec3(1.0D, 0.0D, 0.0D);
+        else towardPlayer = towardPlayer.normalize();
+
+        int y = Math.max(trialCenter.getY() + 1, (int) Math.floor(lockedPosition.y));
+        for (int step = -16; step <= 16; step++) {
+            double offset = step * 3.0D;
+            int x = (int) Math.floor(goldorCenter.x + towardPlayer.x * offset);
+            int z = (int) Math.floor(goldorCenter.z + towardPlayer.z * offset);
+            x = Math.max(trialCenter.getX() - 48, Math.min(trialCenter.getX() + 47, x));
+            z = Math.max(trialCenter.getZ() - 48, Math.min(trialCenter.getZ() + 47, z));
+            positions.add(new BlockPos(x, y, z));
         }
         PENDING.add(new PendingSword(positions, 60, createWarningDisplays(positions)));
         encounterLevel.getServer().getPlayerList().broadcastSystemMessage(

@@ -24,7 +24,7 @@ import java.util.Map;
 @Mixin(AnvilMenu.class)
 public abstract class AnvilMenuMixin extends ItemCombinerMenu {
     @Shadow public int repairItemCountCost;
-    @Shadow @Final private DataSlot cost = DataSlot.standalone();
+    @Shadow @Final private DataSlot cost;
 
     @Unique
     private boolean hypixelcustomrecipe$starUpgrade;
