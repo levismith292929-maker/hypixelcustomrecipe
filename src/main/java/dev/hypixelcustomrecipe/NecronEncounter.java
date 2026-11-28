@@ -182,8 +182,8 @@ public final class NecronEncounter {
 
         WitherBoss boss = EntityTypes.WITHER.create(world, EntitySpawnReason.MOB_SUMMONED);
         if (boss == null) {
-            restoreArena();
-            clearState();
+            if (normalTrial) abortTrial("Necron could not be summoned.");
+            else { restoreArena(); clearState(); }
             return false;
         }
         boss.setPos(center.getX() + 0.5D, center.getY() + 5.0D, center.getZ() + 0.5D);
@@ -196,8 +196,8 @@ public final class NecronEncounter {
         if (maxHealth != null) maxHealth.setBaseValue(ENTITY_HP);
         boss.setHealth((float) ENTITY_HP);
         if (!world.addFreshEntity(boss)) {
-            restoreArena();
-            clearState();
+            if (normalTrial) abortTrial("Necron could not be spawned.");
+            else { restoreArena(); clearState(); }
             return false;
         }
 
