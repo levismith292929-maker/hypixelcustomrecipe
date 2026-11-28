@@ -17,7 +17,7 @@ public final class VoidTrailManager {
     private static final double TRAIL_HALF_WIDTH = 1.25D;
     private static final double TRAIL_HEIGHT = 4.0D;
     private static final double DAMAGE_SAMPLE_SPACING = 0.5D;
-    private static final double PARTICLE_SAMPLE_SPACING = 1.25D;
+    private static final double PARTICLE_SAMPLE_SPACING = 0.45D;
     private static final Map<ServerLevel, List<Trail>> TRAILS = new IdentityHashMap<>();
 
     private VoidTrailManager() {}
@@ -43,7 +43,7 @@ public final class VoidTrailManager {
                 iterator.remove();
                 continue;
             }
-            if (now % 5L == 0L) emitTrailParticles(level, trail);
+            if (now % 2L == 0L) emitTrailParticles(level, trail);
             if (now % 10L == 0L) damagePlayersAlongEntireTrail(level, trail);
         }
         if (trails.isEmpty()) TRAILS.remove(level);
@@ -56,8 +56,11 @@ public final class VoidTrailManager {
         int samples = Math.max(1, (int) Math.ceil(length / PARTICLE_SAMPLE_SPACING));
         for (int i = 0; i <= samples; i++) {
             Vec3 point = trail.start.add(line.scale(i / (double) samples));
+            // Bright end-rod sparks layered with purple portal motes make the trail easier to see.
+            level.sendParticles(ParticleTypes.END_ROD, point.x, point.y + 0.5D, point.z,
+                    2, 0.10D, 0.18D, 0.10D, 0.015D);
             level.sendParticles(ParticleTypes.PORTAL, point.x, point.y + 0.5D, point.z,
-                    1, 0.18D, 0.25D, 0.18D, 0.01D);
+                    2, 0.16D, 0.22D, 0.16D, 0.015D);
         }
     }
 
