@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.mojang.math.Transformation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.network.chat.Component;
@@ -420,7 +420,7 @@ public final class MaxorEncounter {
             BlockPos center = BossArena.getCenter(encounterLevel, maxor.blockPosition());
             stationaryLaser = EntityTypes.BLOCK_DISPLAY.create(encounterLevel, EntitySpawnReason.COMMAND);
             if (stationaryLaser == null) { stationaryLaserTimer = 300; return; }
-            stationaryLaser.setBlockState(BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse("minecraft:red_stained_glass")).defaultBlockState());
+            stationaryLaser.setBlockState(BuiltInRegistries.BLOCK.getValue(Identifier.parse("minecraft:red_stained_glass")).defaultBlockState());
             stationaryLaser.setTransformation(new Transformation(
                     new Vector3f(), new Quaternionf(), new Vector3f(100.0F, 0.18F, 0.22F), new Quaternionf()));
             stationaryLaser.setNoGravity(true);
