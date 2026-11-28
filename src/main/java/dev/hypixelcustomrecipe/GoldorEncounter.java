@@ -220,7 +220,7 @@ public final class GoldorEncounter {
         BAR.setProgress(progress);
         long hp = Math.max(0L, Math.round(progress * MAX_HEALTH));
         BAR.setName(Component.literal("Goldor: " + String.format(java.util.Locale.ROOT, "%,d", hp)
-                + " / 25,000,000 HP"));
+                + " / 250,000,000 HP"));
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.level() == encounterLevel && player.distanceToSqr(goldor) <= 96.0D * 96.0D)
                 BAR.addPlayer(player);
